@@ -29,13 +29,16 @@ export const useMQTT = () => {
     setStatus('Connecting...');
 
     const protocol = import.meta.env.VITE_MQTT_BROKER_PROTOCOL || 'wss';
+    // HiveMQ Cloud requires /mqtt path for WebSocket connections
     const brokerUrl = `${protocol}://${config.broker}:${config.port}/mqtt`;
     const options = {
       username: config.username,
       password: config.password,
       clientId: `bmtl_mqtt_client_${Math.random().toString(16).substr(2, 8)}`,
       clean: true,
-      connectTimeout: 4000,
+      connectTimeout: 10000,
+      keepalive: 30,
+      protocolVersion: 4,
     };
 
     try {
