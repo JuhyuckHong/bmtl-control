@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Control Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>MQTT Control Panel</h1>
+
+    <div class="control-grid">
+        <div class="control-section">
+            <h2>Connection</h2>
+            <div class="form-group">
+                <label for="broker">Broker:</label>
+                <input type="text" id="broker" value="b77496749a2a49af8585d89b4c2ffe30.s1.eu.hivemq.cloud">
+            </div>
+            <div class="form-group">
+                <label for="port">Port:</label>
+                <input type="text" id="port" value="8884">
+            </div>
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password">
+            </div>
+            <div class="form-group">
+                <button id="connect-btn">Connect</button>
+                <button id="disconnect-btn" disabled>Disconnect</button>
+            </div>
+            <div id="status">Status: Disconnected</div>
+        </div>
+
+        <div class="control-section">
+            <h2>Subscribe</h2>
+            <div class="form-group">
+                <label for="sub-topic">Topic:</label>
+                <input type="text" id="sub-topic" value="test/topic/#">
+            </div>
+            <div class="form-group">
+                <button id="subscribe-btn" disabled>Subscribe</button>
+            </div>
+            <h3>Subscriptions</h3>
+            <ul id="subscriptions"></ul>
+        </div>
+
+        <div class="control-section">
+            <h2>Publish</h2>
+            <div class="form-group">
+                <label for="pub-topic">Topic:</label>
+                <input type="text" id="pub-topic" value="test/topic/control">
+            </div>
+            <div class="form-group">
+                <label for="pub-payload">Payload:</label>
+                <input type="text" id="pub-payload">
+            </div>
+            <div class="form-group">
+                <button id="publish-btn" disabled>Publish</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="messages-section">
+        <h2>Messages</h2>
+        <button id="clear-messages-btn">Clear</button>
+        <div id="messages"></div>
+    </div>
+
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
