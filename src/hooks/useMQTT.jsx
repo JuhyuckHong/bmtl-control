@@ -134,6 +134,7 @@ export const useMQTT = () => {
     disconnect,
     subscribe,
     publish,
-    clearMessages
+    clearMessages,
+    client: clientRef.current
   };
 };

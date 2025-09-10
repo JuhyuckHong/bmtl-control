@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LoginForm } from './components/LoginForm';
 import { CommandPanel } from './components/CommandPanel';
 import { MessageLog } from './components/MessageLog';
+import { CameraMonitor } from './pages/CameraMonitor';
 import { useMQTT } from './hooks/useMQTT';
 import './App.css';
 
 function App() {
+  const [currentPage, setCurrentPage] = useState('control');
   const {
     isConnected,
     isConnecting,
@@ -16,42 +18,53 @@ function App() {
     disconnect,
     subscribe,
     publish,
-    clearMessages
+    clearMessages,
+    client
   } = useMQTT();
 
   return (
     <div className="App">
-      <header className="app-header">
-        <h1>🔧 BMTL MQTT 제어 패널</h1>
-      </header>
-
-      <main className="app-main">
-        <div className="left-panel">
-          {!isConnected ? (
-            <LoginForm
-              onConnect={connect}
-              isConnecting={isConnecting}
-              isConnected={isConnected}
-              status={status}
-            />
-          ) : (
-            <CommandPanel
-              onPublish={publish}
-              onSubscribe={subscribe}
-              onDisconnect={disconnect}
-              isConnected={isConnected}
-              subscribedTopics={subscribedTopics}
-            />
-          )}
-        </div>
-
-        <div className="right-panel">
-          <MessageLog
-            messages={messages}
-            onClear={clearMessages}
+      {!isConnected ? (
+        <div className="login-container">
+          <LoginForm
+            onConnect={connect}
+            isConnecting={isConnecting}
+            isConnected={isConnected}
+            status={status}
           />
         </div>
-      </main>
+      ) : (
+        <>
+          <nav className="sidebar">
+            <h1>BMTL MQTT</h1>
+            <div className="nav-buttons">
+              <button 
+                className={currentPage === 'camera' ? 'active' : ''}
+                onClick={() => setCurrentPage('camera')}
+              >
+                Camera Control
+              </button>
+            </div>
+            
+            <div className="mqtt-controls">
+              <CommandPanel
+                onPublish={publish}
+                onSubscribe={subscribe}
+                onDisconnect={disconnect}
+                isConnected={isConnected}
+                subscribedTopics={subscribedTopics}
+              />
+            </div>
+          </nav>
+
+          <main className="app-main">
+            <CameraMonitor 
+              mqttClient={client}
+              subscribedTopics={subscribedTopics}
+            />
+          </main>
+        </>
+      )}
     </div>
   );
 }
