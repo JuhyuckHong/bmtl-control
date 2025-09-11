@@ -101,6 +101,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
         if (topic.includes('/status')) {
           updateModuleStatus(moduleId, {
             isConnected: true,
+            siteName: data.sitename || data.site_name,
             remainingCapacity: data.remaining_capacity,
             lastCaptureTime: data.last_capture_time,
             lastBootTime: data.last_boot_time,

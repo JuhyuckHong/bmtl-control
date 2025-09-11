@@ -50,25 +50,47 @@
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
   box-shadow: 2px 0 8px rgba(0,0,0,0.15);
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* 사이드바 스크롤바 스타일 */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.5);
 }
 
 .sidebar h1 {
-  margin: 0;
+  margin: 0 0 1.5rem 0;
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid rgba(255,255,255,0.2);
   letter-spacing: 0.5px;
+  flex-shrink: 0;
 }
 
 .nav-buttons {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 .nav-buttons button {
@@ -97,8 +119,252 @@
 }
 
 .mqtt-controls {
+  flex: 0 0 auto;
+  overflow-y: auto;
+  max-height: 50%;
+  min-height: 200px;
+}
+
+/* 사이드바 로그인 스타일 */
+.sidebar-login {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.sidebar-login .login-form {
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.sidebar-login .login-form h2 {
+  color: var(--text-white);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* 메인 플레이스홀더 스타일 */
+.main-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.placeholder-content {
+  background: var(--bg-white);
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border: 1px solid var(--border-light);
+  max-width: 500px;
+}
+
+.placeholder-content h2 {
+  color: var(--primary-blue);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.placeholder-content p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 사이드바 메시지 로그 스타일 */
+.sidebar-messages {
+  flex: 1;
+  min-height: 0;
+  margin-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  padding-top: 1rem;
+}
+
+.message-log.compact {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-log.compact .log-header {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.message-log.compact .log-header h3 {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-white);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.collapse-btn {
+  background: none;
+  border: none;
+  color: var(--text-white);
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 0.1rem;
+  width: 16px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.collapse-btn:hover {
+  transform: scale(1.2);
+}
+
+.log-controls {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.auto-scroll-btn, .message-log.compact .clear-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--text-white);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.3rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auto-scroll-btn:hover, .message-log.compact .clear-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.auto-scroll-btn.active {
+  background: rgba(255,255,255,0.3);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.messages-container.compact {
   flex: 1;
   overflow-y: auto;
+  min-height: 0;
+  background: rgba(0,0,0,0.1);
+  border-radius: 4px;
+  padding: 0.3rem;
+}
+
+.messages-container.compact::-webkit-scrollbar {
+  width: 4px;
+}
+
+.messages-container.compact::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+}
+
+.messages-container.compact::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+}
+
+.messages-container.compact::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.5);
+}
+
+.message.compact {
+  margin-bottom: 0.2rem;
+  padding: 0.2rem;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.05);
+  border-left: 2px solid transparent;
+}
+
+.message.compact.message-sent {
+  border-left-color: var(--accent-green);
+}
+
+.message.compact.message-received {
+  border-left-color: var(--accent-blue);
+}
+
+.message.compact.message-system {
+  border-left-color: var(--accent-orange);
+}
+
+.message-compact {
+  display: grid;
+  grid-template-columns: 50px 16px 1fr 2fr;
+  gap: 0.3rem;
+  align-items: center;
+  font-size: 0.65rem;
+}
+
+.message-time-compact {
+  color: rgba(255,255,255,0.7);
+  font-weight: 500;
+}
+
+.message-type-badge {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+.message-type-badge.sent {
+  background: var(--accent-green);
+}
+
+.message-type-badge.received {
+  background: var(--accent-blue);
+}
+
+.message-type-badge.system {
+  background: var(--accent-orange);
+}
+
+.message-topic-compact {
+  color: var(--accent-light);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-payload-compact {
+  color: rgba(255,255,255,0.9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Courier New', monospace;
+}
+
+.message-log.compact .no-messages {
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  font-style: italic;
+  font-size: 0.7rem;
+  padding: 1rem;
 }
 
 .app-main {
@@ -160,6 +426,11 @@
   border: 1px solid rgba(255,255,255,0.4);
   color: var(--text-primary);
   border-radius: 4px;
+}
+
+.sidebar-login .form-group input, .sidebar-login .form-group textarea, .sidebar-login .form-group select {
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(255,255,255,0.3);
 }
 
 .sidebar .form-group input:focus, .sidebar .form-group textarea:focus, .sidebar .form-group select:focus {
@@ -285,6 +556,30 @@
 
 .subscribed-topics {
   margin-top: 1rem;
+}
+
+.sidebar .subscribed-topics {
+  margin-top: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.sidebar .subscribed-topics::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar .subscribed-topics::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+}
+
+.sidebar .subscribed-topics::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+}
+
+.sidebar .subscribed-topics::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.5);
 }
 
 .subscribed-topics h4 {
@@ -461,9 +756,13 @@
 
 /* 카메라 모니터링 스타일 */
 .camera-monitor {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   max-width: 1600px;
-  margin: 1rem auto;
-  padding: 0 1rem;
+  margin: 0 auto;
+  padding: 1rem;
+  overflow: hidden;
 }
 
 .connection-warning {
@@ -483,7 +782,7 @@
   font-weight: 500;
 }
 
-.monitor-header {
+.monitor-header-fixed {
   background: var(--bg-white);
   border: 1px solid var(--border-light);
   border-radius: 8px;
@@ -494,9 +793,10 @@
   align-items: center;
   gap: 1rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  flex-shrink: 0;
 }
 
-.monitor-header h1 {
+.monitor-header-fixed h1 {
   margin: 0;
   color: var(--primary-blue);
   font-size: 1.5rem;
@@ -547,7 +847,7 @@
   color: var(--bg-white);
 }
 
-.monitor-filters {
+.monitor-filters-fixed {
   background: var(--bg-white);
   border: 1px solid var(--border-light);
   border-radius: 8px;
@@ -558,6 +858,7 @@
   gap: 2rem;
   font-size: 0.9rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  flex-shrink: 0;
 }
 
 .filter-group, .search-group {
@@ -591,13 +892,57 @@
   font-size: 0.85rem;
 }
 
-.modules-container {
+.modules-container-scrollable {
   background: var(--bg-white);
   border: 1px solid var(--border-light);
   border-radius: 8px;
-  overflow-x: auto;
-  max-width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+.modules-table-header {
+  display: grid;
+  grid-template-columns: 35px 25px 100px 50px 70px 45px 120px 120px 50px 80px 100px 60px 60px 60px 55px 70px;
+  gap: 0.3rem;
+  padding: 0.4rem;
+  border-bottom: 2px solid var(--border-medium);
+  background: var(--bg-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modules-table-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.modules-table-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modules-table-body::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+.modules-table-body::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 4px;
+}
+
+.modules-table-body::-webkit-scrollbar-thumb:hover {
+  background: var(--border-dark);
 }
 
 .no-modules {
@@ -609,7 +954,7 @@
 
 .camera-module-row {
   display: grid;
-  grid-template-columns: 35px 25px 50px 70px 45px 120px 120px 50px 80px 100px 60px 60px 60px 55px 70px;
+  grid-template-columns: 35px 25px 100px 50px 70px 45px 120px 120px 50px 80px 100px 60px 60px 60px 55px 70px;
   gap: 0.3rem;
   align-items: center;
   padding: 0.4rem;
@@ -628,10 +973,59 @@
   border-bottom: none;
 }
 
+/* 연결되지 않은 디바이스 음영 처리 */
+.camera-module-row.disconnected {
+  opacity: 0.5;
+  background-color: var(--bg-tertiary);
+  position: relative;
+}
+
+.camera-module-row.disconnected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0,0,0,0.05) 10px,
+    rgba(0,0,0,0.05) 20px
+  );
+  pointer-events: none;
+}
+
+.camera-module-row.disconnected:hover {
+  background-color: var(--bg-tertiary);
+  opacity: 0.6;
+}
+
 .camera-module-row .module-id {
   font-weight: 600;
   color: var(--primary-blue);
   text-align: center;
+}
+
+.camera-module-row.disconnected .module-id {
+  color: var(--text-light);
+}
+
+/* 현장 이름 스타일 */
+.camera-module-row .site-name {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: left;
+  padding-left: 0.3rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.camera-module-row.disconnected .site-name {
+  color: var(--text-light);
 }
 
 .status-dot {
@@ -653,7 +1047,6 @@
   background-color: var(--accent-orange);
 }
 
-.camera-module-row .capacity,
 .camera-module-row .capture-progress,
 .camera-module-row .missed-captures,
 .camera-module-row .last-capture,
@@ -665,6 +1058,80 @@
   white-space: nowrap;
 }
 
+/* 용량 진행 막대 스타일 */
+.capacity-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.capacity-progress {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-medium);
+}
+
+.capacity-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-green) 0%, var(--accent-blue) 100%);
+  transition: all 0.3s ease;
+  border-radius: 9px;
+  min-width: 2px;
+}
+
+.capacity-progress.warning .capacity-progress-bar {
+  background: linear-gradient(90deg, var(--accent-orange) 0%, var(--accent-red) 100%);
+  animation: warning-pulse 2s ease-in-out infinite;
+}
+
+/* 연결되지 않은 디바이스 용량 막대 */
+.camera-module-row.disconnected .capacity-progress {
+  background-color: var(--border-light);
+  border-color: var(--border-medium);
+}
+
+.camera-module-row.disconnected .capacity-progress-bar {
+  background: var(--text-light);
+  opacity: 0.5;
+}
+
+.camera-module-row.disconnected .capacity-text {
+  color: var(--text-light);
+  text-shadow: none;
+}
+
+.capacity-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+  pointer-events: none;
+}
+
+.capacity-progress.warning .capacity-text {
+  color: var(--text-white);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+@keyframes warning-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 .camera-module-row .capture-progress {
   font-weight: 600;
   color: var(--accent-blue);
@@ -673,6 +1140,12 @@
 .camera-module-row .missed-captures {
   font-weight: 600;
   color: var(--accent-red);
+}
+
+/* 연결되지 않은 디바이스 텍스트 음영 */
+.camera-module-row.disconnected .capture-progress,
+.camera-module-row.disconnected .missed-captures {
+  color: var(--text-light);
 }
 
 .camera-module-row select {
@@ -747,12 +1220,12 @@
 
 /* 반응형 디자인 */
 @media (max-width: 1200px) {
-  .monitor-header {
+  .monitor-header-fixed {
     flex-direction: column;
     align-items: stretch;
   }
   
-  .monitor-header > * {
+  .monitor-header-fixed > * {
     text-align: center;
   }
   
@@ -772,35 +1245,66 @@
   
   .sidebar {
     width: 100%;
-    min-height: auto;
-    flex-direction: row;
-    flex-wrap: wrap;
+    height: auto;
+    max-height: 50vh;
+    min-height: 200px;
+    flex-direction: column;
     padding: 0.8rem;
+    overflow-y: auto;
   }
   
   .sidebar h1 {
-    flex: 1;
-    min-width: 120px;
+    margin-bottom: 1rem;
+    text-align: center;
   }
   
   .nav-buttons {
     flex-direction: row;
     gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
   }
   
   .mqtt-controls {
-    width: 100%;
-    margin-top: 0.5rem;
+    flex: 1;
+    min-height: 0;
+  }
+  
+  .sidebar-login {
+    flex: 1;
+    min-height: 0;
   }
   
   .app-main {
+    flex: 1;
     padding: 0.5rem;
+    height: 50vh;
+    overflow-y: auto;
   }
   
-  .monitor-filters {
+  .main-placeholder {
+    height: 100%;
+  }
+  
+  .placeholder-content {
+    padding: 2rem;
+    margin: 1rem;
+  }
+  
+  .monitor-filters-fixed {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+  }
+  
+  .camera-monitor {
+    height: calc(100vh - 100px);
+    padding: 0.5rem;
+  }
+  
+  .modules-table-header {
+    font-size: 0.7rem;
+    padding: 0.3rem;
   }
   
   .results-info {

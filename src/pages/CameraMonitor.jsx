@@ -75,7 +75,7 @@ export const CameraMonitor = ({ mqttClient, subscribedTopics }) => {
 
   return (
     <div className="camera-monitor">
-      <div className="monitor-header">
+      <div className="monitor-header-fixed">
         <h1>카메라 모듈 모니터링</h1>
         
         <div className="status-summary">
@@ -104,7 +104,7 @@ export const CameraMonitor = ({ mqttClient, subscribedTopics }) => {
         </div>
       </div>
 
-      <div className="monitor-filters">
+      <div className="monitor-filters-fixed">
         <div className="filter-group">
           <label htmlFor="filter-select">필터</label>
           <select 
@@ -134,21 +134,11 @@ export const CameraMonitor = ({ mqttClient, subscribedTopics }) => {
         </div>
       </div>
 
-      <div className="modules-container">
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '35px 25px 50px 70px 45px 120px 120px 50px 80px 100px 60px 60px 60px 55px 70px',
-          gap: '0.3rem',
-          padding: '0.4rem',
-          borderBottom: '2px solid #e0e0e0',
-          background: '#f8f9fa',
-          fontSize: '0.75rem',
-          fontWeight: '500',
-          color: '#666',
-          textAlign: 'center'
-        }}>
+      <div className="modules-container-scrollable">
+        <div className="modules-table-header">
           <div>ID</div>
           <div>상태</div>
+          <div>현장 이름</div>
           <div>용량</div>
           <div>촬영진행</div>
           <div>누락</div>
@@ -164,22 +154,24 @@ export const CameraMonitor = ({ mqttClient, subscribedTopics }) => {
           <div>설정</div>
         </div>
         
-        {filteredModules.length === 0 ? (
-          <div className="no-modules">
-            <p>표시할 모듈이 없습니다.</p>
-          </div>
-        ) : (
-          filteredModules.map(({ id, status, settings }) => (
-            <CameraModuleRow
-              key={id}
-              moduleId={id}
-              status={status}
-              availableSettings={settings}
-              onCommand={handleCommand}
-              onLoadSettings={handleLoadSettings}
-            />
-          ))
-        )}
+        <div className="modules-table-body">
+          {filteredModules.length === 0 ? (
+            <div className="no-modules">
+              <p>표시할 모듈이 없습니다.</p>
+            </div>
+          ) : (
+            filteredModules.map(({ id, status, settings }) => (
+              <CameraModuleRow
+                key={id}
+                moduleId={id}
+                status={status}
+                availableSettings={settings}
+                onCommand={handleCommand}
+                onLoadSettings={handleLoadSettings}
+              />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

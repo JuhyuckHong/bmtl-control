@@ -24,19 +24,20 @@ function App() {
 
   return (
     <div className="App">
-      {!isConnected ? (
-        <div className="login-container">
-          <LoginForm
-            onConnect={connect}
-            isConnecting={isConnecting}
-            isConnected={isConnected}
-            status={status}
-          />
-        </div>
-      ) : (
-        <>
-          <nav className="sidebar">
-            <h1>BMTL MQTT</h1>
+      <nav className="sidebar">
+        <h1>BMTL MQTT</h1>
+        
+        {!isConnected ? (
+          <div className="sidebar-login">
+            <LoginForm
+              onConnect={connect}
+              isConnecting={isConnecting}
+              isConnected={isConnected}
+              status={status}
+            />
+          </div>
+        ) : (
+          <>
             <div className="nav-buttons">
               <button 
                 className={currentPage === 'camera' ? 'active' : ''}
@@ -55,16 +56,33 @@ function App() {
                 subscribedTopics={subscribedTopics}
               />
             </div>
-          </nav>
+            
+            <div className="sidebar-messages">
+              <MessageLog
+                messages={messages}
+                onClear={clearMessages}
+                isCompact={true}
+              />
+            </div>
+          </>
+        )}
+      </nav>
 
-          <main className="app-main">
-            <CameraMonitor 
-              mqttClient={client}
-              subscribedTopics={subscribedTopics}
-            />
-          </main>
-        </>
-      )}
+      <main className="app-main">
+        {!isConnected ? (
+          <div className="main-placeholder">
+            <div className="placeholder-content">
+              <h2>BMTL MQTT Control Panel</h2>
+              <p>Please connect to MQTT server to access camera controls</p>
+            </div>
+          </div>
+        ) : (
+          <CameraMonitor 
+            mqttClient={client}
+            subscribedTopics={subscribedTopics}
+          />
+        )}
+      </main>
     </div>
   );
 }

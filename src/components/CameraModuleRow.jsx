@@ -55,11 +55,38 @@ export const CameraModuleRow = ({
     return status?.missedCaptures || 0;
   };
 
+  const getCapacityInfo = () => {
+    const capacity = status?.remainingCapacity;
+    if (capacity === null || capacity === undefined) {
+      return { percentage: 0, display: '--', isWarning: false };
+    }
+    
+    const percentage = parseFloat(capacity);
+    const isWarning = percentage >= 90;
+    
+    return {
+      percentage,
+      display: `${percentage}%`,
+      isWarning
+    };
+  };
+
   return (
-    <div className="camera-module-row">
+    <div className={`camera-module-row ${!status?.isConnected ? 'disconnected' : ''}`}>
       <span className="module-id">{moduleId.toString().padStart(2, '0')}</span>
       <div className={`status-dot ${getStatusClass(status?.isConnected)}`}></div>
-      <span className="capacity">{status?.remainingCapacity || '--'}%</span>
+      <span className="site-name" title={status?.siteName || '미설정'}>
+        {status?.siteName || '미설정'}
+      </span>
+      <div className="capacity-container">
+        <div className={`capacity-progress ${getCapacityInfo().isWarning ? 'warning' : ''}`}>
+          <div 
+            className="capacity-progress-bar"
+            style={{ width: `${getCapacityInfo().percentage}%` }}
+          ></div>
+          <span className="capacity-text">{getCapacityInfo().display}</span>
+        </div>
+      </div>
       <span className="capture-progress">{getCaptureProgress()}</span>
       <span className="missed-captures">{getMissedCaptures()}</span>
       <span className="last-capture">{formatDateTime(status?.lastCaptureTime)}</span>
