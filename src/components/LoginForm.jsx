@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 export const LoginForm = ({
   onConnect,
@@ -6,21 +6,12 @@ export const LoginForm = ({
   isConnected,
   status
 }) => {
-  const hasEnvCredentials = import.meta.env.VITE_MQTT_USERNAME && import.meta.env.VITE_MQTT_PASSWORD;
-  
   const [config, setConfig] = useState({
     broker: import.meta.env.VITE_MQTT_BROKER_HOST || 'broker.hivemq.com',
     port: parseInt(import.meta.env.VITE_MQTT_BROKER_PORT) || 8000,
-    username: import.meta.env.VITE_MQTT_USERNAME || '',
-    password: import.meta.env.VITE_MQTT_PASSWORD || ''
+    username: '',
+    password: ''
   });
-
-  // Auto-connect if environment variables are set
-  useEffect(() => {
-    if (hasEnvCredentials && !isConnected && !isConnecting) {
-      onConnect(config);
-    }
-  }, [hasEnvCredentials, isConnected, isConnecting, onConnect, config]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,7 +27,7 @@ export const LoginForm = ({
 
   return (
     <div className="login-form">
-      <h2>MQTT 서버 연결</h2>
+      <h2>BMTL 로그인</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="broker">브로커 주소:</label>
@@ -62,41 +53,39 @@ export const LoginForm = ({
           />
         </div>
 
-        {!hasEnvCredentials && (
-          <>
-            <div className="form-group">
-              <label htmlFor="username">사용자명:</label>
-              <input
-                type="text"
-                id="username"
-                value={config.username}
-                onChange={(e) => handleInputChange('username', e.target.value)}
-                disabled={isConnected}
-              />
-            </div>
+        <div className="form-group">
+          <label htmlFor="username">사용자명:</label>
+          <input
+            type="text"
+            id="username"
+            value={config.username}
+            onChange={(e) => handleInputChange('username', e.target.value)}
+            disabled={isConnected}
+            placeholder="사용자명 입력"
+            required
+          />
+        </div>
 
-            <div className="form-group">
-              <label htmlFor="password">비밀번호:</label>
-              <input
-                type="password"
-                id="password"
-                value={config.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                disabled={isConnected}
-              />
-            </div>
-          </>
-        )}
+        <div className="form-group">
+          <label htmlFor="password">비밀번호:</label>
+          <input
+            type="password"
+            id="password"
+            value={config.password}
+            onChange={(e) => handleInputChange('password', e.target.value)}
+            disabled={isConnected}
+            placeholder="비밀번호 입력"
+            required
+          />
+        </div>
 
-        {!hasEnvCredentials && (
-          <button 
-            type="submit" 
-            disabled={isConnecting || isConnected}
-            className="connect-btn"
-          >
-            {isConnecting ? '연결 중...' : '연결'}
-          </button>
-        )}
+        <button 
+          type="submit" 
+          disabled={isConnecting || isConnected}
+          className="global-btn"
+        >
+          {isConnecting ? '연결 중...' : '로그인'}
+        </button>
       </form>
 
       <div className="status">
