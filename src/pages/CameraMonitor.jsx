@@ -75,62 +75,73 @@ export const CameraMonitor = ({ mqttClient, subscribedTopics }) => {
 
   return (
     <div className="camera-monitor">
-      <div className="monitor-header-fixed">
-        <h1>카메라 모듈 모니터링</h1>
-        
-        <div className="status-summary">
-          <span className="status-count">온라인: {statusCounts.online}</span>
-          <span className="status-count">오프라인: {statusCounts.offline}</span>
-          <span className="status-count">미확인: {statusCounts.unknown}</span>
+      <div className="monitor-header-combined">
+        <div className="header-left">
+          <div className="title-with-status">
+            <h1>모듈 모니터링</h1>
+            <div className="status-summary-compact">
+              <span className="status-item">
+                <div className="status-dot status-online"></div>
+                {statusCounts.online}
+              </span>
+              <span className="status-item">
+                <div className="status-dot status-offline"></div>
+                {statusCounts.offline}
+              </span>
+              <span className="status-item">
+                <div className="status-dot status-unknown"></div>
+                {statusCounts.unknown}
+              </span>
+            </div>
+          </div>
         </div>
         
-        <div className="global-controls">
-          <button 
-            onClick={() => handleGlobalCommand('status_request')}
-            className="global-btn"
-          >
-            전체 상태 요청
-          </button>
-          <button 
-            onClick={(e) => {
-              if (confirm('모든 연결된 모듈을 재부팅하시겠습니까?')) {
-                handleGlobalCommand('reboot');
-              }
-            }}
-            className="global-btn danger"
-          >
-            전체 재부팅
-          </button>
-        </div>
-      </div>
-
-      <div className="monitor-filters-fixed">
-        <div className="filter-group">
-          <label htmlFor="filter-select">필터</label>
-          <select 
-            id="filter-select"
-            value={filter} 
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            <option value="all">전체</option>
-            <option value="online">온라인</option>
-            <option value="offline">오프라인</option>
-          </select>
+        <div className="header-center">
+          <div className="filter-group">
+            <label htmlFor="filter-select">필터</label>
+            <select 
+              id="filter-select"
+              value={filter} 
+              onChange={(e) => setFilter(e.target.value)}
+            >
+              <option value="all">전체</option>
+              <option value="online">온라인</option>
+              <option value="offline">오프라인</option>
+            </select>
+          </div>
+          
+          <div className="search-group">
+            <label htmlFor="search-input">검색</label>
+            <input
+              id="search-input"
+              type="text"
+              placeholder="모듈 번호"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
         </div>
         
-        <div className="search-group">
-          <label htmlFor="search-input">검색</label>
-          <input
-            id="search-input"
-            type="text"
-            placeholder="모듈 번호"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        
-        <div className="results-info">
-          {filteredModules.length}개 모듈
+        <div className="header-right">
+          <div className="global-controls">
+            <button 
+              onClick={() => handleGlobalCommand('status_request')}
+              className="global-btn"
+            >
+              전체 상태 요청
+            </button>
+            <button 
+              onClick={(e) => {
+                if (confirm('모든 연결된 모듈을 재부팅하시겠습니까?')) {
+                  handleGlobalCommand('reboot');
+                }
+              }}
+              className="global-btn danger"
+            >
+              전체 재부팅
+            </button>
+          </div>
         </div>
       </div>
 

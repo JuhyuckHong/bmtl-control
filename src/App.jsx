@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { LoginForm } from './components/LoginForm';
 import { CommandPanel } from './components/CommandPanel';
 import { MessageLog } from './components/MessageLog';
@@ -7,7 +7,6 @@ import { useMQTT } from './hooks/useMQTT';
 import './App.css';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('control');
   const {
     isConnected,
     isConnecting,
@@ -38,15 +37,6 @@ function App() {
           </div>
         ) : (
           <>
-            <div className="nav-buttons">
-              <button 
-                className={currentPage === 'camera' ? 'active' : ''}
-                onClick={() => setCurrentPage('camera')}
-              >
-                Camera Control
-              </button>
-            </div>
-            
             <div className="mqtt-controls">
               <CommandPanel
                 onPublish={publish}
