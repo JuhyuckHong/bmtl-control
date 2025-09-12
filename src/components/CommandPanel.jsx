@@ -37,83 +37,80 @@ export const CommandPanel = ({
   }
 
   return (
-    <div className="command-panel">
-      <div className="panel-header">
-        <h2>제어 패널</h2>
-        <button onClick={onDisconnect} className="disconnect-btn">
-          연결 해제
+    <div className="command-panel compact">
+      <div className="panel-header-compact">
+        <h2>📡 MQTT Control</h2>
+        <button onClick={onDisconnect} className="disconnect-btn-compact">
+          ⚡ 연결해제
         </button>
       </div>
 
-      {/* 메시지 전송 */}
-      <div className="custom-command">
-        <h3>메시지 전송</h3>
-        <form onSubmit={handlePublish}>
-          <div className="form-group">
-            <label htmlFor="pub-topic">토픽:</label>
-            <input
-              type="text"
-              id="pub-topic"
-              value={publishTopic}
-              onChange={(e) => setPublishTopic(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="pub-payload">메시지:</label>
-            <textarea
-              id="pub-payload"
-              value={publishPayload}
-              onChange={(e) => setPublishPayload(e.target.value)}
-              rows="3"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="pub-qos">QoS 레벨:</label>
-            <select
-              id="pub-qos"
-              value={publishQos}
-              onChange={(e) => setPublishQos(e.target.value)}
-            >
-              <option value="0">0 - At most once (최대 1회)</option>
-              <option value="1">1 - At least once (최소 1회)</option>
-              <option value="2">2 - Exactly once (정확히 1회)</option>
-            </select>
-          </div>
-          <button type="submit" className="publish-btn">
-            전송
+      {/* 빠른 액션 영역 */}
+      <div className="quick-actions">
+        <div className="action-row">
+          <input
+            type="text"
+            placeholder="Topic (e.g., device/command)"
+            value={publishTopic}
+            onChange={(e) => setPublishTopic(e.target.value)}
+            className="topic-input"
+          />
+          <select
+            value={publishQos}
+            onChange={(e) => setPublishQos(e.target.value)}
+            className="qos-select"
+          >
+            <option value="0">QoS 0</option>
+            <option value="1">QoS 1</option>
+            <option value="2">QoS 2</option>
+          </select>
+        </div>
+        
+        <div className="action-row">
+          <textarea
+            placeholder="Message payload..."
+            value={publishPayload}
+            onChange={(e) => setPublishPayload(e.target.value)}
+            rows="2"
+            className="payload-input"
+          />
+          <button 
+            onClick={handlePublish}
+            className="publish-btn-compact"
+            disabled={!publishTopic.trim() || !publishPayload.trim()}
+          >
+            📤 Send
           </button>
-        </form>
+        </div>
       </div>
 
-      {/* 구독 관리 */}
-      <div className="subscription">
-        <h3>토픽 구독</h3>
-        <form onSubmit={handleSubscribe}>
-          <div className="form-group">
-            <label htmlFor="sub-topic">구독할 토픽:</label>
-            <input
-              type="text"
-              id="sub-topic"
-              value={subscribeTopic}
-              onChange={(e) => setSubscribeTopic(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" className="subscribe-btn">
-            구독
+      {/* 구독 영역 */}
+      <div className="subscribe-section">
+        <div className="subscribe-row">
+          <input
+            type="text"
+            placeholder="Subscribe to topic..."
+            value={subscribeTopic}
+            onChange={(e) => setSubscribeTopic(e.target.value)}
+            className="subscribe-input"
+          />
+          <button 
+            onClick={handleSubscribe}
+            className="subscribe-btn-compact"
+            disabled={!subscribeTopic.trim()}
+          >
+            📥 Sub
           </button>
-        </form>
-
+        </div>
+        
         {subscribedTopics.length > 0 && (
-          <div className="subscribed-topics">
-            <h4>구독 중인 토픽:</h4>
-            <ul>
+          <div className="topics-compact">
+            <div className="topics-header">📋 Subscribed ({subscribedTopics.length})</div>
+            <div className="topics-list">
               {subscribedTopics.map((topic, index) => (
-                <li key={index}>{topic}</li>
+                <span key={index} className="topic-tag">{topic}</span>
               ))}
-            </ul>
+            </div>
           </div>
         )}
       </div>
