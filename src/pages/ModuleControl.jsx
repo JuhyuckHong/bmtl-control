@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import { CameraModuleRow } from '../components/CameraModuleRow';
 import { useCameraStatus } from '../hooks/useCameraStatus';
 
-export const CameraMonitor = ({ mqttClient, subscribedTopics }) => {
+export const ModuleControl = ({ mqttClient, subscribedTopics, filter, setFilter, searchTerm, setSearchTerm, onGlobalCommand }) => {
   const { moduleStatuses, moduleSettings, sendCommand, requestSettings } = useCameraStatus(
     mqttClient, 
     subscribedTopics
   );
   
-  const [filter, setFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
 
   const getFilteredModules = () => {
     const modules = [];
@@ -48,6 +46,13 @@ export const CameraMonitor = ({ mqttClient, subscribedTopics }) => {
     });
   };
 
+  // 상위 컴포넌트에서 사용할 수 있도록 전역 커맨드 핸들러와 상태 카운트 전달
+  React.useEffect(() => {
+    if (onGlobalCommand) {
+      onGlobalCommand(handleGlobalCommand, getStatusCounts());
+    }
+  }, [moduleStatuses, onGlobalCommand]);
+
   const getStatusCounts = () => {
     const counts = { online: 0, offline: 0, unknown: 0 };
     for (let i = 1; i <= 99; i++) {
@@ -64,88 +69,19 @@ export const CameraMonitor = ({ mqttClient, subscribedTopics }) => {
 
   if (!mqttClient?.connected) {
     return (
-      <div className="camera-monitor">
+      <div className="module-control">
         <div className="connection-warning">
           <h2>MQTT 연결 필요</h2>
-          <p>카메라 모듈 모니터링을 위해 MQTT 서버에 연결해주세요.</p>
+          <p>모듈 제어를 위해 MQTT 서버에 연결해주세요.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="camera-monitor">
-      <div className="monitor-header-combined">
-        <div className="header-left">
-          <div className="title-with-status">
-            <h1>모듈 모니터링</h1>
-            <div className="status-summary-compact">
-              <span className="status-item">
-                <div className="status-dot status-online"></div>
-                {statusCounts.online}
-              </span>
-              <span className="status-item">
-                <div className="status-dot status-offline"></div>
-                {statusCounts.offline}
-              </span>
-              <span className="status-item">
-                <div className="status-dot status-unknown"></div>
-                {statusCounts.unknown}
-              </span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="header-center">
-          <div className="filter-group">
-            <label htmlFor="filter-select">필터</label>
-            <select 
-              id="filter-select"
-              value={filter} 
-              onChange={(e) => setFilter(e.target.value)}
-            >
-              <option value="all">전체</option>
-              <option value="online">온라인</option>
-              <option value="offline">오프라인</option>
-            </select>
-          </div>
-          
-          <div className="search-group">
-            <label htmlFor="search-input">검색</label>
-            <input
-              id="search-input"
-              type="text"
-              placeholder="모듈 번호"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-        </div>
-        
-        <div className="header-right">
-          <div className="global-controls">
-            <button 
-              onClick={() => handleGlobalCommand('status_request')}
-              className="global-btn"
-            >
-              전체 상태 요청
-            </button>
-            <button 
-              onClick={(e) => {
-                if (confirm('모든 연결된 모듈을 재부팅하시겠습니까?')) {
-                  handleGlobalCommand('reboot');
-                }
-              }}
-              className="global-btn danger"
-            >
-              전체 재부팅
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="module-control">
 
-      <div className="modules-container-scrollable">
+      <div className="modules-table">
         <div className="modules-table-header">
           <div>ID</div>
           <div>상태</div>
