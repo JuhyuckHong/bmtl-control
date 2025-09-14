@@ -198,7 +198,6 @@ body {
     box-sizing: border-box;
 }
 
-
 .header-controls {
     display: flex;
     gap: 1.5rem;
@@ -280,13 +279,13 @@ body {
         flex-direction: row;
         gap: 1.5rem;
     }
-    
+
     .mqtt-publish-panel {
         flex: 0 0 400px;
         margin-bottom: 0;
         margin-right: 0;
     }
-    
+
     .mqtt-messages-panel {
         flex: 1;
     }
@@ -852,20 +851,55 @@ button {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
+}
+
+.modules-table-scroll-container {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.modules-table-content {
+    display: flex;
+    flex-direction: column;
+    min-width: fit-content;
 }
 
 .modules-table-header,
 .camera-module-row {
-    display: grid;
-    grid-template-columns: 35px 25px 100px 50px 70px 45px 120px 120px 50px 80px 100px 60px 60px 60px 55px 120px;
-    gap: 0.75rem;
-    padding: 1rem;
+    display: flex;
     border-bottom: 1px solid var(--border);
     font-size: 0.8rem;
-    text-align: center;
     align-items: center;
-    min-width: 1400px;
+    min-height: 48px;
     white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.modules-table-fixed,
+.camera-module-fixed {
+    display: grid;
+    grid-template-columns: 35px 25px 100px;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    text-align: center;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-strong);
+    flex-shrink: 0;
+    z-index: 2;
+    position: sticky;
+    left: 0;
+}
+
+.modules-table-scrollable,
+.camera-module-scrollable {
+    display: grid;
+    grid-template-columns: 50px 70px 45px 120px 120px 50px 80px 100px 60px 60px 60px 55px 120px;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    text-align: center;
+    min-width: 1000px;
 }
 
 .modules-table-header {
@@ -878,10 +912,16 @@ button {
     z-index: 10;
 }
 
-.modules-table-body {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
+.modules-table-header .modules-table-fixed {
+    background: var(--bg-secondary);
+}
+
+.camera-module-row:hover {
+    background: var(--bg-secondary);
+}
+
+.camera-module-row:hover .camera-module-fixed {
+    background: var(--bg-secondary);
 }
 
 .no-modules {
@@ -894,10 +934,6 @@ button {
 
 .no-modules p {
     margin: 0;
-}
-
-.camera-module-row:hover {
-    background: var(--bg-secondary);
 }
 
 .status-dot {
