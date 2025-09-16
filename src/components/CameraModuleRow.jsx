@@ -25,6 +25,14 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
         onCommand(moduleId, "reboot", {});
     };
 
+    const handleWiper = () => {
+        onCommand(moduleId, "wiper", {});
+    };
+
+    const handleCameraPower = () => {
+        onCommand(moduleId, "camera-on-off", {});
+    };
+
     const handleApplySettings = () => {
         onCommand(moduleId, "configure", settings);
     };
@@ -34,6 +42,10 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
 
     const handleLoadSettings = () => {
         onLoadSettings(moduleId);
+    };
+
+    const handleLoadOptions = () => {
+        onCommand(moduleId, "options_request", {});
     };
 
     const getStatusClass = (isConnected) => {
@@ -51,7 +63,7 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
         const minute = date.getMinutes().toString().padStart(2, "0");
         const second = date.getSeconds().toString().padStart(2, "0");
 
-        return `${year}.${month}.${day}\n${hour}:${minute}:${second}`;
+        return `${year}.${month}.${day} ${hour}:${minute}:${second}`;
     };
 
     const formatTime = (timeString) => {
@@ -111,15 +123,29 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                 <div className="last-capture">{formatDateTime(status?.lastCaptureTime)}</div>
                 <div className="last-boot">{formatDateTime(status?.lastBootTime)}</div>
 
-                <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled}>
-                    재부팅
-                </button>
+                <div className="control-buttons">
+                    <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled} title="카메라 재부팅" style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}>
+                        재부팅
+                    </button>
+                    <button className="btn wiper" onClick={handleWiper} disabled={!isEnabled} title="와이퍼 30초 동작" style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}>
+                        와이퍼
+                    </button>
+                    <button
+                        className="btn camera-power"
+                        onClick={handleCameraPower}
+                        disabled={!isEnabled}
+                        title="카메라 전원 On/Off"
+                        style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}
+                    >
+                        전원
+                    </button>
+                </div>
 
                 <div className="time-picker-container">
                     <select
-                        value={settings.startTime?.split(':')[0] || "08"}
+                        value={settings.startTime?.split(":")[0] || "08"}
                         onChange={(e) => {
-                            const minute = settings.startTime?.split(':')[1] || "00";
+                            const minute = settings.startTime?.split(":")[1] || "00";
                             handleSettingChange("startTime", `${e.target.value}:${minute}`);
                         }}
                         disabled={!isEnabled}
@@ -127,16 +153,16 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                         title="시작 시간"
                     >
                         {Array.from({ length: 24 }, (_, hour) => (
-                            <option key={hour} value={hour.toString().padStart(2, '0')}>
-                                {hour.toString().padStart(2, '0')}
+                            <option key={hour} value={hour.toString().padStart(2, "0")}>
+                                {hour.toString().padStart(2, "0")}
                             </option>
                         ))}
                     </select>
                     <span className="time-separator">:</span>
                     <select
-                        value={settings.startTime?.split(':')[1] || "00"}
+                        value={settings.startTime?.split(":")[1] || "00"}
                         onChange={(e) => {
-                            const hour = settings.startTime?.split(':')[0] || "08";
+                            const hour = settings.startTime?.split(":")[0] || "08";
                             handleSettingChange("startTime", `${hour}:${e.target.value}`);
                         }}
                         disabled={!isEnabled}
@@ -144,8 +170,8 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                         title="시작 분"
                     >
                         {Array.from({ length: 60 }, (_, minute) => (
-                            <option key={minute} value={minute.toString().padStart(2, '0')}>
-                                {minute.toString().padStart(2, '0')}
+                            <option key={minute} value={minute.toString().padStart(2, "0")}>
+                                {minute.toString().padStart(2, "0")}
                             </option>
                         ))}
                     </select>
@@ -153,9 +179,9 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
 
                 <div className="time-picker-container">
                     <select
-                        value={settings.endTime?.split(':')[0] || "18"}
+                        value={settings.endTime?.split(":")[0] || "18"}
                         onChange={(e) => {
-                            const minute = settings.endTime?.split(':')[1] || "00";
+                            const minute = settings.endTime?.split(":")[1] || "00";
                             handleSettingChange("endTime", `${e.target.value}:${minute}`);
                         }}
                         disabled={!isEnabled}
@@ -163,16 +189,16 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                         title="종료 시간"
                     >
                         {Array.from({ length: 24 }, (_, hour) => (
-                            <option key={hour} value={hour.toString().padStart(2, '0')}>
-                                {hour.toString().padStart(2, '0')}
+                            <option key={hour} value={hour.toString().padStart(2, "0")}>
+                                {hour.toString().padStart(2, "0")}
                             </option>
                         ))}
                     </select>
                     <span className="time-separator">:</span>
                     <select
-                        value={settings.endTime?.split(':')[1] || "00"}
+                        value={settings.endTime?.split(":")[1] || "00"}
                         onChange={(e) => {
-                            const hour = settings.endTime?.split(':')[0] || "18";
+                            const hour = settings.endTime?.split(":")[0] || "18";
                             handleSettingChange("endTime", `${hour}:${e.target.value}`);
                         }}
                         disabled={!isEnabled}
@@ -180,8 +206,8 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                         title="종료 분"
                     >
                         {Array.from({ length: 60 }, (_, minute) => (
-                            <option key={minute} value={minute.toString().padStart(2, '0')}>
-                                {minute.toString().padStart(2, '0')}
+                            <option key={minute} value={minute.toString().padStart(2, "0")}>
+                                {minute.toString().padStart(2, "0")}
                             </option>
                         ))}
                     </select>
@@ -243,14 +269,37 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                     <option value="f/16">16</option>
                 </select>
 
-                <div style={{ display: "flex", gap: "2px" }}>
-                    <button className="btn load" onClick={handleLoadSettings} disabled={!isEnabled} title="현재 설정 불러오기" style={{ fontSize: "0.65rem", padding: "0.15rem", flex: 1 }}>
-                        현재설정
-                    </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: "100px" }}>
+                    <div style={{ display: "flex", gap: "2px" }}>
+                        <button
+                            className="btn load"
+                            onClick={handleLoadSettings}
+                            disabled={!isEnabled}
+                            title="현재 설정 불러오기"
+                            style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}
+                        >
+                            현재 설정
+                        </button>
+                        <button
+                            className="btn load"
+                            onClick={handleLoadOptions}
+                            disabled={!isEnabled}
+                            title="사용 가능한 옵션 불러오기"
+                            style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}
+                        >
+                            옵션 로드
+                        </button>
 
-                    <button className="btn apply" onClick={handleApplySettings} disabled={!isEnabled} title="변경 적용" style={{ fontSize: "0.65rem", padding: "0.15rem", flex: 1 }}>
-                        변경적용
-                    </button>
+                        <button
+                            className="btn apply"
+                            onClick={handleApplySettings}
+                            disabled={!isEnabled}
+                            title="변경 적용"
+                            style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}
+                        >
+                            변경 적용
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -21,7 +21,7 @@
     --green: #388e3c;
     --blue: #1976d2;
 
-    /* Semantic mapping */
+    /* Light mode semantic mapping */
     --bg-primary: var(--gray-50);
     --bg-secondary: var(--gray-100);
     --surface: var(--white);
@@ -33,6 +33,22 @@
     --success: var(--green);
     --error: var(--red);
     --info: var(--blue);
+}
+
+/* Dark mode colors */
+.dark-mode {
+    /* Dark mode semantic mapping */
+    --bg-primary: var(--gray-900);
+    --bg-secondary: var(--gray-800);
+    --surface: var(--gray-800);
+    --border: var(--gray-700);
+    --border-strong: var(--gray-600);
+    --text-primary: var(--gray-50);
+    --text-secondary: var(--gray-400);
+    --text-tertiary: var(--gray-500);
+    --success: #4caf50;
+    --error: #f44336;
+    --info: #2196f3;
 }
 
 /* Reset and base */
@@ -228,6 +244,32 @@ body {
 }
 
 .toggle-btn:active {
+    background: var(--border);
+}
+
+.dark-mode-toggle {
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+    padding: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s ease;
+    flex-shrink: 0;
+}
+
+.dark-mode-toggle:hover {
+    background: var(--bg-secondary);
+    border-color: var(--text-secondary);
+}
+
+.dark-mode-toggle:active {
     background: var(--border);
 }
 
@@ -872,7 +914,7 @@ button {
     border-bottom: 1px solid var(--border);
     font-size: 0.8rem;
     align-items: center;
-    min-height: 48px;
+    min-height: 40px;
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -890,6 +932,7 @@ button {
     z-index: 2;
     position: sticky;
     left: 0;
+    align-items: center;
 }
 
 .modules-table-scrollable,
@@ -899,6 +942,7 @@ button {
     padding: 0.5rem;
     text-align: center;
     min-width: fit-content;
+    align-items: center;
 }
 
 .modules-table-header {

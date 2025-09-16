@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 export const useColumnResize = () => {
-    const defaultWidths = [50, 70, 45, 80, 80, 50, 85, 85, 70, 100, 60, 60, 60, 55, 120];
+    const defaultWidths = [40, 50, 40, 110, 110, 110, 85, 85, 70, 100, 60, 60, 60, 55, 150];
 
     const [columnWidths, setColumnWidths] = useState(() => {
         const saved = localStorage.getItem("bmtl-column-widths");
