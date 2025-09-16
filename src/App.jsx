@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { ModuleControl } from "./pages/ModuleControl";
 import { MQTTPage } from "./pages/MQTTPage";
+import { ApiDocsPage } from "./pages/ApiDocsPage";
 import { useMQTT } from "./hooks/useMQTT";
 import "./App.css";
+import "./styles/api-docs.css";
 
 function App() {
     const { isConnected, isConnecting, status, messages, subscribedTopics, connect, disconnect, subscribe, publish, clearMessages, client } = useMQTT();
 
-    const [currentPage, setCurrentPage] = useState("mqtt"); // 'control' or 'mqtt'
+    const [currentPage, setCurrentPage] = useState("mqtt"); // 'control', 'mqtt', or 'docs'
     const [filter, setFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
     const [statusCounts, setStatusCounts] = useState({ online: 0, offline: 0, unknown: 0 });
@@ -20,7 +22,13 @@ function App() {
     const [subscribeTopic, setSubscribeTopic] = useState("device/status");
 
     const togglePage = () => {
-        setCurrentPage(currentPage === "control" ? "mqtt" : "control");
+        if (currentPage === "control") {
+            setCurrentPage("mqtt");
+        } else if (currentPage === "mqtt") {
+            setCurrentPage("docs");
+        } else {
+            setCurrentPage("control");
+        }
     };
 
     const handleGlobalCommand = (command) => {
@@ -63,7 +71,7 @@ function App() {
         <div className="App">
             <div className="app-header">
                 <div className="header-title">
-                    <h1>{!isConnected ? "빌드모션 제어판" : currentPage === "control" ? "모듈 제어" : "메시지 제어"}</h1>
+                    <h1>{!isConnected ? "빌드모션 제어판" : currentPage === "control" ? "모듈 제어" : currentPage === "mqtt" ? "메시지 제어" : "API 명세서"}</h1>
                     {isConnected && currentPage === "control" && (
                         <div className="status-summary">
                             <span className="status-item">
@@ -124,14 +132,14 @@ function App() {
 
                 <div className="header-controls">
                     {isConnected && (
-                        <button className="toggle-btn" onClick={togglePage} title={currentPage === "control" ? "MQTT Settings" : "Control Panel"}>
-                            {currentPage === "control" ? "💬" : "🚥"}
+                        <button className="toggle-btn" onClick={togglePage} title={currentPage === "control" ? "MQTT Settings" : currentPage === "mqtt" ? "API Docs" : "Control Panel"}>
+                            {currentPage === "control" ? "💬" : currentPage === "mqtt" ? "📚" : "🚥"}
                         </button>
                     )}
                 </div>
             </div>
 
-            <main className="app-main">
+            <main className={`app-main ${currentPage === "docs" ? "docs-mode" : ""}`}>
                 {!isConnected ? (
                     <MQTTPage
                         isConnected={isConnected}
@@ -161,7 +169,7 @@ function App() {
                         setSearchTerm={setSearchTerm}
                         onGlobalCommand={onModuleControlReady}
                     />
-                ) : (
+                ) : currentPage === "mqtt" ? (
                     <MQTTPage
                         isConnected={isConnected}
                         isConnecting={isConnecting}
@@ -180,6 +188,8 @@ function App() {
                         publishQos={publishQos}
                         setPublishQos={setPublishQos}
                     />
+                ) : (
+                    <ApiDocsPage />
                 )}
             </main>
         </div>
