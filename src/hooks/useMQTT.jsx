@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import mqtt from 'mqtt';
 
 export const useMQTT = () => {
@@ -118,6 +118,24 @@ export const useMQTT = () => {
         }
       });
     }
+  }, [addMessage]);
+
+  // 외부에서 publish 이벤트를 받아서 메시지 로그에 추가
+  React.useEffect(() => {
+    if (!clientRef.current) return;
+
+    const handleExternalPublish = (data) => {
+      addMessage(data.topic, data.payload, 'sent');
+      addMessage('System', `Published to ${data.topic} (QoS: ${data.qos})`, 'system');
+    };
+
+    clientRef.current.on('publish', handleExternalPublish);
+
+    return () => {
+      if (clientRef.current) {
+        clientRef.current.off('publish', handleExternalPublish);
+      }
+    };
   }, [addMessage]);
 
   const clearMessages = useCallback(() => {
