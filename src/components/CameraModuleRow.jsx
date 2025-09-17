@@ -125,7 +125,7 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
 
                 <div className="control-buttons">
                     <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled} title="카메라 재부팅" style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}>
-                        재부팅
+                        모듈
                     </button>
                     <button className="btn wiper" onClick={handleWiper} disabled={!isEnabled} title="와이퍼 30초 동작" style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}>
                         와이퍼
@@ -137,7 +137,7 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                         title="카메라 전원 On/Off"
                         style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}
                     >
-                        전원
+                        카메라
                     </button>
                 </div>
 
