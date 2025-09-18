@@ -108,7 +108,6 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
     const statusCounts = getStatusCounts();
     const filteredModules = getFilteredModules();
 
-
     return (
         <div className="module-control">
             {!isConnected ? (
