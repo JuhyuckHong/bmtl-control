@@ -2,11 +2,9 @@ import React, { useState } from "react";
 import { CameraModuleRow } from "../components/CameraModuleRow";
 import { LoginForm } from "../components/LoginForm";
 import { useCameraStatus } from "../hooks/useCameraStatus";
-import { useColumnResize } from "../hooks/useColumnResize";
 
 export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, status, subscribedTopics, filter, setFilter, searchTerm, setSearchTerm, onGlobalCommand }) => {
     const { moduleStatuses, moduleSettings, sendCommand, requestSettings } = useCameraStatus(mqttClient, subscribedTopics);
-    const { gridTemplateColumns, startResize, resetColumnWidths } = useColumnResize();
 
     const getFilteredModules = () => {
         const modules = [];
@@ -119,61 +117,18 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
                     <div className="modules-table-scroll-container">
                         <div className="modules-table-content">
                             <div className="modules-table-header">
-                                <div className="modules-table-fixed">
-                                    <div>모듈</div>
-                                    <div>상태</div>
-                                    <div>현장 이름</div>
-                                </div>
-                                <div className="modules-table-scrollable" style={{ gridTemplateColumns }}>
-                                    <div className="resizable-header">
-                                        용량<div className="column-resizer" onMouseDown={(e) => startResize(0, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        촬영진행<div className="column-resizer" onMouseDown={(e) => startResize(1, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        누락<div className="column-resizer" onMouseDown={(e) => startResize(2, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        마지막 촬영<div className="column-resizer" onMouseDown={(e) => startResize(3, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        마지막 부팅<div className="column-resizer" onMouseDown={(e) => startResize(4, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        재부팅<div className="column-resizer" onMouseDown={(e) => startResize(5, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        SW버전/업데이트<div className="column-resizer" onMouseDown={(e) => startResize(6, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        시작<div className="column-resizer" onMouseDown={(e) => startResize(7, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        종료<div className="column-resizer" onMouseDown={(e) => startResize(8, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        간격<div className="column-resizer" onMouseDown={(e) => startResize(9, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        이미지크기<div className="column-resizer" onMouseDown={(e) => startResize(10, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        품질<div className="column-resizer" onMouseDown={(e) => startResize(11, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        ISO<div className="column-resizer" onMouseDown={(e) => startResize(12, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        포맷<div className="column-resizer" onMouseDown={(e) => startResize(13, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        조리개<div className="column-resizer" onMouseDown={(e) => startResize(14, e.clientX)}></div>
-                                    </div>
-                                    <div className="resizable-header">
-                                        설정<div className="column-resizer" onMouseDown={(e) => startResize(15, e.clientX)}></div>
-                                    </div>
-                                </div>
+                                <div>모듈</div>
+                                <div>상태</div>
+                                <div>현장 이름</div>
+                                <div className="table-header">용량</div>
+                                <div className="table-header">촬영 현황</div>
+                                <div className="table-header">마지막 촬영</div>
+                                <div className="table-header">마지막 부팅</div>
+                                <div className="table-header">제어</div>
+                                <div className="table-header">소프트웨어</div>
+                                <div className="table-header">시간 설정</div>
+                                <div className="table-header">카메라 설정</div>
+                                <div className="table-header">설정</div>
                             </div>
 
                             {filteredModules.length === 0 ? (
@@ -191,7 +146,6 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
                                         onLoadSettings={handleLoadSettings}
                                         isDummy={module.isDummy}
                                         initialSettings={module.settings}
-                                        gridTemplateColumns={gridTemplateColumns}
                                     />
                                 ))
                             )}
