@@ -17,12 +17,13 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
     const [isSiteNameModalOpen, setIsSiteNameModalOpen] = useState(false);
     const timeOptions = useMemo(() => {
         return Array.from({ length: 24 * 60 }, (_, index) => {
-            const hour = Math.floor(index / 60).toString().padStart(2, "0");
+            const hour = Math.floor(index / 60)
+                .toString()
+                .padStart(2, "0");
             const minute = (index % 60).toString().padStart(2, "0");
             return `${hour}:${minute}`;
         });
     }, []);
-
 
     const handleSettingChange = (key, value) => {
         setSettings((prev) => ({
@@ -128,11 +129,7 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
         <div className={`camera-module-row ${!status?.isConnected ? "disconnected" : ""}`}>
             <span className="module-id">{moduleId.toString().padStart(2, "0")}</span>
             <div className={`status-dot ${getStatusClass(status?.isConnected)}`}></div>
-            <span
-                className="site-name clickable"
-                title={`Site name ${status?.siteName || "Not set"} (click to edit)`}
-                onClick={handleSiteNameChange}
-            >
+            <span className="site-name clickable" title={`Site name ${status?.siteName || "Not set"} (click to edit)`} onClick={handleSiteNameChange}>
                 {status?.siteName || "Not set"}
             </span>
             <div className="capacity-container">
@@ -167,15 +164,8 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
             </div>
 
             <div className="sw-stack">
-                <div className="sw-version">
-                    {status?.swVersion || "v1.0.0"}
-                </div>
-                <button
-                    className="btn sw-update"
-                    onClick={handleSwUpdate}
-                    disabled={!isEnabled}
-                    title="Software update"
-                >
+                <div className="sw-version">{status?.swVersion || "v1.0.0"}</div>
+                <button className="btn sw-update" onClick={handleSwUpdate} disabled={!isEnabled} title="Software update">
                     Update
                 </button>
             </div>
@@ -183,12 +173,7 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
             <div className="time-settings-stack">
                 <div className="setting-group">
                     <span className="setting-label">Start</span>
-                    <select
-                        value={settings.startTime || "08:00"}
-                        onChange={(e) => handleSettingChange("startTime", e.target.value)}
-                        disabled={!isEnabled}
-                        title="Start time"
-                    >
+                    <select value={settings.startTime || "08:00"} onChange={(e) => handleSettingChange("startTime", e.target.value)} disabled={!isEnabled} title="Start time">
                         {timeOptions.map((time) => (
                             <option key={`start-${time}`} value={time}>
                                 {time}
@@ -199,12 +184,7 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
 
                 <div className="setting-group">
                     <span className="setting-label">End</span>
-                    <select
-                        value={settings.endTime || "18:00"}
-                        onChange={(e) => handleSettingChange("endTime", e.target.value)}
-                        disabled={!isEnabled}
-                        title="End time"
-                    >
+                    <select value={settings.endTime || "18:00"} onChange={(e) => handleSettingChange("endTime", e.target.value)} disabled={!isEnabled} title="End time">
                         {timeOptions.map((time) => (
                             <option key={`end-${time}`} value={time}>
                                 {time}
@@ -291,41 +271,20 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
 
             <div className="settings-stack">
                 <div className="settings-stack-inner">
-                    <button
-                        className="btn load"
-                        onClick={handleLoadSettings}
-                        disabled={!isEnabled}
-                        title="현재 설정 불러오기"
-                    >
+                    <button className="btn load" onClick={handleLoadSettings} disabled={!isEnabled} title="현재 설정 불러오기">
                         현재 설정
                     </button>
-                    <button
-                        className="btn load"
-                        onClick={handleLoadOptions}
-                        disabled={!isEnabled}
-                        title="사용 가능한 옵션 불러오기"
-                    >
+                    <button className="btn load" onClick={handleLoadOptions} disabled={!isEnabled} title="사용 가능한 옵션 불러오기">
                         옵션 로드
                     </button>
 
-                    <button
-                        className="btn apply"
-                        onClick={handleApplySettings}
-                        disabled={!isEnabled}
-                        title="변경 적용"
-                    >
+                    <button className="btn apply" onClick={handleApplySettings} disabled={!isEnabled} title="변경 적용">
                         변경 적용
                     </button>
                 </div>
             </div>
 
-            <SiteNameModal
-                isOpen={isSiteNameModalOpen}
-                onClose={() => setIsSiteNameModalOpen(false)}
-                onSubmit={handleSiteNameSubmit}
-                currentSiteName={status?.siteName}
-                moduleId={moduleId}
-            />
+            <SiteNameModal isOpen={isSiteNameModalOpen} onClose={() => setIsSiteNameModalOpen(false)} onSubmit={handleSiteNameSubmit} currentSiteName={status?.siteName} moduleId={moduleId} />
         </div>
     );
 };
