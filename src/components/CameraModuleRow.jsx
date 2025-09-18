@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { SiteNameModal } from "./SiteNameModal";
 
 export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, availableSettings, isDummy, initialSettings, gridTemplateColumns }) => {
     const [settings, setSettings] = useState(
@@ -13,6 +14,7 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
             aperture: "f/2.8",
         }
     );
+    const [isSiteNameModalOpen, setIsSiteNameModalOpen] = useState(false);
 
     const handleSettingChange = (key, value) => {
         setSettings((prev) => ({
@@ -46,6 +48,19 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
 
     const handleLoadOptions = () => {
         onCommand(moduleId, "options_request", {});
+    };
+
+    const handleSiteNameChange = () => {
+        setIsSiteNameModalOpen(true);
+    };
+
+    const handleSiteNameSubmit = async (newSiteName) => {
+        onCommand(moduleId, "sitename", { sitename: newSiteName });
+        setIsSiteNameModalOpen(false);
+    };
+
+    const handleSwUpdate = () => {
+        onCommand(moduleId, "sw-update", {});
     };
 
     const getStatusClass = (isConnected) => {
@@ -106,7 +121,11 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
             <div className="camera-module-fixed">
                 <span className="module-id">{moduleId.toString().padStart(2, "0")}</span>
                 <div className={`status-dot ${getStatusClass(status?.isConnected)}`}></div>
-                <span className="site-name" title={status?.siteName || "미설정"}>
+                <span
+                    className="site-name clickable"
+                    title={`사이트: ${status?.siteName || "미설정"} (클릭하여 변경)`}
+                    onClick={handleSiteNameChange}
+                >
                     {status?.siteName || "미설정"}
                 </span>
             </div>
@@ -124,10 +143,10 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                 <div className="last-boot">{formatDateTime(status?.lastBootTime)}</div>
 
                 <div className="control-buttons">
-                    <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled} title="카메라 재부팅" style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}>
+                    <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled} title="카메라 재부팅">
                         모듈
                     </button>
-                    <button className="btn wiper" onClick={handleWiper} disabled={!isEnabled} title="와이퍼 30초 동작" style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}>
+                    <button className="btn wiper" onClick={handleWiper} disabled={!isEnabled} title="와이퍼 30초 동작">
                         와이퍼
                     </button>
                     <button
@@ -135,9 +154,25 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                         onClick={handleCameraPower}
                         disabled={!isEnabled}
                         title="카메라 전원 On/Off"
-                        style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}
+
                     >
                         카메라
+                    </button>
+                </div>
+
+                <div className="sw-stack">
+                    <div className="sw-version">
+                        {status?.swVersion || "v1.0.0"}
+                    </div>
+
+                    <button
+                        className="btn sw-update"
+                        onClick={handleSwUpdate}
+                        disabled={!isEnabled}
+                        title="소프트웨어 업데이트"
+
+                    >
+                        업데이트
                     </button>
                 </div>
 
@@ -269,14 +304,14 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                     <option value="f/16">16</option>
                 </select>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: "100px" }}>
-                    <div style={{ display: "flex", gap: "2px" }}>
+                <div className="settings-stack">
+                    <div className="settings-stack-inner">
                         <button
                             className="btn load"
                             onClick={handleLoadSettings}
                             disabled={!isEnabled}
                             title="현재 설정 불러오기"
-                            style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}
+
                         >
                             현재 설정
                         </button>
@@ -285,7 +320,7 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                             onClick={handleLoadOptions}
                             disabled={!isEnabled}
                             title="사용 가능한 옵션 불러오기"
-                            style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}
+
                         >
                             옵션 로드
                         </button>
@@ -295,13 +330,21 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                             onClick={handleApplySettings}
                             disabled={!isEnabled}
                             title="변경 적용"
-                            style={{ fontSize: "0.6rem", padding: "0.1rem", flex: 1, margin: "0 0.1rem" }}
+
                         >
                             변경 적용
                         </button>
                     </div>
                 </div>
             </div>
+
+            <SiteNameModal
+                isOpen={isSiteNameModalOpen}
+                onClose={() => setIsSiteNameModalOpen(false)}
+                onSubmit={handleSiteNameSubmit}
+                currentSiteName={status?.siteName}
+                moduleId={moduleId}
+            />
         </div>
     );
 };

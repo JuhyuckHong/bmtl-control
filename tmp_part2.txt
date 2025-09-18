@@ -1,0 +1,66 @@
+                                    </div>
+                                    <div className="resizable-header">
+                                        ?¨Î???div className="column-resizer" onMouseDown={(e) => startResize(5, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        SWÎ≤ÑÏ†Ñ<div className="column-resizer" onMouseDown={(e) => startResize(6, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        ?ÖÎç∞?¥Ìä∏<div className="column-resizer" onMouseDown={(e) => startResize(7, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        ?úÏûë<div className="column-resizer" onMouseDown={(e) => startResize(8, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        Ï¢ÖÎ£å<div className="column-resizer" onMouseDown={(e) => startResize(9, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        Í∞ÑÍ≤©<div className="column-resizer" onMouseDown={(e) => startResize(10, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        ?¥Î?ÏßÄ?¨Í∏∞<div className="column-resizer" onMouseDown={(e) => startResize(11, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        ?àÏßà<div className="column-resizer" onMouseDown={(e) => startResize(12, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        ISO<div className="column-resizer" onMouseDown={(e) => startResize(13, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        ?¨Îß∑<div className="column-resizer" onMouseDown={(e) => startResize(14, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        Ï°∞Î¶¨Í∞?div className="column-resizer" onMouseDown={(e) => startResize(15, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        ?§Ï†ï<div className="column-resizer" onMouseDown={(e) => startResize(16, e.clientX)}></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {filteredModules.length === 0 ? (
+                                <div className="no-modules">
+                                    <p>?úÏãú??Î™®Îìà???ÜÏäµ?àÎã§.</p>
+                                </div>
+                            ) : (
+                                filteredModules.map((module) => (
+                                    <CameraModuleRow
+                                        key={module.id}
+                                        moduleId={module.id}
+                                        status={module.status}
+                                        availableSettings={module.settings}
+                                        onCommand={handleCommand}
+                                        onLoadSettings={handleLoadSettings}
+                                        isDummy={module.isDummy}
+                                        initialSettings={module.settings}
+                                        gridTemplateColumns={gridTemplateColumns}
+                                    />
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};

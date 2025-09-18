@@ -73,6 +73,21 @@ export const ApiDocsPage = () => {
             description: "개별 모듈 카메라 전원 On/Off (01번 모듈 예시)",
             qos: "2",
         },
+        {
+            type: "Publish",
+            topic: "bmtl/set/sitename/01",
+            description: "개별 모듈 사이트 이름 변경 (01번 모듈 예시)",
+            qos: "2",
+            payload: {
+                sitename: "새로운 사이트명",
+            },
+        },
+        {
+            type: "Publish",
+            topic: "bmtl/sw-update/01",
+            description: "개별 모듈 소프트웨어 업데이트 (01번 모듈 예시)",
+            qos: "2",
+        },
         // 구독 메시지 (Subscribe)
         {
             type: "Subscribe",
@@ -88,6 +103,7 @@ export const ApiDocsPage = () => {
                 today_total_captures: 100,
                 today_captured_count: 85,
                 missed_captures: 3,
+                sw_version: "v1.0.0",
             },
         },
         {
@@ -251,6 +267,32 @@ export const ApiDocsPage = () => {
                 timestamp: "2024-01-01T00:00:00Z",
             },
         },
+        {
+            type: "Subscribe",
+            topic: "bmtl/response/sitename/+",
+            description: "사이트 이름 변경 응답 수신",
+            qos: "1",
+            payload: {
+                response_type: "sitename_result",
+                module_id: "camera_01",
+                success: true,
+                message: "Sitename changed successfully",
+                sitename: "새로운 사이트명",
+            },
+        },
+        {
+            type: "Subscribe",
+            topic: "bmtl/response/sw-update/+",
+            description: "소프트웨어 업데이트 응답 수신",
+            qos: "1",
+            payload: {
+                response_type: "sw_update_result",
+                module_id: "camera_01",
+                success: true,
+                message: "Software update completed successfully",
+                version: "v1.2.0",
+            },
+        },
     ];
 
     const connectionInfo = useMemo(
@@ -362,6 +404,22 @@ export const ApiDocsPage = () => {
                     <div className="pattern-item">
                         <code>bmtl/response/camera-on-off/+</code>
                         <span>카메라 전원 제어 응답 (모듈번호)</span>
+                    </div>
+                    <div className="pattern-item">
+                        <code>bmtl/set/sitename/+</code>
+                        <span>사이트 이름 변경 요청 (모듈번호)</span>
+                    </div>
+                    <div className="pattern-item">
+                        <code>bmtl/response/sitename/+</code>
+                        <span>사이트 이름 변경 응답 (모듈번호)</span>
+                    </div>
+                    <div className="pattern-item">
+                        <code>bmtl/sw-update/+</code>
+                        <span>소프트웨어 업데이트 요청 (모듈번호)</span>
+                    </div>
+                    <div className="pattern-item">
+                        <code>bmtl/response/sw-update/+</code>
+                        <span>소프트웨어 업데이트 응답 (모듈번호)</span>
                     </div>
                 </div>
             </section>

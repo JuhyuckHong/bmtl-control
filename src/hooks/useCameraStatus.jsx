@@ -195,6 +195,50 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
         [mqttClient]
     );
 
+    // 사이트 이름 변경 명령
+    const sendSiteNameCommand = useCallback(
+        (moduleId, siteName) => {
+            if (!mqttClient?.connected) return;
+
+            const topic = `bmtl/set/sitename/${moduleId.toString().padStart(2, "0")}`;
+            const payload = JSON.stringify({ sitename: siteName });
+
+            mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
+                if (err) {
+                    console.error(`❌ [MQTT Publish] Failed to send sitename command to module ${moduleId}:`, err);
+                } else {
+                    console.log(`🚀 [MQTT Publish] Sitename command sent to module ${moduleId}`);
+                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
+                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
+                    mqttClient.emit("publish", { topic, payload, qos: 2 });
+                }
+            });
+        },
+        [mqttClient]
+    );
+
+    // SW 업데이트 명령
+    const sendSwUpdateCommand = useCallback(
+        (moduleId) => {
+            if (!mqttClient?.connected) return;
+
+            const topic = `bmtl/sw-update/${moduleId.toString().padStart(2, "0")}`;
+            const payload = JSON.stringify({});
+
+            mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
+                if (err) {
+                    console.error(`❌ [MQTT Publish] Failed to send SW update command to module ${moduleId}:`, err);
+                } else {
+                    console.log(`🚀 [MQTT Publish] SW update command sent to module ${moduleId}`);
+                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
+                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
+                    mqttClient.emit("publish", { topic, payload, qos: 2 });
+                }
+            });
+        },
+        [mqttClient]
+    );
+
     // 통합 명령 전송 함수 (기존 호환성)
     const sendCommand = useCallback(
         (moduleId, command, data) => {
@@ -234,12 +278,18 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     case "camera-on-off":
                         sendCameraPowerCommand(moduleId);
                         break;
+                    case "sitename":
+                        sendSiteNameCommand(moduleId, data.sitename);
+                        break;
+                    case "sw-update":
+                        sendSwUpdateCommand(moduleId);
+                        break;
                     default:
                         console.warn(`Unknown command: ${command}`);
                 }
             }
         },
-        [sendRebootCommand, sendConfigureCommand, sendGlobalRebootCommand, requestAllSettings, sendWiperCommand, sendCameraPowerCommand]
+        [sendRebootCommand, sendConfigureCommand, sendGlobalRebootCommand, requestAllSettings, sendWiperCommand, sendCameraPowerCommand, sendSiteNameCommand, sendSwUpdateCommand]
     );
 
     // 개별 모듈 설정 요청
@@ -279,53 +329,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
         });
     }, [mqttClient]);
 
-    // MQTT 구독 설정 (한 번만 실행)
-    useEffect(() => {
-        if (!mqttClient?.connected) return;
-
-        const topicsToSubscribe = [
-            // 디바이스 헬스 상태
-            "bmtl/status/health/+",
-            // 전체 설정 응답
-            "bmtl/response/settings/all",
-            // 개별 설정 응답
-            "bmtl/response/settings/+",
-            // 설정 변경 응답
-            "bmtl/response/set/settings/+",
-            // 재부팅 응답
-            "bmtl/response/reboot/+",
-            "bmtl/response/reboot/all",
-            // 개별 options 응답
-            "bmtl/response/options/+",
-            // 전체 options 응답
-            "bmtl/response/options/all",
-            // 상태 응답
-            "bmtl/response/status",
-            // 와이퍼 응답
-            "bmtl/response/wiper/+",
-            // 카메라 전원 응답
-            "bmtl/response/camera-on-off/+",
-        ];
-
-        console.log(`📡 [MQTT Subscribe] Subscribing to ${topicsToSubscribe.length} topics for camera control:`);
-        topicsToSubscribe.forEach((topic, index) => {
-            mqttClient.subscribe(topic, (err) => {
-                if (!err) {
-                    setLocalSubscribedTopics((prev) => new Set([...prev, topic]));
-                    console.log(`✅ [MQTT Subscribe] ${index + 1}/${topicsToSubscribe.length} - ${topic}`);
-                } else {
-                    console.error(`❌ [MQTT Subscribe] Failed to subscribe to ${topic}:`, err);
-                }
-            });
-        });
-
-        // 컴포넌트 언마운트 시 구독 해제
-        return () => {
-            topicsToSubscribe.forEach((topic) => {
-                mqttClient.unsubscribe(topic);
-            });
-        };
-    }, [mqttClient]);
+    // MQTT 구독 설정은 connect 이벤트에서 처리
 
     // 메시지 처리
     useEffect(() => {
@@ -356,6 +360,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                         todayTotalCaptures: data.today_total_captures,
                         todayCapturedCount: data.today_captured_count,
                         missedCaptures: data.missed_captures,
+                        swVersion: data.sw_version || data.swVersion, // SW 버전 정보 추가
                     });
                 } else if (topic.startsWith("bmtl/response/settings/")) {
                     // 설정 응답 처리
@@ -431,6 +436,30 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
                     console.log(`🔌 [Camera Power Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `New state: ${data.new_state || 'Unknown'}`);
+                } else if (topic.startsWith("bmtl/response/sitename/")) {
+                    // 사이트 이름 변경 응답 처리
+                    const moduleIdStr = topicParts[3];
+                    const moduleId = parseInt(moduleIdStr, 10);
+                    console.log(`🏷️ [Sitename Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `New sitename: ${data.sitename || 'Unknown'}`);
+
+                    // 성공 시 모듈 상태 업데이트
+                    if (data.success && data.sitename) {
+                        updateModuleStatus(moduleId, {
+                            siteName: data.sitename,
+                        });
+                    }
+                } else if (topic.startsWith("bmtl/response/sw-update/")) {
+                    // SW 업데이트 응답 처리
+                    const moduleIdStr = topicParts[3];
+                    const moduleId = parseInt(moduleIdStr, 10);
+                    console.log(`💿 [SW Update Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `Version: ${data.version || 'Unknown'}`);
+
+                    // 성공 시 모듈 상태 업데이트 (새 SW 버전 반영)
+                    if (data.success && data.version) {
+                        updateModuleStatus(moduleId, {
+                            swVersion: data.version,
+                        });
+                    }
                 } else {
                     console.log(`❓ [Unknown Topic] Unhandled topic: ${topic}`);
                 }
@@ -441,10 +470,53 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
 
         const handleConnect = () => {
             console.log("🟢 [MQTT Client] Connected to broker");
+
+            // 연결 시 토픽 구독
+            const topicsToSubscribe = [
+                // 디바이스 헬스 상태
+                "bmtl/status/health/+",
+                // 전체 설정 응답
+                "bmtl/response/settings/all",
+                // 개별 설정 응답
+                "bmtl/response/settings/+",
+                // 설정 변경 응답
+                "bmtl/response/set/settings/+",
+                // 재부팅 응답
+                "bmtl/response/reboot/+",
+                "bmtl/response/reboot/all",
+                // 개별 options 응답
+                "bmtl/response/options/+",
+                // 전체 options 응답
+                "bmtl/response/options/all",
+                // 상태 응답
+                "bmtl/response/status",
+                // 와이퍼 응답
+                "bmtl/response/wiper/+",
+                // 카메라 전원 응답
+                "bmtl/response/camera-on-off/+",
+                // 사이트 이름 응답
+                "bmtl/response/sitename/+",
+                // SW 업데이트 응답
+                "bmtl/response/sw-update/+",
+            ];
+
+            console.log(`📡 [MQTT Subscribe] Subscribing to ${topicsToSubscribe.length} topics for camera control:`);
+            topicsToSubscribe.forEach((topic, index) => {
+                mqttClient.subscribe(topic, (err) => {
+                    if (!err) {
+                        setLocalSubscribedTopics((prev) => new Set([...prev, topic]));
+                        console.log(`✅ [MQTT Subscribe] ${index + 1}/${topicsToSubscribe.length} - ${topic}`);
+                    } else {
+                        console.error(`❌ [MQTT Subscribe] Failed to subscribe to ${topic}:`, err);
+                    }
+                });
+            });
         };
 
         const handleDisconnect = () => {
             console.log("🔴 [MQTT Client] Disconnected from broker");
+            // 연결 해제 시 구독 상태 초기화
+            setLocalSubscribedTopics(new Set());
         };
 
         const handleReconnect = () => {

@@ -144,31 +144,34 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
                                         재부팅<div className="column-resizer" onMouseDown={(e) => startResize(5, e.clientX)}></div>
                                     </div>
                                     <div className="resizable-header">
-                                        시작<div className="column-resizer" onMouseDown={(e) => startResize(6, e.clientX)}></div>
+                                        SW버전/업데이트<div className="column-resizer" onMouseDown={(e) => startResize(6, e.clientX)}></div>
                                     </div>
                                     <div className="resizable-header">
-                                        종료<div className="column-resizer" onMouseDown={(e) => startResize(7, e.clientX)}></div>
+                                        시작<div className="column-resizer" onMouseDown={(e) => startResize(7, e.clientX)}></div>
                                     </div>
                                     <div className="resizable-header">
-                                        간격<div className="column-resizer" onMouseDown={(e) => startResize(8, e.clientX)}></div>
+                                        종료<div className="column-resizer" onMouseDown={(e) => startResize(8, e.clientX)}></div>
                                     </div>
                                     <div className="resizable-header">
-                                        이미지크기<div className="column-resizer" onMouseDown={(e) => startResize(9, e.clientX)}></div>
+                                        간격<div className="column-resizer" onMouseDown={(e) => startResize(9, e.clientX)}></div>
                                     </div>
                                     <div className="resizable-header">
-                                        품질<div className="column-resizer" onMouseDown={(e) => startResize(10, e.clientX)}></div>
+                                        이미지크기<div className="column-resizer" onMouseDown={(e) => startResize(10, e.clientX)}></div>
                                     </div>
                                     <div className="resizable-header">
-                                        ISO<div className="column-resizer" onMouseDown={(e) => startResize(11, e.clientX)}></div>
+                                        품질<div className="column-resizer" onMouseDown={(e) => startResize(11, e.clientX)}></div>
                                     </div>
                                     <div className="resizable-header">
-                                        포맷<div className="column-resizer" onMouseDown={(e) => startResize(12, e.clientX)}></div>
+                                        ISO<div className="column-resizer" onMouseDown={(e) => startResize(12, e.clientX)}></div>
                                     </div>
                                     <div className="resizable-header">
-                                        조리개<div className="column-resizer" onMouseDown={(e) => startResize(13, e.clientX)}></div>
+                                        포맷<div className="column-resizer" onMouseDown={(e) => startResize(13, e.clientX)}></div>
                                     </div>
                                     <div className="resizable-header">
-                                        설정<div className="column-resizer" onMouseDown={(e) => startResize(14, e.clientX)}></div>
+                                        조리개<div className="column-resizer" onMouseDown={(e) => startResize(14, e.clientX)}></div>
+                                    </div>
+                                    <div className="resizable-header">
+                                        설정<div className="column-resizer" onMouseDown={(e) => startResize(15, e.clientX)}></div>
                                     </div>
                                 </div>
                             </div>
