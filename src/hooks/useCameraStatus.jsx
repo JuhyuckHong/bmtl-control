@@ -44,9 +44,11 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
 
             mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
                 if (err) {
-                    console.error(`Failed to send reboot command to module ${moduleId}:`, err);
+                    console.error(`❌ [MQTT Publish] Failed to send reboot command to module ${moduleId}:`, err);
                 } else {
-                    console.log(`Reboot command sent to module ${moduleId}`, topic, payload);
+                    console.log(`🚀 [MQTT Publish] Reboot command sent to module ${moduleId}`);
+                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
+                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
                     mqttClient.emit("publish", { topic, payload, qos: 2 });
                 }
             });
@@ -64,9 +66,11 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
 
             mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
                 if (err) {
-                    console.error(`Failed to send configure command to module ${moduleId}:`, err);
+                    console.error(`❌ [MQTT Publish] Failed to send configure command to module ${moduleId}:`, err);
                 } else {
-                    console.log(`Configure command sent to module ${moduleId}:`, settings, topic, payload);
+                    console.log(`🚀 [MQTT Publish] Configure command sent to module ${moduleId}`);
+                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
+                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
                     mqttClient.emit("publish", { topic, payload, qos: 2 });
                 }
             });
@@ -83,9 +87,11 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
 
         mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
             if (err) {
-                console.error("Failed to send global reboot command:", err);
+                console.error("❌ [MQTT Publish] Failed to send global reboot command:", err);
             } else {
-                console.log("Global reboot command sent", topic, payload);
+                console.log("🚀 [MQTT Publish] Global reboot command sent");
+                console.log(`📡 [MQTT Publish] Topic: ${topic}`);
+                console.log(`📦 [MQTT Publish] Payload: ${payload}`);
                 mqttClient.emit("publish", { topic, payload, qos: 2 });
             }
         });
@@ -155,9 +161,11 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
 
             mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
                 if (err) {
-                    console.error(`Failed to send wiper command to module ${moduleId}:`, err);
+                    console.error(`❌ [MQTT Publish] Failed to send wiper command to module ${moduleId}:`, err);
                 } else {
-                    console.log(`Wiper command sent to module ${moduleId}`, topic, payload);
+                    console.log(`🚀 [MQTT Publish] Wiper command sent to module ${moduleId}`);
+                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
+                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
                     mqttClient.emit("publish", { topic, payload, qos: 2 });
                 }
             });
@@ -175,9 +183,11 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
 
             mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
                 if (err) {
-                    console.error(`Failed to send camera power command to module ${moduleId}:`, err);
+                    console.error(`❌ [MQTT Publish] Failed to send camera power command to module ${moduleId}:`, err);
                 } else {
-                    console.log(`Camera power command sent to module ${moduleId}`, topic, payload);
+                    console.log(`🚀 [MQTT Publish] Camera power command sent to module ${moduleId}`);
+                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
+                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
                     mqttClient.emit("publish", { topic, payload, qos: 2 });
                 }
             });
@@ -332,18 +342,17 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                 const topicParts = topic.split("/");
 
                 if (topic.startsWith("bmtl/status/health/")) {
-                    // 디바이스 헬스 상태 처리
+                    // 디바이스 헬스 상태 처리 (메시지를 받으면 온라인으로 간주)
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
-                    console.log(`💚 [Health Update] Module ${moduleId} - Status: ${data.status}, Site: ${data.site_name}`);
+                    console.log(`💚 [Health Update] Module ${moduleId} - Online, Site: ${data.site_name}`);
 
                     updateModuleStatus(moduleId, {
-                        isConnected: data.status === "online",
+                        isConnected: true, // 메시지를 받으면 온라인으로 처리
                         siteName: data.site_name,
                         remainingCapacity: data.storage_used,
                         lastCaptureTime: data.last_capture_time,
                         lastBootTime: data.last_boot_time,
-                        batteryLevel: data.battery_level,
                         todayTotalCaptures: data.today_total_captures,
                         todayCapturedCount: data.today_captured_count,
                         missedCaptures: data.missed_captures,
@@ -430,17 +439,59 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
             }
         };
 
+        const handleConnect = () => {
+            console.log("🟢 [MQTT Client] Connected to broker");
+        };
+
+        const handleDisconnect = () => {
+            console.log("🔴 [MQTT Client] Disconnected from broker");
+        };
+
+        const handleReconnect = () => {
+            console.log("🔄 [MQTT Client] Reconnecting to broker");
+        };
+
+        const handleError = (error) => {
+            console.error("❌ [MQTT Client] Error:", error);
+        };
+
+        const handleOffline = () => {
+            console.log("📴 [MQTT Client] Gone offline");
+        };
+
+        const handleClose = () => {
+            console.log("🚪 [MQTT Client] Connection closed");
+        };
+
         mqttClient.on("message", handleMessage);
+        mqttClient.on("connect", handleConnect);
+        mqttClient.on("disconnect", handleDisconnect);
+        mqttClient.on("reconnect", handleReconnect);
+        mqttClient.on("error", handleError);
+        mqttClient.on("offline", handleOffline);
+        mqttClient.on("close", handleClose);
 
         return () => {
             mqttClient.off("message", handleMessage);
+            mqttClient.off("connect", handleConnect);
+            mqttClient.off("disconnect", handleDisconnect);
+            mqttClient.off("reconnect", handleReconnect);
+            mqttClient.off("error", handleError);
+            mqttClient.off("offline", handleOffline);
+            mqttClient.off("close", handleClose);
         };
     }, [mqttClient, updateModuleStatus, updateModuleSettings]);
 
-    // 모듈 연결 상태 체크 (5분간 응답 없으면 오프라인 처리)
+    // 모듈 연결 상태 체크 및 구독 상태 로깅 (5분간 응답 없으면 오프라인 처리)
     useEffect(() => {
         const interval = setInterval(() => {
             const now = new Date();
+
+            // 구독 상태 로깅
+            console.log(`📊 [MQTT Status] Subscribed topics: ${localSubscribedTopics.size}`);
+            console.log(`📊 [MQTT Status] Connected modules: ${Object.keys(moduleStatuses).length}`);
+            console.log(`📊 [MQTT Status] Active subscriptions:`, Array.from(localSubscribedTopics));
+
             setModuleStatuses((prev) => {
                 const updated = { ...prev };
                 Object.keys(updated).forEach((moduleId) => {
@@ -454,7 +505,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
         }, 30000); // 30초마다 체크
 
         return () => clearInterval(interval);
-    }, []);
+    }, [localSubscribedTopics, moduleStatuses]);
 
     return {
         moduleStatuses,

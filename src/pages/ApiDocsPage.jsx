@@ -81,8 +81,6 @@ export const ApiDocsPage = () => {
             qos: "0-1",
             payload: {
                 module_id: "camera_01",
-                status: "online/offline",
-                battery_level: 85,
                 storage_used: 45.2,
                 last_capture_time: "2024-01-01T12:30:00Z",
                 last_boot_time: "2024-01-01T08:15:00Z",
@@ -90,7 +88,6 @@ export const ApiDocsPage = () => {
                 today_total_captures: 100,
                 today_captured_count: 85,
                 missed_captures: 3,
-                timestamp: "2024-01-01T00:00:00Z",
             },
         },
         {
