@@ -1,11 +1,15 @@
-/* Override app-main for docs mode */
+/* === API DOCUMENTATION STYLES ===
+ * Specialized styles for API documentation display
+ */
+
+/* App main override for docs mode */
 .app-main.docs-mode {
     overflow: auto !important;
     padding: 0 !important;
     margin: 0 !important;
 }
 
-/* API Documentation Styles */
+/* === MAIN CONTAINER === */
 .api-docs-page {
     width: 100%;
     max-width: none;
@@ -36,7 +40,7 @@
     margin: 0;
 }
 
-/* Connection Section */
+/* === CONNECTION INFO SECTION === */
 .connection-section {
     margin-bottom: 40px;
 }
@@ -80,7 +84,7 @@
     color: var(--success);
 }
 
-/* QoS Section */
+/* === QOS INFORMATION SECTION === */
 .qos-section {
     margin-bottom: 24px;
 }
@@ -128,7 +132,7 @@
     font-size: 11px;
 }
 
-/* Endpoints Section */
+/* === ENDPOINTS DOCUMENTATION === */
 .endpoints-section {
     margin-bottom: 24px;
 }
@@ -249,7 +253,7 @@
     white-space: pre-wrap;
 }
 
-/* Patterns Section */
+/* === TOPIC PATTERNS SECTION === */
 .patterns-section {
     margin-bottom: 24px;
 }
@@ -297,7 +301,7 @@
     font-size: 11px;
 }
 
-/* Errors Section */
+/* === ERROR CODES SECTION === */
 .errors-section h2 {
     color: var(--text-primary);
     margin-bottom: 12px;
@@ -342,7 +346,8 @@
     font-size: 11px;
 }
 
-/* Responsive Design */
+/* === RESPONSIVE DESIGN === */
+/* Mobile and tablet adaptations for docs */
 @media (max-width: 768px) {
     .api-docs-page {
         padding: 15px;
