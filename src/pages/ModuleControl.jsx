@@ -141,7 +141,6 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
                                         key={module.id}
                                         moduleId={module.id}
                                         status={module.status}
-                                        availableSettings={module.settings}
                                         onCommand={handleCommand}
                                         onLoadSettings={handleLoadSettings}
                                         isDummy={module.isDummy}

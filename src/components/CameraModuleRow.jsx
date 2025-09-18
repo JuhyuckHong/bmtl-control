@@ -1,7 +1,17 @@
 import React, { useState, useMemo } from "react";
 import { SiteNameModal } from "./SiteNameModal";
 
-export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, availableSettings, isDummy, initialSettings, gridTemplateColumns }) => {
+/**
+ * Camera Module Row Component
+ * @param {Object} props - Component props
+ * @param {number} props.moduleId - Module ID number
+ * @param {Object} props.status - Module status object
+ * @param {Function} props.onCommand - Command handler function
+ * @param {Function} props.onLoadSettings - Load settings handler function
+ * @param {boolean} props.isDummy - Whether this is a dummy module
+ * @param {Object} props.initialSettings - Initial settings object
+ */
+export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, isDummy, initialSettings }) => {
     const [settings, setSettings] = useState(
         initialSettings || {
             startTime: "08:00",
@@ -90,15 +100,6 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
         return `${year}.${month}.${day} ${hour}:${minute}:${second}`;
     };
 
-    const formatTime = (timeString) => {
-        if (!timeString) return "";
-        // 24시간 형식 HH:MM으로 표시
-        const [hours, minutes] = timeString.split(":");
-        const hour24 = parseInt(hours, 10);
-        const formattedHour = hour24.toString().padStart(2, "0");
-        return `${formattedHour}:${minutes}`;
-    };
-
     const getCaptureProgress = () => {
         const totalToday = status?.todayTotalCaptures || 0;
         const captured = status?.todayCapturedCount || 0;
@@ -109,7 +110,7 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
         return status?.missedCaptures || 0;
     };
 
-    const getCapacityInfo = () => {
+    const capacityInfo = useMemo(() => {
         const capacity = status?.remainingCapacity;
         if (capacity === null || capacity === undefined) {
             return { percentage: 0, display: "--", isWarning: false };
@@ -123,7 +124,7 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
             display: `${percentage}%`,
             isWarning,
         };
-    };
+    }, [status?.remainingCapacity]);
 
     return (
         <div className={`camera-module-row ${!status?.isConnected ? "disconnected" : ""}`}>
@@ -133,9 +134,9 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, a
                 {status?.siteName || "Not set"}
             </span>
             <div className="capacity-container">
-                <div className={`capacity-progress ${getCapacityInfo().isWarning ? "warning" : ""}`}>
-                    <div className="capacity-progress-bar" style={{ width: `${getCapacityInfo().percentage}%` }}></div>
-                    <span className="capacity-text">{getCapacityInfo().display}</span>
+                <div className={`capacity-progress ${capacityInfo.isWarning ? "warning" : ""}`}>
+                    <div className="capacity-progress-bar" style={{ width: `${capacityInfo.percentage}%` }}></div>
+                    <span className="capacity-text">{capacityInfo.display}</span>
                 </div>
             </div>
             <div className="capture-info-stack">
