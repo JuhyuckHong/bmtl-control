@@ -1,24 +1,42 @@
 import React, { useState, useCallback, useRef } from 'react';
 import mqtt from 'mqtt';
 
+const MAX_MESSAGE_HISTORY = 500;
+
 export const useMQTT = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [status, setStatus] = useState('Disconnected');
   const [messages, setMessages] = useState([]);
-  const [subscribedTopics] = useState(new Set());
-  
+  const [subscribedTopics, setSubscribedTopics] = useState([]);
+
   const clientRef = useRef(null);
+  const subscribedTopicsRef = useRef(new Set());
+
+  const syncSubscribedTopics = useCallback(() => {
+    setSubscribedTopics(Array.from(subscribedTopicsRef.current));
+  }, []);
 
   const addMessage = useCallback((topic, payload, type = 'received') => {
     const newMessage = {
       topic,
       payload,
       timestamp: new Date(),
-      type
+      type,
     };
-    setMessages(prev => [...prev, newMessage]);
+
+    setMessages((prev) => {
+      const next = [...prev, newMessage];
+      if (next.length > MAX_MESSAGE_HISTORY) {
+        return next.slice(-MAX_MESSAGE_HISTORY);
+      }
+      return next;
+    });
   }, []);
+
+  const addSystemMessage = useCallback((payload) => {
+    addMessage('System', payload, 'system');
+  }, [addMessage]);
 
   const connect = useCallback(async (config) => {
     if (clientRef.current?.connected) {
@@ -49,19 +67,29 @@ export const useMQTT = () => {
         setIsConnected(true);
         setIsConnecting(false);
         setStatus('Connected');
-        addMessage('System', 'Connected to MQTT broker', 'system');
+        addSystemMessage('Connected to MQTT broker');
+
+        if (subscribedTopicsRef.current.size > 0) {
+          subscribedTopicsRef.current.forEach((topic) => {
+            client.subscribe(topic, (err) => {
+              if (err) {
+                addSystemMessage(`Resubscribe error: ${err.message}`);
+              }
+            });
+          });
+        }
       });
 
       client.on('reconnect', () => {
         setStatus('Reconnecting...');
-        addMessage('System', 'Reconnecting...', 'system');
+        addSystemMessage('Reconnecting...');
       });
 
       client.on('close', () => {
         setIsConnected(false);
         setIsConnecting(false);
         setStatus('Disconnected');
-        addMessage('System', 'Disconnected from MQTT broker', 'system');
+        addSystemMessage('Disconnected from MQTT broker');
         clientRef.current = null;
       });
 
@@ -69,7 +97,7 @@ export const useMQTT = () => {
         setIsConnected(false);
         setIsConnecting(false);
         setStatus(`Error: ${err.message}`);
-        addMessage('System', `Connection error: ${err.message}`, 'system');
+        addSystemMessage(`Connection error: ${err.message}`);
         client.end();
       });
 
@@ -77,34 +105,54 @@ export const useMQTT = () => {
         addMessage(topic, payload.toString(), 'received');
       });
 
+      syncSubscribedTopics();
     } catch (error) {
       setIsConnecting(false);
       setStatus(`Connection failed: ${error}`);
-      addMessage('System', `Connection failed: ${error}`, 'system');
+      addSystemMessage(`Connection failed: ${error}`);
     }
-  }, [addMessage]);
+  }, [addMessage, addSystemMessage, syncSubscribedTopics]);
 
   const disconnect = useCallback(() => {
     if (clientRef.current) {
-      clientRef.current.end();
+      clientRef.current.end(true);
       clientRef.current = null;
     }
   }, []);
 
   const subscribe = useCallback((topic) => {
     if (clientRef.current?.connected && topic.trim()) {
-      if (!subscribedTopics.has(topic)) {
+      if (!subscribedTopicsRef.current.has(topic)) {
         clientRef.current.subscribe(topic, (err) => {
           if (!err) {
-            subscribedTopics.add(topic);
-            addMessage('System', `Subscribed to ${topic}`, 'system');
+            subscribedTopicsRef.current.add(topic);
+            syncSubscribedTopics();
+            addSystemMessage(`Subscribed to ${topic}`);
           } else {
-            addMessage('System', `Subscription error: ${err.message}`, 'system');
+            addSystemMessage(`Subscription error: ${err.message}`);
           }
         });
       }
     }
-  }, [addMessage, subscribedTopics]);
+  }, [addSystemMessage, syncSubscribedTopics]);
+
+  const unsubscribe = useCallback((topic) => {
+    if (!clientRef.current?.connected) {
+      return;
+    }
+
+    if (subscribedTopicsRef.current.has(topic)) {
+      clientRef.current.unsubscribe(topic, (err) => {
+        if (!err) {
+          subscribedTopicsRef.current.delete(topic);
+          syncSubscribedTopics();
+          addSystemMessage(`Unsubscribed from ${topic}`);
+        } else {
+          addSystemMessage(`Unsubscribe error: ${err.message}`);
+        }
+      });
+    }
+  }, [addSystemMessage, syncSubscribedTopics]);
 
   const publish = useCallback((topic, payload, qos = 0) => {
     if (clientRef.current?.connected && topic.trim()) {
@@ -112,31 +160,19 @@ export const useMQTT = () => {
       clientRef.current.publish(topic, payload, options, (err) => {
         if (!err) {
           addMessage(topic, payload, 'sent');
-          addMessage('System', `Published to ${topic} (QoS: ${qos})`, 'system');
+          addSystemMessage(`Published to ${topic} (QoS: ${qos})`);
         } else {
-          addMessage('System', `Publish error: ${err.message}`, 'system');
+          addSystemMessage(`Publish error: ${err.message}`);
         }
       });
     }
-  }, [addMessage]);
+  }, [addMessage, addSystemMessage]);
 
-  // 외부에서 publish 이벤트를 받아서 메시지 로그에 추가
-  React.useEffect(() => {
-    if (!clientRef.current) return;
-
-    const handleExternalPublish = (data) => {
-      addMessage(data.topic, data.payload, 'sent');
-      addMessage('System', `Published to ${data.topic} (QoS: ${data.qos})`, 'system');
-    };
-
-    clientRef.current.on('publish', handleExternalPublish);
-
-    return () => {
-      if (clientRef.current) {
-        clientRef.current.off('publish', handleExternalPublish);
-      }
-    };
-  }, [addMessage]);
+  // ?��??�서 publish ?�벤?��? 받아??메시지 로그??추�?
+  const recordExternalPublish = useCallback((topic, payload, qos) => {
+    addMessage(topic, payload, 'sent');
+    addSystemMessage(`Published to ${topic} (QoS: ${qos})`);
+  }, [addMessage, addSystemMessage]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
@@ -147,12 +183,14 @@ export const useMQTT = () => {
     isConnecting,
     status,
     messages,
-    subscribedTopics: Array.from(subscribedTopics),
+    subscribedTopics,
     connect,
     disconnect,
     subscribe,
+    unsubscribe,
     publish,
+    recordExternalPublish,
     clearMessages,
-    client: clientRef.current
+    client: clientRef.current,
   };
 };
