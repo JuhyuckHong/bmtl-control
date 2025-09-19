@@ -1,6 +1,5 @@
 import React from "react";
 import { LoginForm } from "../components/LoginForm";
-import { CommandPanel } from "../components/CommandPanel";
 import { MessageLog } from "../components/MessageLog";
 
 export const MQTTPage = ({
@@ -48,13 +47,13 @@ export const MQTTPage = ({
                                 className="publish-btn"
                                 disabled={!publishTopic.trim() || !publishPayload.trim()}
                             >
-                                📤 전송
+                                ?�� ?�송
                             </button>
                         </div>
 
                         {subscribedTopics.length > 0 && (
                             <div className="subscribed-topics">
-                                <div className="topics-header">📋 구독 중인 토픽 ({subscribedTopics.length})</div>
+                                <div className="topics-header">?�� 구독 중인 ?�픽 ({subscribedTopics.length})</div>
                                 <div className="topics-list">
                                     {subscribedTopics.map((topic, index) => (
                                         <span key={index} className="topic-tag">
