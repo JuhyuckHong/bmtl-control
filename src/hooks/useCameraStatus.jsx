@@ -23,6 +23,8 @@ const CAMERA_CONTROL_TOPICS = [
     "bmtl/response/sitename/+",
     // SW 업데이트 응답
     "bmtl/response/sw-update/+",
+    // SW 버전 응답
+    "bmtl/response/sw-version/+",
 ];
 
 const hasStatusDiff = (existingModule, statusData = {}) => {
@@ -510,6 +512,18 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     if (data.success && data.version) {
                         updateModuleStatus(moduleId, {
                             swVersion: data.version,
+                        });
+                    }
+                } else if (topic.startsWith("bmtl/response/sw-version/")) {
+                    // SW 버전 응답 처리
+                    const moduleIdStr = topicParts[3];
+                    const moduleId = parseInt(moduleIdStr, 10);
+                    debugLog(`📋 [SW Version Response] Module ${moduleId}:`, `Commit Hash: ${data.commit_hash || 'Unknown'}`);
+
+                    // SW 버전 정보 업데이트
+                    if (data.commit_hash) {
+                        updateModuleStatus(moduleId, {
+                            swVersion: data.commit_hash,
                         });
                     }
                 } else {

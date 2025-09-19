@@ -253,6 +253,15 @@ export const ApiDocsPage = () => {
                 version: "v1.2.0",
             },
         },
+        {
+            type: "Subscribe",
+            topic: "bmtl/response/sw-version/+",
+            description: "소프트웨어 버전 정보 수신",
+            qos: "1",
+            payload: {
+                commit_hash: "a1b2c3d4",
+            },
+        },
     ];
 
     const connectionInfo = useMemo(
@@ -372,6 +381,10 @@ export const ApiDocsPage = () => {
                     <div className="pattern-item">
                         <code>bmtl/response/sw-update/+</code>
                         <span>소프트웨어 업데이트 응답 (모듈번호)</span>
+                    </div>
+                    <div className="pattern-item">
+                        <code>bmtl/response/sw-version/+</code>
+                        <span>소프트웨어 버전 정보 (모듈번호)</span>
                     </div>
                 </div>
             </section>
