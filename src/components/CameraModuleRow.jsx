@@ -1,6 +1,19 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { SiteNameModal } from "./SiteNameModal";
 
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, hour) => hour.toString().padStart(2, "0"));
+const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, minute) => minute.toString().padStart(2, "0"));
+const DEFAULT_SETTINGS = {
+    startTime: "08:00",
+    endTime: "18:00",
+    captureInterval: "10",
+    imageSize: "1920x1080",
+    quality: "보통",
+    iso: "400",
+    format: "JPG",
+    aperture: "f/2.8",
+};
+
 /**
  * Camera Module Row Component
  * @param {Object} props - Component props
@@ -12,31 +25,8 @@ import { SiteNameModal } from "./SiteNameModal";
  * @param {Object} props.initialSettings - Initial settings object
  */
 const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings, isDummy, initialSettings }) => {
-    const [settings, setSettings] = useState(
-        initialSettings || {
-            startTime: "08:00",
-            endTime: "18:00",
-            captureInterval: "10",
-            imageSize: "1920x1080",
-            quality: "보통",
-            iso: "400",
-            format: "JPG",
-            aperture: "f/2.8",
-        }
-    );
+    const [settings, setSettings] = useState(initialSettings || DEFAULT_SETTINGS);
     const [isSiteNameModalOpen, setIsSiteNameModalOpen] = useState(false);
-    const hourOptions = useMemo(() => {
-        return Array.from({ length: 24 }, (_, hour) => {
-            return hour.toString().padStart(2, "0");
-        });
-    }, []);
-
-    const minuteOptions = useMemo(() => {
-        return Array.from({ length: 60 }, (_, minute) => {
-            return minute.toString().padStart(2, "0");
-        });
-    }, []);
-
     const handleSettingChange = useCallback((key, value) => {
         setSettings((prev) => ({
             ...prev,
@@ -199,7 +189,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                             title="시작 시간"
                             className="time-select"
                         >
-                            {hourOptions.map((hour) => (
+                            {HOUR_OPTIONS.map((hour) => (
                                 <option key={`start-hour-${hour}`} value={hour}>
                                     {hour}시
                                 </option>
@@ -212,7 +202,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                             title="시작 분"
                             className="time-select"
                         >
-                            {minuteOptions.map((minute) => (
+                            {MINUTE_OPTIONS.map((minute) => (
                                 <option key={`start-minute-${minute}`} value={minute}>
                                     {minute}분
                                 </option>
@@ -231,7 +221,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                             title="종료 시간"
                             className="time-select"
                         >
-                            {hourOptions.map((hour) => (
+                            {HOUR_OPTIONS.map((hour) => (
                                 <option key={`end-hour-${hour}`} value={hour}>
                                     {hour}시
                                 </option>
@@ -244,7 +234,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                             title="종료 분"
                             className="time-select"
                         >
-                            {minuteOptions.map((minute) => (
+                            {MINUTE_OPTIONS.map((minute) => (
                                 <option key={`end-minute-${minute}`} value={minute}>
                                     {minute}분
                                 </option>
