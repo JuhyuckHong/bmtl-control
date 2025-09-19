@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { SiteNameModal } from "./SiteNameModal";
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, hour) => hour.toString().padStart(2, "0"));
@@ -24,8 +24,25 @@ const DEFAULT_SETTINGS = {
  * @param {boolean} props.isDummy - Whether this is a dummy module
  * @param {Object} props.initialSettings - Initial settings object
  */
+
+const areSettingsEqual = (a = {}, b = {}) => {
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+
+    if (aKeys.length !== bKeys.length) {
+        return false;
+    }
+
+    return aKeys.every((key) => a[key] === b[key]);
+};
+
 const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings, isDummy, initialSettings }) => {
     const [settings, setSettings] = useState(initialSettings || DEFAULT_SETTINGS);
+    useEffect(() => {
+        const nextSettings = initialSettings || DEFAULT_SETTINGS;
+        setSettings((prev) => (areSettingsEqual(prev, nextSettings) ? prev : nextSettings));
+    }, [initialSettings]);
+
     const [isSiteNameModalOpen, setIsSiteNameModalOpen] = useState(false);
     const handleSettingChange = useCallback((key, value) => {
         setSettings((prev) => ({
