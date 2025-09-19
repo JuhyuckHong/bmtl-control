@@ -29,6 +29,15 @@ const CAMERA_CONTROL_TOPICS = [
     "bmtl/response/sw-update/+",
 ];
 
+const hasStatusDiff = (existingModule, statusData = {}) => {
+    if (!existingModule) {
+        return true;
+    }
+
+    return Object.entries(statusData).some(([key, value]) => existingModule[key] !== value);
+};
+
+
 export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => {
     const [moduleStatuses, setModuleStatuses] = useState({});
     const [moduleSettings, setModuleSettings] = useState({});
@@ -42,23 +51,20 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
     };
 
     // 모듈 상태 업데이트
-    const updateModuleStatus = useCallback((moduleId, statusData) => {
+    const updateModuleStatus = useCallback((moduleId, statusData = {}) => {
         setModuleStatuses((prev) => {
             const existingModule = prev[moduleId];
-            const updatedModule = {
-                ...existingModule,
-                ...statusData,
-                lastUpdated: new Date(),
-            };
+            const nextTimestamp = new Date();
+            const hasChange = hasStatusDiff(existingModule, statusData);
+            const baseModule = existingModule || {};
 
-            // 실제로 변경된 내용이 있는지 확인
-            if (existingModule && JSON.stringify(existingModule) === JSON.stringify(updatedModule)) {
-                return prev;
-            }
+            const nextModule = hasChange
+                ? { ...baseModule, ...statusData, lastUpdated: nextTimestamp }
+                : { ...baseModule, lastUpdated: nextTimestamp };
 
             return {
                 ...prev,
-                [moduleId]: updatedModule,
+                [moduleId]: nextModule,
             };
         });
     }, []);
