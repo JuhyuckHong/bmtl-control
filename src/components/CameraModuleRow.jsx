@@ -3,6 +3,7 @@ import { SiteNameModal } from "./SiteNameModal";
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, hour) => hour.toString().padStart(2, "0"));
 const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, minute) => minute.toString().padStart(2, "0"));
+const INTERVAL_OPTIONS = Array.from({ length: 60 }, (_, index) => (index + 1).toString().padStart(2, "0"));
 const DEFAULT_SETTINGS = {
     startTime: "08:00",
     endTime: "18:00",
@@ -278,18 +279,21 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
 
                 <div className="setting-group">
                     <span className="setting-label">간격</span>
-                    <div className="interval-container">
-                        <input
-                            type="number"
-                            min="1"
-                            max="60"
+                    <div className="time-select-container">
+                        <select
                             value={settings.captureInterval || "10"}
                             onChange={(e) => handleSettingChange("captureInterval", e.target.value)}
                             disabled={!isEnabled}
-                            className="interval-input"
                             title="촬영 간격 (분)"
-                        />
-                        <span className="interval-unit">분</span>
+                            className="time-select"
+                        >
+                            {INTERVAL_OPTIONS.map((interval) => (
+                                <option key={`interval-${interval}`} value={interval}>
+                                    {interval}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="time-unit">분</span>
                     </div>
                 </div>
             </div>
