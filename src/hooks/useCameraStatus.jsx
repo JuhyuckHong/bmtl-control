@@ -1,10 +1,45 @@
 import { useState, useCallback, useEffect } from "react";
 
+
+const CAMERA_CONTROL_TOPICS = [
+    // 서비스 상태
+    "bmtl/status/health/+",
+    // 전체 설정 응답
+    "bmtl/response/settings/all",
+    // 개별 설정 응답
+    "bmtl/response/settings/+",
+    // 설정 변경 응답
+    "bmtl/response/set/settings/+",
+    // 재부팅 응답
+    "bmtl/response/reboot/+",
+    "bmtl/response/reboot/all",
+    // 개별 options 응답
+    "bmtl/response/options/+",
+    // 전체 options 응답
+    "bmtl/response/options/all",
+    // 상태 응답
+    "bmtl/response/status",
+    // 와이퍼 응답
+    "bmtl/response/wiper/+",
+    // 카메라 전원 응답
+    "bmtl/response/camera-on-off/+",
+    // 사이트명 응답
+    "bmtl/response/sitename/+",
+    // SW 업데이트 응답
+    "bmtl/response/sw-update/+",
+];
+
 export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => {
     const [moduleStatuses, setModuleStatuses] = useState({});
     const [moduleSettings, setModuleSettings] = useState({});
     const [moduleOptions, setModuleOptions] = useState({});
     const [localSubscribedTopics, setLocalSubscribedTopics] = useState(new Set());
+    const isDevelopment = process.env.NODE_ENV === "development";
+    const debugLog = (...args) => {
+        if (isDevelopment) {
+            window.console.log(...args);
+        }
+    };
 
     // 모듈 상태 업데이트
     const updateModuleStatus = useCallback((moduleId, statusData) => {
@@ -56,9 +91,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                 if (err) {
                     console.error(`❌ [MQTT Publish] Failed to send reboot command to module ${moduleId}:`, err);
                 } else {
-                    console.log(`🚀 [MQTT Publish] Reboot command sent to module ${moduleId}`);
-                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
-                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
+                    debugLog(`🚀 [MQTT Publish] Reboot command sent to module ${moduleId}`);
+                    debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                    debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
                     if (recordPublish) {
                         recordPublish(topic, payload, 2);
                     }
@@ -80,9 +115,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                 if (err) {
                     console.error(`❌ [MQTT Publish] Failed to send configure command to module ${moduleId}:`, err);
                 } else {
-                    console.log(`🚀 [MQTT Publish] Configure command sent to module ${moduleId}`);
-                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
-                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
+                    debugLog(`🚀 [MQTT Publish] Configure command sent to module ${moduleId}`);
+                    debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                    debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
                     if (recordPublish) {
                         recordPublish(topic, payload, 2);
                     }
@@ -103,9 +138,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
             if (err) {
                 console.error("❌ [MQTT Publish] Failed to send global reboot command:", err);
             } else {
-                console.log("🚀 [MQTT Publish] Global reboot command sent");
-                console.log(`📡 [MQTT Publish] Topic: ${topic}`);
-                console.log(`📦 [MQTT Publish] Payload: ${payload}`);
+                debugLog("🚀 [MQTT Publish] Global reboot command sent");
+                debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
                 if (recordPublish) {
                     recordPublish(topic, payload, 2);
                 }
@@ -124,7 +159,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
             if (err) {
                 console.error("Failed to request all settings:", err);
             } else {
-                console.log("All settings request sent", topic, payload);
+                debugLog("All settings request sent", topic, payload);
                 if (recordPublish) {
                     recordPublish(topic, payload, 2);
                 }
@@ -144,7 +179,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                 if (err) {
                     console.error(`Failed to request options for module ${moduleId}:`, err);
                 } else {
-                    console.log(`Options request sent for module ${moduleId}`, topic, payload);
+                    debugLog(`Options request sent for module ${moduleId}`, topic, payload);
                     if (recordPublish) {
                         recordPublish(topic, payload, 2);
                     }
@@ -165,7 +200,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
             if (err) {
                 console.error("Failed to request all options:", err);
             } else {
-                console.log("All options request sent", topic, payload);
+                debugLog("All options request sent", topic, payload);
                 if (recordPublish) {
                     recordPublish(topic, payload, 2);
                 }
@@ -185,9 +220,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                 if (err) {
                     console.error(`❌ [MQTT Publish] Failed to send wiper command to module ${moduleId}:`, err);
                 } else {
-                    console.log(`🚀 [MQTT Publish] Wiper command sent to module ${moduleId}`);
-                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
-                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
+                    debugLog(`🚀 [MQTT Publish] Wiper command sent to module ${moduleId}`);
+                    debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                    debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
                     if (recordPublish) {
                         recordPublish(topic, payload, 2);
                     }
@@ -209,9 +244,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                 if (err) {
                     console.error(`❌ [MQTT Publish] Failed to send camera power command to module ${moduleId}:`, err);
                 } else {
-                    console.log(`🚀 [MQTT Publish] Camera power command sent to module ${moduleId}`);
-                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
-                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
+                    debugLog(`🚀 [MQTT Publish] Camera power command sent to module ${moduleId}`);
+                    debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                    debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
                     if (recordPublish) {
                         recordPublish(topic, payload, 2);
                     }
@@ -233,9 +268,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                 if (err) {
                     console.error(`❌ [MQTT Publish] Failed to send sitename command to module ${moduleId}:`, err);
                 } else {
-                    console.log(`🚀 [MQTT Publish] Sitename command sent to module ${moduleId}`);
-                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
-                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
+                    debugLog(`🚀 [MQTT Publish] Sitename command sent to module ${moduleId}`);
+                    debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                    debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
                     if (recordPublish) {
                         recordPublish(topic, payload, 2);
                     }
@@ -257,9 +292,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                 if (err) {
                     console.error(`❌ [MQTT Publish] Failed to send SW update command to module ${moduleId}:`, err);
                 } else {
-                    console.log(`🚀 [MQTT Publish] SW update command sent to module ${moduleId}`);
-                    console.log(`📡 [MQTT Publish] Topic: ${topic}`);
-                    console.log(`📦 [MQTT Publish] Payload: ${payload}`);
+                    debugLog(`🚀 [MQTT Publish] SW update command sent to module ${moduleId}`);
+                    debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                    debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
                     if (recordPublish) {
                         recordPublish(topic, payload, 2);
                     }
@@ -334,7 +369,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                 if (err) {
                     console.error(`Failed to request settings for module ${moduleId}:`, err);
                 } else {
-                    console.log(`Settings request sent for module ${moduleId}`, topic, payload);
+                    debugLog(`Settings request sent for module ${moduleId}`, topic, payload);
                     if (recordPublish) {
                         recordPublish(topic, payload, 2);
                     }
@@ -355,7 +390,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
             if (err) {
                 console.error("Failed to request status:", err);
             } else {
-                console.log("Status request sent", topic, payload);
+                debugLog("Status request sent", topic, payload);
                 if (recordPublish) {
                     recordPublish(topic, payload, 2);
                 }
@@ -374,7 +409,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                 const data = JSON.parse(message.toString());
                 // 개발 모드에서만 상세 로그 출력
                 if (process.env.NODE_ENV === 'development') {
-                    console.log(`🔔 [MQTT Message] Topic: ${topic}`, data);
+                    debugLog(`🔔 [MQTT Message] Topic: ${topic}`, data);
                 }
 
                 // 토픽 파싱
@@ -385,7 +420,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
                     if (process.env.NODE_ENV === 'development') {
-                        console.log(`💚 [Health Update] Module ${moduleId} - Online, Site: ${data.site_name}`);
+                        debugLog(`💚 [Health Update] Module ${moduleId} - Online, Site: ${data.site_name}`);
                     }
 
                     updateModuleStatus(moduleId, {
@@ -403,11 +438,11 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     // 설정 응답 처리
                     if (topicParts[3] === "all") {
                         // 전체 설정 응답
-                        console.log(`⚙️ [Settings] All modules settings received`);
+                        debugLog(`⚙️ [Settings] All modules settings received`);
                         if (data.response_type === "all_settings") {
                             Object.entries(data.modules).forEach(([moduleKey, settings]) => {
                                 const moduleId = parseInt(moduleKey.replace("camera_", ""), 10);
-                                console.log(`⚙️ [Settings] Module ${moduleId} settings:`, settings);
+                                debugLog(`⚙️ [Settings] Module ${moduleId} settings:`, settings);
                                 updateModuleSettings(moduleId, settings);
                             });
                         }
@@ -415,7 +450,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         // 개별 설정 응답
                         const moduleIdStr = topicParts[3];
                         const moduleId = parseInt(moduleIdStr, 10);
-                        console.log(`⚙️ [Settings] Module ${moduleId} individual settings received`);
+                        debugLog(`⚙️ [Settings] Module ${moduleId} individual settings received`);
 
                         if (data.response_type === "settings") {
                             updateModuleSettings(moduleId, data.settings);
@@ -426,19 +461,19 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     const moduleIdStr = topicParts[4];
                     const moduleId = parseInt(moduleIdStr, 10);
 
-                    console.log(`🔧 [Config Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed");
+                    debugLog(`🔧 [Config Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed");
                 } else if (topic.startsWith("bmtl/response/status")) {
                     // 상태 응답 처리
-                    console.log("📈 [Status Response] Global status received:", data);
+                    debugLog("📈 [Status Response] Global status received:", data);
                 } else if (topic.startsWith("bmtl/response/reboot/")) {
                     // 재부팅 응답 처리
                     const moduleIdStr = topicParts[3];
 
                     if (moduleIdStr === "all") {
-                        console.log(`🔄 [Global Reboot Response]:`, data.success ? "✅ Success" : "❌ Failed");
+                        debugLog(`🔄 [Global Reboot Response]:`, data.success ? "✅ Success" : "❌ Failed");
                     } else {
                         const moduleId = parseInt(moduleIdStr, 10);
-                        console.log(`🔄 [Reboot Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed");
+                        debugLog(`🔄 [Reboot Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed");
                     }
                 } else if (topic.startsWith("bmtl/response/options/")) {
                     // options 응답 처리
@@ -446,18 +481,18 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
 
                     if (moduleIdStr === "all") {
                         // 전체 options 응답
-                        console.log(`🔍 [Options] All modules options received`);
+                        debugLog(`🔍 [Options] All modules options received`);
                         if (data.response_type === "all_options") {
                             Object.entries(data.modules).forEach(([moduleKey, options]) => {
                                 const moduleId = parseInt(moduleKey.replace("camera_", ""), 10);
-                                console.log(`🔍 [Options] Module ${moduleId} options:`, options);
+                                debugLog(`🔍 [Options] Module ${moduleId} options:`, options);
                                 updateModuleOptions(moduleId, options);
                             });
                         }
                     } else {
                         // 개별 options 응답
                         const moduleId = parseInt(moduleIdStr, 10);
-                        console.log(`🔍 [Options] Module ${moduleId} options received:`, data.options);
+                        debugLog(`🔍 [Options] Module ${moduleId} options received:`, data.options);
 
                         if (data.response_type === "options") {
                             updateModuleOptions(moduleId, data.options);
@@ -467,17 +502,17 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     // 와이퍼 응답 처리
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
-                    console.log(`🧽 [Wiper Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed");
+                    debugLog(`🧽 [Wiper Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed");
                 } else if (topic.startsWith("bmtl/response/camera-on-off/")) {
                     // 카메라 전원 응답 처리
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
-                    console.log(`🔌 [Camera Power Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `New state: ${data.new_state || 'Unknown'}`);
+                    debugLog(`🔌 [Camera Power Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `New state: ${data.new_state || 'Unknown'}`);
                 } else if (topic.startsWith("bmtl/response/sitename/")) {
                     // 사이트 이름 변경 응답 처리
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
-                    console.log(`🏷️ [Sitename Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `New sitename: ${data.sitename || 'Unknown'}`);
+                    debugLog(`🏷️ [Sitename Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `New sitename: ${data.sitename || 'Unknown'}`);
 
                     // 성공 시 모듈 상태 업데이트
                     if (data.success && data.sitename) {
@@ -489,7 +524,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     // SW 업데이트 응답 처리
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
-                    console.log(`💿 [SW Update Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `Version: ${data.version || 'Unknown'}`);
+                    debugLog(`💿 [SW Update Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `Version: ${data.version || 'Unknown'}`);
 
                     // 성공 시 모듈 상태 업데이트 (새 SW 버전 반영)
                     if (data.success && data.version) {
@@ -498,7 +533,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         });
                     }
                 } else {
-                    console.log(`❓ [Unknown Topic] Unhandled topic: ${topic}`);
+                    debugLog(`❓ [Unknown Topic] Unhandled topic: ${topic}`);
                 }
             } catch (error) {
                 console.error("Error parsing MQTT message:", error, "Topic:", topic);
@@ -506,43 +541,16 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
         };
 
         const handleConnect = () => {
-            console.log("🟢 [MQTT Client] Connected to broker");
+            debugLog("🟢 [MQTT Client] Connected to broker");
 
             // 연결 시 토픽 구독
-            const topicsToSubscribe = [
-                // 디바이스 헬스 상태
-                "bmtl/status/health/+",
-                // 전체 설정 응답
-                "bmtl/response/settings/all",
-                // 개별 설정 응답
-                "bmtl/response/settings/+",
-                // 설정 변경 응답
-                "bmtl/response/set/settings/+",
-                // 재부팅 응답
-                "bmtl/response/reboot/+",
-                "bmtl/response/reboot/all",
-                // 개별 options 응답
-                "bmtl/response/options/+",
-                // 전체 options 응답
-                "bmtl/response/options/all",
-                // 상태 응답
-                "bmtl/response/status",
-                // 와이퍼 응답
-                "bmtl/response/wiper/+",
-                // 카메라 전원 응답
-                "bmtl/response/camera-on-off/+",
-                // 사이트 이름 응답
-                "bmtl/response/sitename/+",
-                // SW 업데이트 응답
-                "bmtl/response/sw-update/+",
-            ];
 
-            console.log(`📡 [MQTT Subscribe] Subscribing to ${topicsToSubscribe.length} topics for camera control:`);
-            topicsToSubscribe.forEach((topic, index) => {
+            debugLog(`📡 [MQTT Subscribe] Subscribing to ${CAMERA_CONTROL_TOPICS.length} topics for camera control:`);
+            CAMERA_CONTROL_TOPICS.forEach((topic, index) => {
                 mqttClient.subscribe(topic, (err) => {
                     if (!err) {
                         setLocalSubscribedTopics((prev) => new Set([...prev, topic]));
-                        console.log(`✅ [MQTT Subscribe] ${index + 1}/${topicsToSubscribe.length} - ${topic}`);
+                        debugLog(`✅ [MQTT Subscribe] ${index + 1}/${CAMERA_CONTROL_TOPICS.length} - ${topic}`);
                     } else {
                         console.error(`❌ [MQTT Subscribe] Failed to subscribe to ${topic}:`, err);
                     }
@@ -551,13 +559,13 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
         };
 
         const handleDisconnect = () => {
-            console.log("🔴 [MQTT Client] Disconnected from broker");
+            debugLog("🔴 [MQTT Client] Disconnected from broker");
             // 연결 해제 시 구독 상태 초기화
             setLocalSubscribedTopics(new Set());
         };
 
         const handleReconnect = () => {
-            console.log("🔄 [MQTT Client] Reconnecting to broker");
+            debugLog("🔄 [MQTT Client] Reconnecting to broker");
         };
 
         const handleError = (error) => {
@@ -565,11 +573,11 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
         };
 
         const handleOffline = () => {
-            console.log("📴 [MQTT Client] Gone offline");
+            debugLog("📴 [MQTT Client] Gone offline");
         };
 
         const handleClose = () => {
-            console.log("🚪 [MQTT Client] Connection closed");
+            debugLog("🚪 [MQTT Client] Connection closed");
         };
 
         mqttClient.on("message", handleMessage);
@@ -598,7 +606,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
 
             // 개발 모드에서만 상태 로깅
             if (process.env.NODE_ENV === 'development') {
-                console.log(`📊 [MQTT Status] Subscribed topics: ${localSubscribedTopics.size}`);
+                debugLog(`📊 [MQTT Status] Subscribed topics: ${localSubscribedTopics.size}`);
             }
 
             setModuleStatuses((prev) => {
