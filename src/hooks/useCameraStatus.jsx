@@ -310,6 +310,31 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
         [mqttClient]
     );
 
+    // 개별 모듈 설정 요청
+    const requestSettings = useCallback(
+        (moduleId) => {
+            if (!mqttClient?.connected) return;
+
+            const topic = `bmtl/request/settings/${moduleId.toString().padStart(2, "0")}`;
+            const payload = JSON.stringify({});
+
+            mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
+                if (err) {
+                    console.error(`Failed to request settings for module ${moduleId}:`, err);
+                } else {
+                    debugLog(`Settings request sent for module ${moduleId}`, topic, payload);
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
+                }
+            });
+        },
+        [mqttClient]
+    );
+
+    // 상태 요청
+
+
     // 통합 명령 전송 함수 (기존 호환성)
     const sendCommand = useCallback(
         (moduleId, command, data) => {
@@ -364,28 +389,6 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
     );
 
     // 개별 모듈 설정 요청
-    const requestSettings = useCallback(
-        (moduleId) => {
-            if (!mqttClient?.connected) return;
-
-            const topic = `bmtl/request/settings/${moduleId.toString().padStart(2, "0")}`;
-            const payload = JSON.stringify({});
-
-            mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
-                if (err) {
-                    console.error(`Failed to request settings for module ${moduleId}:`, err);
-                } else {
-                    debugLog(`Settings request sent for module ${moduleId}`, topic, payload);
-                    if (recordPublish) {
-                        recordPublish(topic, payload, 2);
-                    }
-                }
-            });
-        },
-        [mqttClient]
-    );
-
-    // 상태 요청
     const requestStatus = useCallback(() => {
         if (!mqttClient?.connected) return;
 

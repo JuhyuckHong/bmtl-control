@@ -115,13 +115,6 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
         }
     }, [sendCommand]);
 
-    // 상위 컴포넌트에서 사용할 수 있도록 전역 커맨드 핸들러와 상태 카운트 전달
-    React.useEffect(() => {
-        if (onGlobalCommand) {
-            onGlobalCommand(handleGlobalCommand, statusCounts);
-        }
-    }, [onGlobalCommand, handleGlobalCommand, statusCounts]);
-
     const getStatusCounts = () => {
         const counts = { online: 0, offline: 0, unknown: 0 };
         const knownModuleIds = collectKnownModuleIds();
@@ -145,6 +138,13 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
     };
 
     const statusCounts = React.useMemo(() => getStatusCounts(), [moduleStatuses, moduleSettings]);
+
+    // 상위 컴포넌트에서 사용할 수 있도록 전역 커맨드 핸들러와 상태 카운트 전달
+    React.useEffect(() => {
+        if (onGlobalCommand) {
+            onGlobalCommand(handleGlobalCommand, statusCounts);
+        }
+    }, [onGlobalCommand, handleGlobalCommand, statusCounts]);
     const filteredModules = getFilteredModules();
 
     return (
