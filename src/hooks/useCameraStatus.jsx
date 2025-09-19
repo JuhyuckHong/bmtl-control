@@ -354,7 +354,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                 }
             }
         },
-        [sendRebootCommand, sendConfigureCommand, sendGlobalRebootCommand, requestAllSettings, sendWiperCommand, sendCameraPowerCommand, sendSiteNameCommand, sendSwUpdateCommand]
+        [sendRebootCommand, sendConfigureCommand, sendGlobalRebootCommand, requestAllSettings, requestAllOptions, requestSettings, requestOptions, sendWiperCommand, sendCameraPowerCommand, sendSiteNameCommand, sendSwUpdateCommand]
     );
 
     // 개별 모듈 설정 요청
