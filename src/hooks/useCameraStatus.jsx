@@ -25,6 +25,8 @@ const CAMERA_CONTROL_TOPICS = [
     "bmtl/response/sw-update/+",
     // SW 버전 응답
     "bmtl/response/sw-version/+",
+    // SW 롤백 응답
+    "bmtl/response/sw-rollback/+",
 ];
 
 const hasStatusDiff = (existingModule, statusData = {}) => {
@@ -307,6 +309,75 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
         [mqttClient]
     );
 
+    // SW 롤백 명령
+    const sendSwRollbackCommand = useCallback(
+        (moduleId) => {
+            if (!mqttClient?.connected) return;
+
+            const topic = `bmtl/sw-rollback/${moduleId.toString().padStart(2, "0")}`;
+            const payload = JSON.stringify({});
+
+            mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
+                if (err) {
+                    console.error(`❌ [MQTT Publish] Failed to send SW rollback command to module ${moduleId}:`, err);
+                } else {
+                    debugLog(`🚀 [MQTT Publish] SW rollback command sent to module ${moduleId}`);
+                    debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                    debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
+                }
+            });
+        },
+        [mqttClient]
+    );
+
+    // 개별 모듈 상태 요청
+    const requestStatus = useCallback(
+        (moduleId) => {
+            if (!mqttClient?.connected) return;
+
+            const topic = `bmtl/request/status/${moduleId.toString().padStart(2, "0")}`;
+            const payload = JSON.stringify({});
+
+            mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
+                if (err) {
+                    console.error(`❌ [MQTT Publish] Failed to request status from module ${moduleId}:`, err);
+                } else {
+                    debugLog(`🚀 [MQTT Publish] Status request sent to module ${moduleId}`);
+                    debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                    debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
+                }
+            });
+        },
+        [mqttClient]
+    );
+
+    // 전체 모듈 상태 요청
+    const requestAllStatus = useCallback(() => {
+        if (!mqttClient?.connected) return;
+
+        const topic = "bmtl/request/status/all";
+        const payload = JSON.stringify({});
+
+        mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
+            if (err) {
+                console.error("❌ [MQTT Publish] Failed to request status from all modules:", err);
+            } else {
+                debugLog("🚀 [MQTT Publish] Status request sent to all modules");
+                debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
+                if (recordPublish) {
+                    recordPublish(topic, payload, 2);
+                }
+            }
+        });
+    }, [mqttClient]);
+
     // 개별 모듈 설정 요청
     const requestSettings = useCallback(
         (moduleId) => {
@@ -341,6 +412,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     case "status_request":
                         requestAllSettings();
                         break;
+                    case "status_request_all":
+                        requestAllStatus();
+                        break;
                     case "options_request":
                         requestAllOptions();
                         break;
@@ -359,6 +433,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     case "status_request":
                         requestSettings(moduleId);
                         break;
+                    case "status_request_single":
+                        requestStatus(moduleId);
+                        break;
                     case "options_request":
                         requestOptions(moduleId);
                         break;
@@ -374,12 +451,15 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     case "sw-update":
                         sendSwUpdateCommand(moduleId);
                         break;
+                    case "sw-rollback":
+                        sendSwRollbackCommand(moduleId);
+                        break;
                     default:
                         console.warn(`Unknown command: ${command}`);
                 }
             }
         },
-        [sendRebootCommand, sendConfigureCommand, sendGlobalRebootCommand, requestAllSettings, requestAllOptions, requestSettings, requestOptions, sendWiperCommand, sendCameraPowerCommand, sendSiteNameCommand, sendSwUpdateCommand]
+        [sendRebootCommand, sendConfigureCommand, sendGlobalRebootCommand, requestAllSettings, requestAllOptions, requestSettings, requestOptions, sendWiperCommand, sendCameraPowerCommand, sendSiteNameCommand, sendSwUpdateCommand, sendSwRollbackCommand, requestStatus, requestAllStatus]
     );
 
     // 개별 모듈 설정 요청
@@ -412,6 +492,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         isConnected: true, // 메시지를 받으면 온라인으로 처리
                         siteName: data.site_name,
                         remainingCapacity: data.storage_used,
+                        temperature: data.temperature, // 온도 정보 추가
                         lastCaptureTime: data.last_capture_time,
                         lastBootTime: data.last_boot_time,
                         todayTotalCaptures: data.today_total_captures,
@@ -503,17 +584,10 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         });
                     }
                 } else if (topic.startsWith("bmtl/response/sw-update/")) {
-                    // SW 업데이트 응답 처리
+                    // SW 업데이트 응답 처리 (로그만 출력, 버전 업데이트는 sw-version 토픽에서 처리)
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
-                    debugLog(`💿 [SW Update Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `Version: ${data.version || 'Unknown'}`);
-
-                    // 성공 시 모듈 상태 업데이트 (새 SW 버전 반영)
-                    if (data.success && data.version) {
-                        updateModuleStatus(moduleId, {
-                            swVersion: data.version,
-                        });
-                    }
+                    debugLog(`💿 [SW Update Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed");
                 } else if (topic.startsWith("bmtl/response/sw-version/")) {
                     // SW 버전 응답 처리
                     const moduleIdStr = topicParts[3];
@@ -526,6 +600,11 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                             swVersion: data.commit_hash,
                         });
                     }
+                } else if (topic.startsWith("bmtl/response/sw-rollback/")) {
+                    // SW 롤백 응답 처리
+                    const moduleIdStr = topicParts[3];
+                    const moduleId = parseInt(moduleIdStr, 10);
+                    debugLog(`⏮️ [SW Rollback Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `Message: ${data.message || 'No message'}`);
                 } else {
                     debugLog(`❓ [Unknown Topic] Unhandled topic: ${topic}`);
                 }

@@ -107,6 +107,10 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
         onCommand(moduleId, "sw-update", {});
     }, [onCommand, moduleId]);
 
+    const handleSwRollback = useCallback(() => {
+        onCommand(moduleId, "sw-rollback", {});
+    }, [onCommand, moduleId]);
+
     const getStatusClass = useCallback((isConnected) => {
         if (isConnected === null) return "status-unknown";
         return isConnected ? "status-online" : "status-offline";
@@ -193,6 +197,9 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                 <div className="sw-version">{status?.swVersion || "v1.0.0"}</div>
                 <button className="btn sw-update" onClick={handleSwUpdate} disabled={!isEnabled} title="소프트웨어 업데이트">
                     업데이트
+                </button>
+                <button className="btn sw-rollback" onClick={handleSwRollback} disabled={!isEnabled} title="이전 버전으로 롤백">
+                    롤백
                 </button>
             </div>
 

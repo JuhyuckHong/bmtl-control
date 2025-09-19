@@ -1969,3 +1969,23 @@ button {
     border-color: var(--text-tertiary);
     color: var(--bg-primary);
 }
+
+/* SW Rollback Button */
+.btn.sw-rollback {
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    min-width: 45px;
+}
+
+.btn.sw-rollback:hover:not(:disabled) {
+    background: var(--bg-secondary);
+    border-color: var(--text-secondary);
+}
+
+.btn.sw-rollback:disabled {
+    background: var(--text-tertiary);
+    border-color: var(--text-tertiary);
+    color: var(--bg-primary);
+    opacity: 0.6;
+}

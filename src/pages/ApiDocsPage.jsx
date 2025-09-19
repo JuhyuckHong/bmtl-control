@@ -6,7 +6,7 @@ export const ApiDocsPage = () => {
         {
             type: "Publish",
             topic: "bmtl/request/settings/all",
-            description: "전체 설정 불러오기 요청",
+            description: "전체 설정 불러오기 요청 (각 모듈이 bmtl/status/health/{device_id}로 개별 응답)",
             qos: "2",
         },
         {
@@ -82,6 +82,24 @@ export const ApiDocsPage = () => {
             description: "개별 모듈 소프트웨어 업데이트 (01번 모듈 예시)",
             qos: "2",
         },
+        {
+            type: "Publish",
+            topic: "bmtl/sw-rollback/01",
+            description: "개별 모듈 소프트웨어 롤백 (01번 모듈 예시)",
+            qos: "2",
+        },
+        {
+            type: "Publish",
+            topic: "bmtl/request/status/01",
+            description: "개별 모듈 상태 요청 (01번 모듈 예시)",
+            qos: "2",
+        },
+        {
+            type: "Publish",
+            topic: "bmtl/request/status/all",
+            description: "전체 모듈 상태 요청 (각 모듈이 bmtl/status/health/{device_id}로 응답)",
+            qos: "2",
+        },
         // 구독 메시지 (Subscribe)
         {
             type: "Subscribe",
@@ -89,8 +107,9 @@ export const ApiDocsPage = () => {
             description: "디바이스 헬스 상태 수신",
             qos: "0-1",
             payload: {
-                module_id: "camera_01",
+                module_id: "bmotion01",
                 storage_used: 45.2,
+                temperature: 42.3,
                 last_capture_time: "2024-01-01T12:30:00Z",
                 last_boot_time: "2024-01-01T08:15:00Z",
                 site_name: "현장명",
@@ -246,11 +265,9 @@ export const ApiDocsPage = () => {
             description: "소프트웨어 업데이트 응답 수신",
             qos: "1",
             payload: {
-                response_type: "sw_update_result",
-                module_id: "camera_01",
                 success: true,
                 message: "Software update completed successfully",
-                version: "v1.2.0",
+                version: "v1.2.3",
             },
         },
         {
@@ -260,6 +277,16 @@ export const ApiDocsPage = () => {
             qos: "1",
             payload: {
                 commit_hash: "a1b2c3d4",
+            },
+        },
+        {
+            type: "Subscribe",
+            topic: "bmtl/response/sw-rollback/+",
+            description: "소프트웨어 롤백 응답 수신",
+            qos: "1",
+            payload: {
+                success: true,
+                message: "Rollback completed successfully",
             },
         },
     ];
@@ -320,11 +347,11 @@ export const ApiDocsPage = () => {
                     </div>
                     <div className="pattern-item">
                         <code>bmtl/request/settings/+</code>
-                        <span>설정 요청 (all 또는 모듈번호)</span>
+                        <span>설정 요청 (all은 헬스체크로 응답, 모듈번호는 개별 응답)</span>
                     </div>
                     <div className="pattern-item">
                         <code>bmtl/response/settings/+</code>
-                        <span>설정 응답 (all 또는 모듈번호)</span>
+                        <span>개별 설정 응답 (모듈번호)</span>
                     </div>
                     <div className="pattern-item">
                         <code>bmtl/set/settings/+</code>
@@ -385,6 +412,18 @@ export const ApiDocsPage = () => {
                     <div className="pattern-item">
                         <code>bmtl/response/sw-version/+</code>
                         <span>소프트웨어 버전 정보 (모듈번호)</span>
+                    </div>
+                    <div className="pattern-item">
+                        <code>bmtl/sw-rollback/+</code>
+                        <span>소프트웨어 롤백 요청 (모듈번호)</span>
+                    </div>
+                    <div className="pattern-item">
+                        <code>bmtl/response/sw-rollback/+</code>
+                        <span>소프트웨어 롤백 응답 (모듈번호)</span>
+                    </div>
+                    <div className="pattern-item">
+                        <code>bmtl/request/status/+</code>
+                        <span>상태 요청 (all 또는 모듈번호, 헬스체크로 응답)</span>
                     </div>
                 </div>
             </section>
