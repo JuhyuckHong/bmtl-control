@@ -105,22 +105,22 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
         requestSettings(moduleId);
     };
 
-    const handleGlobalCommand = (command) => {
+    const handleGlobalCommand = React.useCallback((command) => {
         if (command === "status_request") {
-            // 전체 설정 불러오기 요청
             sendCommand("global", "status_request", {});
+        } else if (command === "options_request") {
+            sendCommand("global", "options_request", {});
         } else if (command === "reboot") {
-            // 전체 재부팅 명령
             sendCommand("global", "reboot", {});
         }
-    };
+    }, [sendCommand]);
 
     // 상위 컴포넌트에서 사용할 수 있도록 전역 커맨드 핸들러와 상태 카운트 전달
     React.useEffect(() => {
         if (onGlobalCommand) {
-            onGlobalCommand(handleGlobalCommand, getStatusCounts());
+            onGlobalCommand(handleGlobalCommand, statusCounts);
         }
-    }, [moduleStatuses, onGlobalCommand]);
+    }, [onGlobalCommand, handleGlobalCommand, statusCounts]);
 
     const getStatusCounts = () => {
         const counts = { online: 0, offline: 0, unknown: 0 };
@@ -144,7 +144,7 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
         return counts;
     };
 
-    const statusCounts = getStatusCounts();
+    const statusCounts = React.useMemo(() => getStatusCounts(), [moduleStatuses, moduleSettings]);
     const filteredModules = getFilteredModules();
 
     return (
