@@ -118,7 +118,15 @@ export const useMQTT = () => {
       clientRef.current.end(true);
       clientRef.current = null;
     }
-  }, []);
+
+    subscribedTopicsRef.current.clear();
+    syncSubscribedTopics();
+    setIsConnected(false);
+    setIsConnecting(false);
+    setStatus('Disconnected');
+    setMessages([]);
+    addSystemMessage('Disconnected from MQTT broker');
+  }, [addSystemMessage, syncSubscribedTopics]);
 
   const subscribe = useCallback((topic) => {
     if (clientRef.current?.connected && topic.trim()) {
