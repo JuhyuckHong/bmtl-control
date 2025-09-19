@@ -17,12 +17,6 @@ export const ApiDocsPage = () => {
         },
         {
             type: "Publish",
-            topic: "bmtl/request/status",
-            description: "전체 상태 요청",
-            qos: "2",
-        },
-        {
-            type: "Publish",
             topic: "bmtl/set/settings/01",
             description: "개별 모듈 설정 변경",
             qos: "2",
@@ -108,28 +102,6 @@ export const ApiDocsPage = () => {
         },
         {
             type: "Subscribe",
-            topic: "bmtl/response/settings/all",
-            description: "전체 설정 응답 수신",
-            qos: "1",
-            payload: {
-                response_type: "all_settings",
-                modules: {
-                    camera_01: {
-                        start_time: "08:00",
-                        end_time: "18:00",
-                        capture_interval: 10,
-                        image_size: "1920x1080",
-                        quality: "높음",
-                        iso: "400",
-                        format: "JPG",
-                        aperture: "f/2.8",
-                    },
-                },
-                timestamp: "2024-01-01T00:00:00Z",
-            },
-        },
-        {
-            type: "Subscribe",
             topic: "bmtl/response/settings/+",
             description: "개별 설정 응답 수신",
             qos: "1",
@@ -146,18 +118,6 @@ export const ApiDocsPage = () => {
                     format: "JPG",
                     aperture: "f/2.8",
                 },
-                timestamp: "2024-01-01T00:00:00Z",
-            },
-        },
-        {
-            type: "Subscribe",
-            topic: "bmtl/response/status",
-            description: "전체 상태 응답 수신",
-            qos: "1",
-            payload: {
-                response_type: "status",
-                system_status: "normal",
-                connected_modules: ["camera_01", "camera_02"],
                 timestamp: "2024-01-01T00:00:00Z",
             },
         },
@@ -364,14 +324,6 @@ export const ApiDocsPage = () => {
                     <div className="pattern-item">
                         <code>bmtl/response/set/settings/+</code>
                         <span>설정 변경 응답</span>
-                    </div>
-                    <div className="pattern-item">
-                        <code>bmtl/request/status</code>
-                        <span>전체 상태 요청</span>
-                    </div>
-                    <div className="pattern-item">
-                        <code>bmtl/response/status</code>
-                        <span>전체 상태 응답</span>
                     </div>
                     <div className="pattern-item">
                         <code>bmtl/request/options/+</code>

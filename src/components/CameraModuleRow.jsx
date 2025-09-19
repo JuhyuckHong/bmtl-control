@@ -198,7 +198,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
             <div className="time-settings-stack">
                 <div className="setting-group">
                     <span className="setting-label">시작</span>
-                    <div className="time-picker">
+                    <div className="time-select-container">
                         <select
                             value={(settings.startTime || "08:00").split(":")[0]}
                             onChange={(e) => handleTimeChange("startTime", "hour", e.target.value)}
@@ -208,10 +208,17 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                         >
                             {HOUR_OPTIONS.map((hour) => (
                                 <option key={`start-hour-${hour}`} value={hour}>
-                                    {hour}시
+                                    {hour}
                                 </option>
                             ))}
                         </select>
+                        <span className="time-unit">시</span>
+                    </div>
+                </div>
+
+                <div className="setting-group">
+                    <span className="setting-label"></span>
+                    <div className="time-select-container">
                         <select
                             value={(settings.startTime || "08:00").split(":")[1]}
                             onChange={(e) => handleTimeChange("startTime", "minute", e.target.value)}
@@ -221,16 +228,17 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                         >
                             {MINUTE_OPTIONS.map((minute) => (
                                 <option key={`start-minute-${minute}`} value={minute}>
-                                    {minute}분
+                                    {minute}
                                 </option>
                             ))}
                         </select>
+                        <span className="time-unit">분</span>
                     </div>
                 </div>
 
                 <div className="setting-group">
                     <span className="setting-label">종료</span>
-                    <div className="time-picker">
+                    <div className="time-select-container">
                         <select
                             value={(settings.endTime || "18:00").split(":")[0]}
                             onChange={(e) => handleTimeChange("endTime", "hour", e.target.value)}
@@ -240,10 +248,17 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                         >
                             {HOUR_OPTIONS.map((hour) => (
                                 <option key={`end-hour-${hour}`} value={hour}>
-                                    {hour}시
+                                    {hour}
                                 </option>
                             ))}
                         </select>
+                        <span className="time-unit">시</span>
+                    </div>
+                </div>
+
+                <div className="setting-group">
+                    <span className="setting-label"></span>
+                    <div className="time-select-container">
                         <select
                             value={(settings.endTime || "18:00").split(":")[1]}
                             onChange={(e) => handleTimeChange("endTime", "minute", e.target.value)}
@@ -253,10 +268,11 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                         >
                             {MINUTE_OPTIONS.map((minute) => (
                                 <option key={`end-minute-${minute}`} value={minute}>
-                                    {minute}분
+                                    {minute}
                                 </option>
                             ))}
                         </select>
+                        <span className="time-unit">분</span>
                     </div>
                 </div>
 

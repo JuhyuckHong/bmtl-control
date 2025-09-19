@@ -1,11 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 
-
 const CAMERA_CONTROL_TOPICS = [
     // 서비스 상태
     "bmtl/status/health/+",
-    // 전체 설정 응답
-    "bmtl/response/settings/all",
     // 개별 설정 응답
     "bmtl/response/settings/+",
     // 설정 변경 응답
@@ -18,7 +15,6 @@ const CAMERA_CONTROL_TOPICS = [
     // 전체 options 응답
     "bmtl/response/options/all",
     // 상태 응답
-    "bmtl/response/status",
     // 와이퍼 응답
     "bmtl/response/wiper/+",
     // 카메라 전원 응답
@@ -36,7 +32,6 @@ const hasStatusDiff = (existingModule, statusData = {}) => {
 
     return Object.entries(statusData).some(([key, value]) => existingModule[key] !== value);
 };
-
 
 export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => {
     const [moduleStatuses, setModuleStatuses] = useState({});
@@ -332,9 +327,6 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
         [mqttClient]
     );
 
-    // 상태 요청
-
-
     // 통합 명령 전송 함수 (기존 호환성)
     const sendCommand = useCallback(
         (moduleId, command, data) => {
@@ -389,24 +381,6 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
     );
 
     // 개별 모듈 설정 요청
-    const requestStatus = useCallback(() => {
-        if (!mqttClient?.connected) return;
-
-        const topic = "bmtl/request/status";
-        const payload = JSON.stringify({});
-
-        mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
-            if (err) {
-                console.error("Failed to request status:", err);
-            } else {
-                debugLog("Status request sent", topic, payload);
-                if (recordPublish) {
-                    recordPublish(topic, payload, 2);
-                }
-            }
-        });
-    }, [mqttClient]);
-
     // MQTT 구독 설정은 connect 이벤트에서 처리
 
     // 메시지 처리
@@ -471,9 +445,6 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     const moduleId = parseInt(moduleIdStr, 10);
 
                     debugLog(`🔧 [Config Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed");
-                } else if (topic.startsWith("bmtl/response/status")) {
-                    // 상태 응답 처리
-                    debugLog("📈 [Status Response] Global status received:", data);
                 } else if (topic.startsWith("bmtl/response/reboot/")) {
                     // 재부팅 응답 처리
                     const moduleIdStr = topicParts[3];
@@ -647,7 +618,6 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
         moduleOptions,
         sendCommand,
         requestSettings,
-        requestStatus,
         requestOptions,
         requestAllOptions,
     };
