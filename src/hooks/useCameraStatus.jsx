@@ -410,7 +410,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         sendGlobalRebootCommand();
                         break;
                     case "status_request":
-                        requestAllSettings();
+                        requestAllStatus();
                         break;
                     case "status_request_all":
                         requestAllStatus();
@@ -431,7 +431,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         sendConfigureCommand(moduleId, data);
                         break;
                     case "status_request":
-                        requestSettings(moduleId);
+                        requestStatus(moduleId);
                         break;
                     case "status_request_single":
                         requestStatus(moduleId);
@@ -492,7 +492,6 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         isConnected: true, // 메시지를 받으면 온라인으로 처리
                         siteName: data.site_name,
                         storageUsed: data.storage_used,
-                        remainingCapacity: data.storage_used,
                         temperature: data.temperature, // 온도 정보 추가
                         lastCaptureTime: data.last_capture_time,
                         lastBootTime: data.last_boot_time,
@@ -508,7 +507,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         debugLog(`⚙️ [Settings] All modules settings received`);
                         if (data.response_type === "all_settings") {
                             Object.entries(data.modules).forEach(([moduleKey, settings]) => {
-                                const moduleId = parseInt(moduleKey.replace("camera_", ""), 10);
+                                const moduleId = parseInt(moduleKey.replace("bmotion", ""), 10);
                                 debugLog(`⚙️ [Settings] Module ${moduleId} settings:`, settings);
                                 updateModuleSettings(moduleId, settings);
                             });
@@ -548,7 +547,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         debugLog(`🔍 [Options] All modules options received`);
                         if (data.response_type === "all_options") {
                             Object.entries(data.modules).forEach(([moduleKey, options]) => {
-                                const moduleId = parseInt(moduleKey.replace("camera_", ""), 10);
+                                const moduleId = parseInt(moduleKey.replace("bmotion", ""), 10);
                                 debugLog(`🔍 [Options] Module ${moduleId} options:`, options);
                                 updateModuleOptions(moduleId, options);
                             });

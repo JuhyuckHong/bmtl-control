@@ -85,7 +85,7 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
     }, [onCommand, moduleId, settings]);
 
     // 개발 환경에서는 연결 상태와 무관하게 제어 가능하도록 유지
-    const isEnabled = true;
+    const isEnabled = status?.isConnected || isDummy;
 
     const handleLoadSettings = useCallback(() => {
         onLoadSettings(moduleId);
