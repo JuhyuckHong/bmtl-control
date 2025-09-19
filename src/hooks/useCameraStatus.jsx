@@ -491,6 +491,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     updateModuleStatus(moduleId, {
                         isConnected: true, // 메시지를 받으면 온라인으로 처리
                         siteName: data.site_name,
+                        storageUsed: data.storage_used,
                         remainingCapacity: data.storage_used,
                         temperature: data.temperature, // 온도 정보 추가
                         lastCaptureTime: data.last_capture_time,

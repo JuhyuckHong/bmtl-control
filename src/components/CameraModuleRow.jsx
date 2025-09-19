@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS = {
  * Camera Module Row Component
  * @param {Object} props - Component props
  * @param {number} props.moduleId - Module ID number
+ * @param {string} props.moduleDisplayId - Formatted module identifier for UI
  * @param {Object} props.status - Module status object
  * @param {Function} props.onCommand - Command handler function
  * @param {Function} props.onLoadSettings - Load settings handler function
@@ -37,7 +38,7 @@ const areSettingsEqual = (a = {}, b = {}) => {
     return aKeys.every((key) => a[key] === b[key]);
 };
 
-const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings, isDummy, initialSettings }) => {
+const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand, onLoadSettings, isDummy, initialSettings }) => {
     const [settings, setSettings] = useState(initialSettings || DEFAULT_SETTINGS);
     useEffect(() => {
         const nextSettings = initialSettings || DEFAULT_SETTINGS;
@@ -52,9 +53,9 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
         }));
     }, []);
 
-    const handleTimeChange = useCallback((timeType, component, value) => {
+    const handleTimeChange = useCallback((timeKey, component, value) => {
         setSettings((prev) => {
-            const currentTime = prev[timeType] || "08:00";
+            const currentTime = prev[timeKey] || "08:00";
             const [currentHour, currentMinute] = currentTime.split(":");
 
             const newHour = component === "hour" ? value : currentHour;
@@ -62,7 +63,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
 
             return {
                 ...prev,
-                [timeType]: `${newHour}:${newMinute}`,
+                [timeKey]: `${newHour}:${newMinute}`,
             };
         });
     }, []);
@@ -83,8 +84,8 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
         onCommand(moduleId, "configure", settings);
     }, [onCommand, moduleId, settings]);
 
-    // isDummy인 경우의 상태값도 확인 (개발용으로 항상 활성화)
-    const isEnabled = true; // isDummy || status?.isConnected;
+    // 개발 환경에서는 연결 상태와 무관하게 제어 가능하도록 유지
+    const isEnabled = true;
 
     const handleLoadSettings = useCallback(() => {
         onLoadSettings(moduleId);
@@ -98,10 +99,13 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
         setIsSiteNameModalOpen(true);
     }, []);
 
-    const handleSiteNameSubmit = useCallback(async (newSiteName) => {
-        onCommand(moduleId, "sitename", { sitename: newSiteName });
-        setIsSiteNameModalOpen(false);
-    }, [onCommand, moduleId]);
+    const handleSiteNameSubmit = useCallback(
+        (newSiteName) => {
+            onCommand(moduleId, "sitename", { sitename: newSiteName });
+            setIsSiteNameModalOpen(false);
+        },
+        [onCommand, moduleId],
+    );
 
     const handleSwUpdate = useCallback(() => {
         onCommand(moduleId, "sw-update", {});
@@ -112,13 +116,22 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
     }, [onCommand, moduleId]);
 
     const getStatusClass = useCallback((isConnected) => {
-        if (isConnected === null) return "status-unknown";
+        if (isConnected === null || isConnected === undefined) {
+            return "status-unknown";
+        }
         return isConnected ? "status-online" : "status-offline";
     }, []);
 
     const formatDateTime = useCallback((timestamp) => {
-        if (!timestamp) return "없음";
+        if (!timestamp) {
+            return "없음";
+        }
+
         const date = new Date(timestamp);
+        if (Number.isNaN(date.getTime())) {
+            return "없음";
+        }
+
         const year = date.getFullYear().toString().slice(-2);
         const month = (date.getMonth() + 1).toString().padStart(2, "0");
         const day = date.getDate().toString().padStart(2, "0");
@@ -130,44 +143,56 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
     }, []);
 
     const getCaptureProgress = useCallback(() => {
-        const totalToday = status?.todayTotalCaptures || 0;
-        const captured = status?.todayCapturedCount || 0;
+        const totalToday = Number(status?.todayTotalCaptures) || 0;
+        const captured = Number(status?.todayCapturedCount) || 0;
         return `${captured}/${totalToday}`;
     }, [status?.todayTotalCaptures, status?.todayCapturedCount]);
 
     const getMissedCaptures = useCallback(() => {
-        return status?.missedCaptures || 0;
+        const missed = Number(status?.missedCaptures);
+        return Number.isNaN(missed) ? 0 : missed;
     }, [status?.missedCaptures]);
 
-    const capacityInfo = useMemo(() => {
-        const capacity = status?.remainingCapacity;
-        if (capacity === null || capacity === undefined) {
+    const storageInfo = useMemo(() => {
+        const usage = Number(status?.storageUsed);
+        if (Number.isNaN(usage)) {
             return { percentage: 0, display: "--", isWarning: false };
         }
 
-        const percentage = parseFloat(capacity);
-        const isWarning = percentage >= 90;
+        const clamped = Math.max(0, Math.min(usage, 100));
+        return {
+            percentage: clamped,
+            display: `${clamped.toFixed(1)}%`,
+            isWarning: clamped >= 80,
+        };
+    }, [status?.storageUsed]);
+
+    const temperatureInfo = useMemo(() => {
+        const value = Number(status?.temperature);
+        if (Number.isNaN(value)) {
+            return { display: "없음", isWarning: false };
+        }
 
         return {
-            percentage,
-            display: `${percentage}%`,
-            isWarning,
+            display: `${value.toFixed(1)}°C`,
+            isWarning: value >= 50,
         };
-    }, [status?.remainingCapacity]);
+    }, [status?.temperature]);
 
     return (
-        <div className={`camera-module-row ${!status?.isConnected ? "disconnected" : ""}`}>
-            <span className="module-id">{moduleId.toString().padStart(2, "0")}</span>
+        <div className={`camera-module-row ${status?.isConnected === false ? "disconnected" : ""}`}>
+            <span className="module-id">{moduleDisplayId || moduleId.toString().padStart(2, "0")}</span>
             <div className={`status-dot ${getStatusClass(status?.isConnected)}`}></div>
-            <span className="site-name clickable" title={`Site name ${status?.siteName || "Not set"} (click to edit)`} onClick={handleSiteNameChange}>
-                {status?.siteName || "Not set"}
+            <span className="site-name clickable" title={`현장 이름 ${status?.siteName || "미지정"} (클릭하여 수정)`} onClick={handleSiteNameChange}>
+                {status?.siteName || "미지정"}
             </span>
             <div className="capacity-container">
-                <div className={`capacity-progress ${capacityInfo.isWarning ? "warning" : ""}`}>
-                    <div className="capacity-progress-bar" style={{ width: `${capacityInfo.percentage}%` }}></div>
-                    <span className="capacity-text">{capacityInfo.display}</span>
+                <div className={`capacity-progress ${storageInfo.isWarning ? "warning" : ""}`}>
+                    <div className="capacity-progress-bar" style={{ width: `${Math.min(storageInfo.percentage, 100)}%` }}></div>
+                    <span className="capacity-text">{storageInfo.display}</span>
                 </div>
             </div>
+            <div className={`temperature ${temperatureInfo.isWarning ? "warning" : ""}`}>{temperatureInfo.display}</div>
             <div className="capture-info-stack">
                 <div className="capture-info-item">
                     <span className="info-label">촬영</span>
@@ -185,7 +210,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                 <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled} title="모듈 재부팅">
                     재부팅
                 </button>
-                <button className="btn wiper" onClick={handleWiper} disabled={!isEnabled} title="와이퍼 30초 동작">
+                <button className="btn wiper" onClick={handleWiper} disabled={!isEnabled} title="와이퍼 30초 작동">
                     와이퍼
                 </button>
                 <button className="btn camera-power" onClick={handleCameraPower} disabled={!isEnabled} title="카메라 전원 토글">
@@ -194,8 +219,8 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
             </div>
 
             <div className="sw-stack">
-                <div className="sw-version">{status?.swVersion || "v1.0.0"}</div>
-                <button className="btn sw-update" onClick={handleSwUpdate} disabled={!isEnabled} title="소프트웨어 업데이트">
+                <div className="sw-version">{status?.swVersion || "-"}</div>
+                <button className="btn sw-update" onClick={handleSwUpdate} disabled={!isEnabled} title="소프트웨어 업데이트 요청">
                     업데이트
                 </button>
                 <button className="btn sw-rollback" onClick={handleSwRollback} disabled={!isEnabled} title="이전 버전으로 롤백">
@@ -211,7 +236,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                             value={(settings.startTime || "08:00").split(":")[0]}
                             onChange={(e) => handleTimeChange("startTime", "hour", e.target.value)}
                             disabled={!isEnabled}
-                            title="시작 시간"
+                            title="시작 시간 (시)"
                             className="time-select"
                         >
                             {HOUR_OPTIONS.map((hour) => (
@@ -231,7 +256,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                             value={(settings.startTime || "08:00").split(":")[1]}
                             onChange={(e) => handleTimeChange("startTime", "minute", e.target.value)}
                             disabled={!isEnabled}
-                            title="시작 분"
+                            title="시작 시간 (분)"
                             className="time-select"
                         >
                             {MINUTE_OPTIONS.map((minute) => (
@@ -251,7 +276,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                             value={(settings.endTime || "18:00").split(":")[0]}
                             onChange={(e) => handleTimeChange("endTime", "hour", e.target.value)}
                             disabled={!isEnabled}
-                            title="종료 시간"
+                            title="종료 시간 (시)"
                             className="time-select"
                         >
                             {HOUR_OPTIONS.map((hour) => (
@@ -271,7 +296,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                             value={(settings.endTime || "18:00").split(":")[1]}
                             onChange={(e) => handleTimeChange("endTime", "minute", e.target.value)}
                             disabled={!isEnabled}
-                            title="종료 분"
+                            title="종료 시간 (분)"
                             className="time-select"
                         >
                             {MINUTE_OPTIONS.map((minute) => (
@@ -308,7 +333,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
             <div className="camera-settings-stack">
                 <div className="setting-group">
                     <span className="setting-label">Size</span>
-                    <select value={settings.imageSize} onChange={(e) => handleSettingChange("imageSize", e.target.value)} disabled={!isEnabled} title="이미지 크기">
+                    <select value={settings.imageSize} onChange={(e) => handleSettingChange("imageSize", e.target.value)} disabled={!isEnabled} title="이미지 해상도">
                         <option value="640x480">640x480</option>
                         <option value="1280x720">1280x720</option>
                         <option value="1920x1080">1920x1080</option>
@@ -328,7 +353,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
 
                 <div className="setting-group">
                     <span className="setting-label">ISO</span>
-                    <select value={settings.iso} onChange={(e) => handleSettingChange("iso", e.target.value)} disabled={!isEnabled} title="ISO">
+                    <select value={settings.iso} onChange={(e) => handleSettingChange("iso", e.target.value)} disabled={!isEnabled} title="ISO 감도">
                         <option value="100">100</option>
                         <option value="200">200</option>
                         <option value="400">400</option>
@@ -341,7 +366,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
 
                 <div className="setting-group">
                     <span className="setting-label">Format</span>
-                    <select value={settings.format} onChange={(e) => handleSettingChange("format", e.target.value)} disabled={!isEnabled} title="이미지 형식">
+                    <select value={settings.format} onChange={(e) => handleSettingChange("format", e.target.value)} disabled={!isEnabled} title="이미지 포맷">
                         <option value="JPG">JPG</option>
                         <option value="RAW">RAW</option>
                         <option value="JPG+RAW">JPG+RAW</option>
@@ -350,7 +375,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
 
                 <div className="setting-group">
                     <span className="setting-label">Aperture</span>
-                    <select value={settings.aperture} onChange={(e) => handleSettingChange("aperture", e.target.value)} disabled={!isEnabled} title="조리개">
+                    <select value={settings.aperture} onChange={(e) => handleSettingChange("aperture", e.target.value)} disabled={!isEnabled} title="조리개 값">
                         <option value="f/1.4">1.4</option>
                         <option value="f/2.0">2.0</option>
                         <option value="f/2.8">2.8</option>
@@ -371,8 +396,7 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
                     <button className="btn load" onClick={handleLoadOptions} disabled={!isEnabled} title="사용 가능한 옵션 불러오기">
                         옵션 로드
                     </button>
-
-                    <button className="btn apply" onClick={handleApplySettings} disabled={!isEnabled} title="변경 적용">
+                    <button className="btn apply" onClick={handleApplySettings} disabled={!isEnabled} title="변경 사항 적용">
                         변경 적용
                     </button>
                 </div>
@@ -383,5 +407,5 @@ const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings,
     );
 };
 
-// React.memo로 컴포넌트 최적화
+// React.memo로 렌더링 최적화
 export const CameraModuleRow = React.memo(CameraModuleRowComponent);

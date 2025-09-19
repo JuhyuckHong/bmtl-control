@@ -1,9 +1,24 @@
-import React, { useState } from "react";
+import React from "react";
 import { CameraModuleRow } from "../components/CameraModuleRow";
 import { LoginForm } from "../components/LoginForm";
 import { useCameraStatus } from "../hooks/useCameraStatus";
 
-export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, status, subscribedTopics, filter, setFilter, searchTerm, setSearchTerm, onGlobalCommand, recordPublish }) => {
+const formatModuleId = (moduleId) => `bmotion${moduleId.toString().padStart(2, "0")}`;
+
+export const ModuleControl = ({
+    mqttClient,
+    connect,
+    isConnecting,
+    isConnected,
+    status,
+    subscribedTopics,
+    filter,
+    setFilter,
+    searchTerm,
+    setSearchTerm,
+    onGlobalCommand,
+    recordPublish,
+}) => {
     const { moduleStatuses, moduleSettings, sendCommand, requestSettings } = useCameraStatus(mqttClient, subscribedTopics, recordPublish);
 
     const collectKnownModuleIds = () => {
@@ -31,23 +46,36 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
         const knownModuleIds = collectKnownModuleIds().sort((a, b) => a - b);
         const normalizedSearch = (searchTerm || "").trim().toLowerCase();
 
-        const matchesSearch = (moduleId, status) => {
-            if (!normalizedSearch) return true;
-            const moduleIdMatch = moduleId.toString().includes(normalizedSearch);
-            const siteNameMatch = status?.siteName && status.siteName.toLowerCase().includes(normalizedSearch);
+        const matchesSearch = (moduleId, moduleStatus) => {
+            if (!normalizedSearch) {
+                return true;
+            }
+
+            const numericIdText = moduleId.toString();
+            const displayId = formatModuleId(moduleId).toLowerCase();
+
+            const moduleIdMatch = numericIdText.includes(normalizedSearch) || displayId.includes(normalizedSearch);
+            const siteNameMatch = moduleStatus?.siteName && moduleStatus.siteName.toLowerCase().includes(normalizedSearch);
+
             return moduleIdMatch || siteNameMatch;
         };
 
         knownModuleIds.forEach((moduleId) => {
-            const status = moduleStatuses[moduleId] || { isConnected: null };
+            const moduleStatus = moduleStatuses[moduleId] || { isConnected: null };
 
-            if (filter === "online" && status.isConnected !== true) return;
-            if (filter === "offline" && status.isConnected !== false) return;
-            if (!matchesSearch(moduleId, status)) return;
+            if (filter === "online" && moduleStatus.isConnected !== true) {
+                return;
+            }
+            if (filter === "offline" && moduleStatus.isConnected !== false) {
+                return;
+            }
+            if (!matchesSearch(moduleId, moduleStatus)) {
+                return;
+            }
 
             modules.push({
                 id: moduleId,
-                status,
+                status: moduleStatus,
                 settings: moduleSettings[moduleId],
             });
         });
@@ -55,20 +83,23 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
         const isDevelopment = process.env.NODE_ENV === "development";
 
         if (isDevelopment && !modules.some((module) => module.id === 0)) {
-            // 더미 모듈 00번 추가 (항상 연결된 상태로 표시)
             const dummyStatus = {
                 isConnected: true,
                 lastCaptureTime: new Date("2024-12-15T14:30:25"),
                 lastBootTime: new Date("2024-12-15T08:15:10"),
-                batteryLevel: 95,
                 storageUsed: 45.2,
-                siteName: "테스트 현장",
+                temperature: 24.7,
+                siteName: "테스트_현장",
+                swVersion: "v1.2.2",
+                todayTotalCaptures: 120,
+                todayCapturedCount: 80,
+                missedCaptures: 2,
             };
 
-            // 더미 모듈 검색 조건 확인
             let includesDummy = true;
             if (normalizedSearch) {
-                const moduleIdMatch = "0".includes(normalizedSearch);
+                const displayId = formatModuleId(0).toLowerCase();
+                const moduleIdMatch = "0".includes(normalizedSearch) || displayId.includes(normalizedSearch);
                 const siteNameMatch = dummyStatus.siteName.toLowerCase().includes(normalizedSearch);
                 includesDummy = moduleIdMatch || siteNameMatch;
             }
@@ -79,16 +110,17 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
                 modules.push({
                     id: 0,
                     status: dummyStatus,
-                    settings: moduleSettings[0] || {
-                        startTime: "08:00",
-                        endTime: "18:00",
-                        captureInterval: "10",
-                        imageSize: "1920x1080",
-                        quality: "85",
-                        iso: "auto",
-                        format: "jpeg",
-                        aperture: "f/2.8",
-                    },
+                    settings:
+                        moduleSettings[0] || {
+                            startTime: "08:00",
+                            endTime: "18:00",
+                            captureInterval: "10",
+                            imageSize: "1920x1080",
+                            quality: "85",
+                            iso: "auto",
+                            format: "jpeg",
+                            aperture: "f/2.8",
+                        },
                     isDummy: true,
                 });
             }
@@ -105,15 +137,18 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
         requestSettings(moduleId);
     };
 
-    const handleGlobalCommand = React.useCallback((command) => {
-        if (command === "status_request") {
-            sendCommand("global", "status_request", {});
-        } else if (command === "options_request") {
-            sendCommand("global", "options_request", {});
-        } else if (command === "reboot") {
-            sendCommand("global", "reboot", {});
-        }
-    }, [sendCommand]);
+    const handleGlobalCommand = React.useCallback(
+        (command) => {
+            if (command === "status_request") {
+                sendCommand("global", "status_request_all", {});
+            } else if (command === "options_request") {
+                sendCommand("global", "options_request", {});
+            } else if (command === "reboot") {
+                sendCommand("global", "reboot", {});
+            }
+        },
+        [sendCommand],
+    );
 
     const getStatusCounts = () => {
         const counts = { online: 0, offline: 0, unknown: 0 };
@@ -124,10 +159,10 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
         }
 
         knownModuleIds.forEach((moduleId) => {
-            const status = moduleStatuses[moduleId];
-            if (status?.isConnected === true) {
+            const moduleStatus = moduleStatuses[moduleId];
+            if (moduleStatus?.isConnected === true) {
                 counts.online += 1;
-            } else if (status?.isConnected === false) {
+            } else if (moduleStatus?.isConnected === false) {
                 counts.offline += 1;
             } else {
                 counts.unknown += 1;
@@ -139,12 +174,13 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
 
     const statusCounts = React.useMemo(() => getStatusCounts(), [moduleStatuses, moduleSettings]);
 
-    // 상위 컴포넌트에서 사용할 수 있도록 전역 커맨드 핸들러와 상태 카운트 전달
+    // 상위 컴포넌트(App)로 전역 커맨드 핸들러와 상태 요약 전달
     React.useEffect(() => {
         if (onGlobalCommand) {
             onGlobalCommand(handleGlobalCommand, statusCounts);
         }
     }, [onGlobalCommand, handleGlobalCommand, statusCounts]);
+
     const filteredModules = getFilteredModules();
 
     return (
@@ -161,15 +197,16 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
                                 <div>모듈</div>
                                 <div>상태</div>
                                 <div>현장 이름</div>
-                                <div className="table-header">용량</div>
+                                <div className="table-header">저장 사용률</div>
+                                <div className="table-header">장비 온도</div>
                                 <div className="table-header">촬영 현황</div>
                                 <div className="table-header">마지막 촬영</div>
                                 <div className="table-header">마지막 부팅</div>
-                                <div className="table-header">제어</div>
+                                <div className="table-header">모듈 제어</div>
                                 <div className="table-header">소프트웨어</div>
-                                <div className="table-header">시간 설정</div>
+                                <div className="table-header">운영 시간</div>
                                 <div className="table-header">카메라 설정</div>
-                                <div className="table-header">설정</div>
+                                <div className="table-header">설정 관리</div>
                             </div>
 
                             {filteredModules.length === 0 ? (
@@ -181,6 +218,7 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
                                     <CameraModuleRow
                                         key={module.id}
                                         moduleId={module.id}
+                                        moduleDisplayId={formatModuleId(module.id)}
                                         status={module.status}
                                         onCommand={handleCommand}
                                         onLoadSettings={handleLoadSettings}
