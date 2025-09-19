@@ -3,8 +3,8 @@ import { CameraModuleRow } from "../components/CameraModuleRow";
 import { LoginForm } from "../components/LoginForm";
 import { useCameraStatus } from "../hooks/useCameraStatus";
 
-export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, status, subscribedTopics, filter, setFilter, searchTerm, setSearchTerm, onGlobalCommand }) => {
-    const { moduleStatuses, moduleSettings, sendCommand, requestSettings } = useCameraStatus(mqttClient, subscribedTopics);
+export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, status, subscribedTopics, filter, setFilter, searchTerm, setSearchTerm, onGlobalCommand, recordPublish }) => {
+    const { moduleStatuses, moduleSettings, sendCommand, requestSettings } = useCameraStatus(mqttClient, subscribedTopics, recordPublish);
 
     const getFilteredModules = () => {
         const modules = [];

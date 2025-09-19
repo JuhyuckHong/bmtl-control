@@ -9,7 +9,7 @@ import "./App.css";
 import "./styles/api-docs.css";
 
 function App() {
-    const { isConnected, isConnecting, status, messages, subscribedTopics, connect, disconnect, subscribe, publish, clearMessages, client } = useMQTT();
+    const { isConnected, isConnecting, status, messages, subscribedTopics, connect, disconnect, subscribe, publish, recordExternalPublish, clearMessages, client } = useMQTT();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -184,6 +184,7 @@ function App() {
                                 isConnecting={isConnecting}
                                 isConnected={isConnected}
                                 status={status}
+                                recordPublish={recordExternalPublish}
                             />
                         }
                     />
@@ -225,6 +226,7 @@ function App() {
                                 isConnecting={isConnecting}
                                 isConnected={isConnected}
                                 status={status}
+                                recordPublish={recordExternalPublish}
                             />
                         }
                     />

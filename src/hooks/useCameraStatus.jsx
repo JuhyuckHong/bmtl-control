@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 
-export const useCameraStatus = (mqttClient, subscribedTopics) => {
+export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => {
     const [moduleStatuses, setModuleStatuses] = useState({});
     const [moduleSettings, setModuleSettings] = useState({});
     const [moduleOptions, setModuleOptions] = useState({});
@@ -59,7 +59,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     console.log(`🚀 [MQTT Publish] Reboot command sent to module ${moduleId}`);
                     console.log(`📡 [MQTT Publish] Topic: ${topic}`);
                     console.log(`📦 [MQTT Publish] Payload: ${payload}`);
-                    mqttClient.emit("publish", { topic, payload, qos: 2 });
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
                 }
             });
         },
@@ -81,7 +83,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     console.log(`🚀 [MQTT Publish] Configure command sent to module ${moduleId}`);
                     console.log(`📡 [MQTT Publish] Topic: ${topic}`);
                     console.log(`📦 [MQTT Publish] Payload: ${payload}`);
-                    mqttClient.emit("publish", { topic, payload, qos: 2 });
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
                 }
             });
         },
@@ -102,7 +106,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                 console.log("🚀 [MQTT Publish] Global reboot command sent");
                 console.log(`📡 [MQTT Publish] Topic: ${topic}`);
                 console.log(`📦 [MQTT Publish] Payload: ${payload}`);
-                mqttClient.emit("publish", { topic, payload, qos: 2 });
+                if (recordPublish) {
+                    recordPublish(topic, payload, 2);
+                }
             }
         });
     }, [mqttClient]);
@@ -119,7 +125,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                 console.error("Failed to request all settings:", err);
             } else {
                 console.log("All settings request sent", topic, payload);
-                mqttClient.emit("publish", { topic, payload, qos: 2 });
+                if (recordPublish) {
+                    recordPublish(topic, payload, 2);
+                }
             }
         });
     }, [mqttClient]);
@@ -137,7 +145,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     console.error(`Failed to request options for module ${moduleId}:`, err);
                 } else {
                     console.log(`Options request sent for module ${moduleId}`, topic, payload);
-                    mqttClient.emit("publish", { topic, payload, qos: 2 });
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
                 }
             });
         },
@@ -156,7 +166,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                 console.error("Failed to request all options:", err);
             } else {
                 console.log("All options request sent", topic, payload);
-                mqttClient.emit("publish", { topic, payload, qos: 2 });
+                if (recordPublish) {
+                    recordPublish(topic, payload, 2);
+                }
             }
         });
     }, [mqttClient]);
@@ -176,7 +188,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     console.log(`🚀 [MQTT Publish] Wiper command sent to module ${moduleId}`);
                     console.log(`📡 [MQTT Publish] Topic: ${topic}`);
                     console.log(`📦 [MQTT Publish] Payload: ${payload}`);
-                    mqttClient.emit("publish", { topic, payload, qos: 2 });
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
                 }
             });
         },
@@ -198,7 +212,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     console.log(`🚀 [MQTT Publish] Camera power command sent to module ${moduleId}`);
                     console.log(`📡 [MQTT Publish] Topic: ${topic}`);
                     console.log(`📦 [MQTT Publish] Payload: ${payload}`);
-                    mqttClient.emit("publish", { topic, payload, qos: 2 });
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
                 }
             });
         },
@@ -220,7 +236,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     console.log(`🚀 [MQTT Publish] Sitename command sent to module ${moduleId}`);
                     console.log(`📡 [MQTT Publish] Topic: ${topic}`);
                     console.log(`📦 [MQTT Publish] Payload: ${payload}`);
-                    mqttClient.emit("publish", { topic, payload, qos: 2 });
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
                 }
             });
         },
@@ -242,7 +260,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     console.log(`🚀 [MQTT Publish] SW update command sent to module ${moduleId}`);
                     console.log(`📡 [MQTT Publish] Topic: ${topic}`);
                     console.log(`📦 [MQTT Publish] Payload: ${payload}`);
-                    mqttClient.emit("publish", { topic, payload, qos: 2 });
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
                 }
             });
         },
@@ -315,7 +335,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     console.error(`Failed to request settings for module ${moduleId}:`, err);
                 } else {
                     console.log(`Settings request sent for module ${moduleId}`, topic, payload);
-                    mqttClient.emit("publish", { topic, payload, qos: 2 });
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
                 }
             });
         },
@@ -334,7 +356,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                 console.error("Failed to request status:", err);
             } else {
                 console.log("Status request sent", topic, payload);
-                mqttClient.emit("publish", { topic, payload, qos: 2 });
+                if (recordPublish) {
+                    recordPublish(topic, payload, 2);
+                }
             }
         });
     }, [mqttClient]);
