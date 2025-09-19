@@ -6,65 +6,95 @@ import { useCameraStatus } from "../hooks/useCameraStatus";
 export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, status, subscribedTopics, filter, setFilter, searchTerm, setSearchTerm, onGlobalCommand, recordPublish }) => {
     const { moduleStatuses, moduleSettings, sendCommand, requestSettings } = useCameraStatus(mqttClient, subscribedTopics, recordPublish);
 
+    const collectKnownModuleIds = () => {
+        const ids = new Set();
+
+        Object.keys(moduleStatuses || {}).forEach((key) => {
+            const numericId = Number(key);
+            if (!Number.isNaN(numericId)) {
+                ids.add(numericId);
+            }
+        });
+
+        Object.keys(moduleSettings || {}).forEach((key) => {
+            const numericId = Number(key);
+            if (!Number.isNaN(numericId)) {
+                ids.add(numericId);
+            }
+        });
+
+        return Array.from(ids);
+    };
+
     const getFilteredModules = () => {
         const modules = [];
+        const knownModuleIds = collectKnownModuleIds().sort((a, b) => a - b);
+        const normalizedSearch = (searchTerm || "").trim().toLowerCase();
 
-        // 더미 모듈 00번 추가 (항상 연결된 상태로 표시)
-        const dummyStatus = {
-            isConnected: true,
-            lastCaptureTime: new Date("2024-12-15T14:30:25"),
-            lastBootTime: new Date("2024-12-15T08:15:10"),
-            batteryLevel: 95,
-            storageUsed: 45.2,
-            siteName: "테스트 현장",
+        const matchesSearch = (moduleId, status) => {
+            if (!normalizedSearch) return true;
+            const moduleIdMatch = moduleId.toString().includes(normalizedSearch);
+            const siteNameMatch = status?.siteName && status.siteName.toLowerCase().includes(normalizedSearch);
+            return moduleIdMatch || siteNameMatch;
         };
 
-        // 더미 모듈 검색 조건 확인
-        let includesDummy = true;
-        if (searchTerm) {
-            const moduleIdMatch = "0".includes(searchTerm);
-            const siteNameMatch = dummyStatus.siteName.toLowerCase().includes(searchTerm.toLowerCase());
-            includesDummy = moduleIdMatch || siteNameMatch;
-        }
+        knownModuleIds.forEach((moduleId) => {
+            const status = moduleStatuses[moduleId] || { isConnected: null };
 
-        if (includesDummy && (filter === "all" || filter === "online")) {
+            if (filter === "online" && status.isConnected !== true) return;
+            if (filter === "offline" && status.isConnected !== false) return;
+            if (!matchesSearch(moduleId, status)) return;
+
             modules.push({
-                id: 0,
-                status: dummyStatus,
-                settings: moduleSettings[0] || {
-                    startTime: "08:00",
-                    endTime: "18:00",
-                    captureInterval: "10",
-                    imageSize: "1920x1080",
-                    quality: "85",
-                    iso: "auto",
-                    format: "jpeg",
-                    aperture: "f/2.8",
-                },
-                isDummy: true,
+                id: moduleId,
+                status,
+                settings: moduleSettings[moduleId],
             });
-        }
+        });
 
-        for (let i = 1; i <= 99; i++) {
-            const status = moduleStatuses[i] || { isConnected: null };
+        const isDevelopment = process.env.NODE_ENV === "development";
 
-            if (filter === "online" && !status.isConnected) continue;
-            if (filter === "offline" && status.isConnected !== false) continue;
+        if (isDevelopment && !modules.some((module) => module.id === 0)) {
+            // 더미 모듈 00번 추가 (항상 연결된 상태로 표시)
+            const dummyStatus = {
+                isConnected: true,
+                lastCaptureTime: new Date("2024-12-15T14:30:25"),
+                lastBootTime: new Date("2024-12-15T08:15:10"),
+                batteryLevel: 95,
+                storageUsed: 45.2,
+                siteName: "테스트 현장",
+            };
 
-            // 모듈 번호 또는 현장 이름으로 검색
-            if (searchTerm) {
-                const moduleIdMatch = i.toString().includes(searchTerm);
-                const siteNameMatch = status.siteName && status.siteName.toLowerCase().includes(searchTerm.toLowerCase());
-                if (!moduleIdMatch && !siteNameMatch) continue;
+            // 더미 모듈 검색 조건 확인
+            let includesDummy = true;
+            if (normalizedSearch) {
+                const moduleIdMatch = "0".includes(normalizedSearch);
+                const siteNameMatch = dummyStatus.siteName.toLowerCase().includes(normalizedSearch);
+                includesDummy = moduleIdMatch || siteNameMatch;
             }
 
-            modules.push({
-                id: i,
-                status,
-                settings: moduleSettings[i],
-            });
+            const passesFilter = filter === "all" || filter === "online";
+
+            if (includesDummy && passesFilter && matchesSearch(0, dummyStatus)) {
+                modules.push({
+                    id: 0,
+                    status: dummyStatus,
+                    settings: moduleSettings[0] || {
+                        startTime: "08:00",
+                        endTime: "18:00",
+                        captureInterval: "10",
+                        imageSize: "1920x1080",
+                        quality: "85",
+                        iso: "auto",
+                        format: "jpeg",
+                        aperture: "f/2.8",
+                    },
+                    isDummy: true,
+                });
+            }
         }
-        return modules;
+
+        return modules.sort((a, b) => a.id - b.id);
     };
 
     const handleCommand = (moduleId, command, data) => {
@@ -94,12 +124,23 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
 
     const getStatusCounts = () => {
         const counts = { online: 0, offline: 0, unknown: 0 };
-        for (let i = 1; i <= 99; i++) {
-            const status = moduleStatuses[i]?.isConnected;
-            if (status === true) counts.online++;
-            else if (status === false) counts.offline++;
-            else counts.unknown++;
+        const knownModuleIds = collectKnownModuleIds();
+
+        if (knownModuleIds.length === 0) {
+            return counts;
         }
+
+        knownModuleIds.forEach((moduleId) => {
+            const status = moduleStatuses[moduleId];
+            if (status?.isConnected === true) {
+                counts.online += 1;
+            } else if (status?.isConnected === false) {
+                counts.offline += 1;
+            } else {
+                counts.unknown += 1;
+            }
+        });
+
         return counts;
     };
 
