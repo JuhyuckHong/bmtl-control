@@ -62,6 +62,9 @@
 body {
     color: var(--text-primary);
     background: var(--bg-primary);
+    /* GPU 가속을 위한 기본 설정 */
+    will-change: auto;
+    transform: translateZ(0);
 }
 
 /* === APP LAYOUT === */
@@ -159,7 +162,7 @@ body {
     color: var(--text-primary);
     font-size: 0.875rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.15s ease-out;
     height: 38px;
     box-sizing: border-box;
     display: flex;
@@ -405,7 +408,7 @@ body {
     color: white;
     font-size: 0.875rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.15s ease-out;
     white-space: nowrap;
     align-self: flex-start;
 }
@@ -984,7 +987,8 @@ button {
     align-items: stretch;
 }
 
-.control-buttons .btn {
+.control-buttons .btn,
+.control-buttons button {
     padding: 2px 4px;
     font-size: 0.7rem;
     min-height: 16px;
@@ -994,14 +998,18 @@ button {
     color: var(--text-primary);
     cursor: pointer;
     transition: all 0.1s ease;
+    width: 100%;
+    text-align: center;
 }
 
-.control-buttons .btn:hover:not(:disabled) {
+.control-buttons .btn:hover:not(:disabled),
+.control-buttons button:hover:not(:disabled) {
     background: var(--bg-secondary);
     border-color: var(--text-secondary);
 }
 
-.control-buttons .btn:disabled {
+.control-buttons .btn:disabled,
+.control-buttons button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
@@ -1009,7 +1017,7 @@ button {
 .sw-stack {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     align-items: stretch;
 }
 
@@ -1260,6 +1268,48 @@ button {
     opacity: 0.6;
 }
 
+/* Time picker container */
+.time-picker {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+}
+
+.camera-module-row .time-select {
+    flex: 1;
+    min-width: 30px !important;
+    max-width: 40px;
+    padding: 0.1rem 0.1rem;
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    text-align: center;
+    text-align-last: center;
+}
+
+.camera-module-row .time-select:hover:not(:disabled) {
+    border-color: var(--text-secondary);
+    background-color: var(--bg-secondary);
+}
+
+.camera-module-row .time-select:focus {
+    outline: none;
+    border-color: var(--text-primary);
+    background-color: var(--bg-secondary);
+}
+
+.camera-module-row .time-select:disabled {
+    background-color: var(--bg-secondary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .camera-settings-row {
     display: flex;
     flex-direction: column;
@@ -1269,34 +1319,6 @@ button {
 .camera-settings-row > select {
     width: 100%;
     min-width: 0;
-}
-
-/* === CONTROL PANEL BUTTONS === */
-/* Compact button styling for module control panels */
-
-.control-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    justify-content: center;
-}
-
-/* Control panel specific button styling - minimal size */
-.control-buttons .btn,
-.control-buttons button {
-    width: 100%;
-    min-width: 50px;
-    padding: 0.15rem 0.25rem;
-    font-size: inherit; /* 부�??�소???�트 ?�기 ?�속 */
-    font-weight: 500;
-    line-height: 1;
-    border-radius: 2px;
-    margin: 0;
-    height: 22px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .modules-table-header {
@@ -1372,17 +1394,9 @@ button {
 }
 
 .time-picker {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.time-picker:disabled {
-    cursor: not-allowed;
+    display: flex;
+    gap: 2px;
+    align-items: center;
 }
 
 .time-display-container:hover .time-display {
@@ -1435,21 +1449,6 @@ button {
 .time-select-container {
     position: relative;
     width: 100%;
-}
-
-.time-select {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-
-.time-select:disabled {
-    cursor: not-allowed;
 }
 
 .time-select-container .time-display {
@@ -1526,6 +1525,9 @@ button {
     height: 8px;
     border-radius: 50%;
     margin: 0 auto;
+    /* GPU 가속 적용 - 상태 변경이 빈번함 */
+    will-change: background-color;
+    transform: translateZ(0);
 }
 
 .status-online {
@@ -1873,25 +1875,25 @@ button {
     font-weight: 500;
     color: var(--text-primary);
     background: var(--bg-secondary);
-    padding: 0.25rem;
+    padding: 0.15rem;
     border-radius: 3px;
     border: 1px solid var(--border);
-    min-height: 24px;
+    min-height: 20px;
     text-align: center;
 }
 
 /* SW Update Button - Control Panel Size */
 .control-buttons .btn.sw-update {
-    background: var(--success);
-    color: white;
-    border: 1px solid var(--success);
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
     min-width: 45px;
     padding: 0.15rem 0.2rem;
 }
 
 .control-buttons .btn.sw-update:hover:not(:disabled) {
-    background: #2e7d32;
-    border-color: #2e7d32;
+    background: var(--bg-secondary);
+    border-color: var(--text-secondary);
 }
 
 .control-buttons .btn.sw-update:disabled {
@@ -1903,15 +1905,15 @@ button {
 
 /* Regular SW Update Button (non-control panel) */
 .btn.sw-update:not(.control-buttons .btn) {
-    background: var(--success);
-    color: white;
-    border: 1px solid var(--success);
-    min-width: 60px;
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    min-width: 45px;
 }
 
 .btn.sw-update:not(.control-buttons .btn):hover:not(:disabled) {
-    background: #2e7d32;
-    border-color: #2e7d32;
+    background: var(--bg-secondary);
+    border-color: var(--text-secondary);
 }
 
 .btn.sw-update:not(.control-buttons .btn):disabled {

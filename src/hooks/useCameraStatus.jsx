@@ -8,14 +8,24 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
 
     // 모듈 상태 업데이트
     const updateModuleStatus = useCallback((moduleId, statusData) => {
-        setModuleStatuses((prev) => ({
-            ...prev,
-            [moduleId]: {
-                ...prev[moduleId],
+        setModuleStatuses((prev) => {
+            const existingModule = prev[moduleId];
+            const updatedModule = {
+                ...existingModule,
                 ...statusData,
                 lastUpdated: new Date(),
-            },
-        }));
+            };
+
+            // 실제로 변경된 내용이 있는지 확인
+            if (existingModule && JSON.stringify(existingModule) === JSON.stringify(updatedModule)) {
+                return prev;
+            }
+
+            return {
+                ...prev,
+                [moduleId]: updatedModule,
+            };
+        });
     }, []);
 
     // 모듈 설정 업데이트
@@ -338,9 +348,10 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
         const handleMessage = (topic, message) => {
             try {
                 const data = JSON.parse(message.toString());
-                console.log(`🔔 [MQTT Message] Topic: ${topic}`);
-                console.log(`📄 [MQTT Message] Payload:`, data);
-                console.log(`📊 [MQTT Message] Raw:`, message.toString());
+                // 개발 모드에서만 상세 로그 출력
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(`🔔 [MQTT Message] Topic: ${topic}`, data);
+                }
 
                 // 토픽 파싱
                 const topicParts = topic.split("/");
@@ -349,7 +360,9 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
                     // 디바이스 헬스 상태 처리 (메시지를 받으면 온라인으로 간주)
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
-                    console.log(`💚 [Health Update] Module ${moduleId} - Online, Site: ${data.site_name}`);
+                    if (process.env.NODE_ENV === 'development') {
+                        console.log(`💚 [Health Update] Module ${moduleId} - Online, Site: ${data.site_name}`);
+                    }
 
                     updateModuleStatus(moduleId, {
                         isConnected: true, // 메시지를 받으면 온라인으로 처리
@@ -559,25 +572,33 @@ export const useCameraStatus = (mqttClient, subscribedTopics) => {
         const interval = setInterval(() => {
             const now = new Date();
 
-            // 구독 상태 로깅
-            console.log(`📊 [MQTT Status] Subscribed topics: ${localSubscribedTopics.size}`);
-            console.log(`📊 [MQTT Status] Connected modules: ${Object.keys(moduleStatuses).length}`);
-            console.log(`📊 [MQTT Status] Active subscriptions:`, Array.from(localSubscribedTopics));
+            // 개발 모드에서만 상태 로깅
+            if (process.env.NODE_ENV === 'development') {
+                console.log(`📊 [MQTT Status] Subscribed topics: ${localSubscribedTopics.size}`);
+            }
 
             setModuleStatuses((prev) => {
-                const updated = { ...prev };
-                Object.keys(updated).forEach((moduleId) => {
-                    const lastUpdated = updated[moduleId].lastUpdated;
-                    if (lastUpdated && now - lastUpdated > 5 * 60 * 1000) {
-                        updated[moduleId].isConnected = false;
+                const updated = {};
+                let hasChanges = false;
+
+                Object.keys(prev).forEach((moduleId) => {
+                    const module = prev[moduleId];
+                    const lastUpdated = module.lastUpdated;
+
+                    if (lastUpdated && now - lastUpdated > 5 * 60 * 1000 && module.isConnected !== false) {
+                        updated[moduleId] = { ...module, isConnected: false };
+                        hasChanges = true;
+                    } else {
+                        updated[moduleId] = module;
                     }
                 });
-                return updated;
+
+                return hasChanges ? updated : prev;
             });
         }, 30000); // 30초마다 체크
 
         return () => clearInterval(interval);
-    }, [localSubscribedTopics, moduleStatuses]);
+    }, [localSubscribedTopics]); // moduleStatuses 의존성 제거
 
     return {
         moduleStatuses,

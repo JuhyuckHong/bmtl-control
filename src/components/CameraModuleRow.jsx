@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { SiteNameModal } from "./SiteNameModal";
 
 /**
@@ -11,7 +11,7 @@ import { SiteNameModal } from "./SiteNameModal";
  * @param {boolean} props.isDummy - Whether this is a dummy module
  * @param {Object} props.initialSettings - Initial settings object
  */
-export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, isDummy, initialSettings }) => {
+const CameraModuleRowComponent = ({ moduleId, status, onCommand, onLoadSettings, isDummy, initialSettings }) => {
     const [settings, setSettings] = useState(
         initialSettings || {
             startTime: "08:00",
@@ -25,69 +25,86 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, i
         }
     );
     const [isSiteNameModalOpen, setIsSiteNameModalOpen] = useState(false);
-    const timeOptions = useMemo(() => {
-        return Array.from({ length: 24 * 60 }, (_, index) => {
-            const hour = Math.floor(index / 60)
-                .toString()
-                .padStart(2, "0");
-            const minute = (index % 60).toString().padStart(2, "0");
-            return `${hour}:${minute}`;
+    const hourOptions = useMemo(() => {
+        return Array.from({ length: 24 }, (_, hour) => {
+            return hour.toString().padStart(2, "0");
         });
     }, []);
 
-    const handleSettingChange = (key, value) => {
+    const minuteOptions = useMemo(() => {
+        return Array.from({ length: 60 }, (_, minute) => {
+            return minute.toString().padStart(2, "0");
+        });
+    }, []);
+
+    const handleSettingChange = useCallback((key, value) => {
         setSettings((prev) => ({
             ...prev,
             [key]: value,
         }));
-    };
+    }, []);
 
-    const handleReboot = () => {
+    const handleTimeChange = useCallback((timeType, component, value) => {
+        setSettings((prev) => {
+            const currentTime = prev[timeType] || "08:00";
+            const [currentHour, currentMinute] = currentTime.split(":");
+
+            const newHour = component === "hour" ? value : currentHour;
+            const newMinute = component === "minute" ? value : currentMinute;
+
+            return {
+                ...prev,
+                [timeType]: `${newHour}:${newMinute}`,
+            };
+        });
+    }, []);
+
+    const handleReboot = useCallback(() => {
         onCommand(moduleId, "reboot", {});
-    };
+    }, [onCommand, moduleId]);
 
-    const handleWiper = () => {
+    const handleWiper = useCallback(() => {
         onCommand(moduleId, "wiper", {});
-    };
+    }, [onCommand, moduleId]);
 
-    const handleCameraPower = () => {
+    const handleCameraPower = useCallback(() => {
         onCommand(moduleId, "camera-on-off", {});
-    };
+    }, [onCommand, moduleId]);
 
-    const handleApplySettings = () => {
+    const handleApplySettings = useCallback(() => {
         onCommand(moduleId, "configure", settings);
-    };
+    }, [onCommand, moduleId, settings]);
 
-    // isDummy인 경우의 상태값도 확인
-    const isEnabled = isDummy || status?.isConnected;
+    // isDummy인 경우의 상태값도 확인 (개발용으로 항상 활성화)
+    const isEnabled = true; // isDummy || status?.isConnected;
 
-    const handleLoadSettings = () => {
+    const handleLoadSettings = useCallback(() => {
         onLoadSettings(moduleId);
-    };
+    }, [onLoadSettings, moduleId]);
 
-    const handleLoadOptions = () => {
+    const handleLoadOptions = useCallback(() => {
         onCommand(moduleId, "options_request", {});
-    };
+    }, [onCommand, moduleId]);
 
-    const handleSiteNameChange = () => {
+    const handleSiteNameChange = useCallback(() => {
         setIsSiteNameModalOpen(true);
-    };
+    }, []);
 
-    const handleSiteNameSubmit = async (newSiteName) => {
+    const handleSiteNameSubmit = useCallback(async (newSiteName) => {
         onCommand(moduleId, "sitename", { sitename: newSiteName });
         setIsSiteNameModalOpen(false);
-    };
+    }, [onCommand, moduleId]);
 
-    const handleSwUpdate = () => {
+    const handleSwUpdate = useCallback(() => {
         onCommand(moduleId, "sw-update", {});
-    };
+    }, [onCommand, moduleId]);
 
-    const getStatusClass = (isConnected) => {
+    const getStatusClass = useCallback((isConnected) => {
         if (isConnected === null) return "status-unknown";
         return isConnected ? "status-online" : "status-offline";
-    };
+    }, []);
 
-    const formatDateTime = (timestamp) => {
+    const formatDateTime = useCallback((timestamp) => {
         if (!timestamp) return "없음";
         const date = new Date(timestamp);
         const year = date.getFullYear().toString().slice(-2);
@@ -98,17 +115,17 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, i
         const second = date.getSeconds().toString().padStart(2, "0");
 
         return `${year}.${month}.${day} ${hour}:${minute}:${second}`;
-    };
+    }, []);
 
-    const getCaptureProgress = () => {
+    const getCaptureProgress = useCallback(() => {
         const totalToday = status?.todayTotalCaptures || 0;
         const captured = status?.todayCapturedCount || 0;
         return `${captured}/${totalToday}`;
-    };
+    }, [status?.todayTotalCaptures, status?.todayCapturedCount]);
 
-    const getMissedCaptures = () => {
+    const getMissedCaptures = useCallback(() => {
         return status?.missedCaptures || 0;
-    };
+    }, [status?.missedCaptures]);
 
     const capacityInfo = useMemo(() => {
         const capacity = status?.remainingCapacity;
@@ -153,49 +170,91 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, i
             <div className="last-boot">{formatDateTime(status?.lastBootTime)}</div>
 
             <div className="control-buttons">
-                <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled} title="Reboot module">
-                    Reboot
+                <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled} title="모듈 재부팅">
+                    재부팅
                 </button>
-                <button className="btn wiper" onClick={handleWiper} disabled={!isEnabled} title="Run wiper for 30 seconds">
-                    Wiper
+                <button className="btn wiper" onClick={handleWiper} disabled={!isEnabled} title="와이퍼 30초 동작">
+                    와이퍼
                 </button>
-                <button className="btn camera-power" onClick={handleCameraPower} disabled={!isEnabled} title="Toggle camera power">
-                    Camera Power
+                <button className="btn camera-power" onClick={handleCameraPower} disabled={!isEnabled} title="카메라 전원 토글">
+                    카메라 전원
                 </button>
             </div>
 
             <div className="sw-stack">
                 <div className="sw-version">{status?.swVersion || "v1.0.0"}</div>
-                <button className="btn sw-update" onClick={handleSwUpdate} disabled={!isEnabled} title="Software update">
-                    Update
+                <button className="btn sw-update" onClick={handleSwUpdate} disabled={!isEnabled} title="소프트웨어 업데이트">
+                    업데이트
                 </button>
             </div>
 
             <div className="time-settings-stack">
                 <div className="setting-group">
-                    <span className="setting-label">Start</span>
-                    <select value={settings.startTime || "08:00"} onChange={(e) => handleSettingChange("startTime", e.target.value)} disabled={!isEnabled} title="Start time">
-                        {timeOptions.map((time) => (
-                            <option key={`start-${time}`} value={time}>
-                                {time}
-                            </option>
-                        ))}
-                    </select>
+                    <span className="setting-label">시작</span>
+                    <div className="time-picker">
+                        <select
+                            value={(settings.startTime || "08:00").split(":")[0]}
+                            onChange={(e) => handleTimeChange("startTime", "hour", e.target.value)}
+                            disabled={!isEnabled}
+                            title="시작 시간"
+                            className="time-select"
+                        >
+                            {hourOptions.map((hour) => (
+                                <option key={`start-hour-${hour}`} value={hour}>
+                                    {hour}시
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            value={(settings.startTime || "08:00").split(":")[1]}
+                            onChange={(e) => handleTimeChange("startTime", "minute", e.target.value)}
+                            disabled={!isEnabled}
+                            title="시작 분"
+                            className="time-select"
+                        >
+                            {minuteOptions.map((minute) => (
+                                <option key={`start-minute-${minute}`} value={minute}>
+                                    {minute}분
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 <div className="setting-group">
-                    <span className="setting-label">End</span>
-                    <select value={settings.endTime || "18:00"} onChange={(e) => handleSettingChange("endTime", e.target.value)} disabled={!isEnabled} title="End time">
-                        {timeOptions.map((time) => (
-                            <option key={`end-${time}`} value={time}>
-                                {time}
-                            </option>
-                        ))}
-                    </select>
+                    <span className="setting-label">종료</span>
+                    <div className="time-picker">
+                        <select
+                            value={(settings.endTime || "18:00").split(":")[0]}
+                            onChange={(e) => handleTimeChange("endTime", "hour", e.target.value)}
+                            disabled={!isEnabled}
+                            title="종료 시간"
+                            className="time-select"
+                        >
+                            {hourOptions.map((hour) => (
+                                <option key={`end-hour-${hour}`} value={hour}>
+                                    {hour}시
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            value={(settings.endTime || "18:00").split(":")[1]}
+                            onChange={(e) => handleTimeChange("endTime", "minute", e.target.value)}
+                            disabled={!isEnabled}
+                            title="종료 분"
+                            className="time-select"
+                        >
+                            {minuteOptions.map((minute) => (
+                                <option key={`end-minute-${minute}`} value={minute}>
+                                    {minute}분
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 <div className="setting-group">
-                    <span className="setting-label">Interval</span>
+                    <span className="setting-label">간격</span>
                     <div className="interval-container">
                         <input
                             type="number"
@@ -205,9 +264,9 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, i
                             onChange={(e) => handleSettingChange("captureInterval", e.target.value)}
                             disabled={!isEnabled}
                             className="interval-input"
-                            title="Capture interval (minutes)"
+                            title="촬영 간격 (분)"
                         />
-                        <span className="interval-unit">min</span>
+                        <span className="interval-unit">분</span>
                     </div>
                 </div>
             </div>
@@ -289,3 +348,6 @@ export const CameraModuleRow = ({ moduleId, status, onCommand, onLoadSettings, i
         </div>
     );
 };
+
+// React.memo로 컴포넌트 최적화
+export const CameraModuleRow = React.memo(CameraModuleRowComponent);
