@@ -260,19 +260,23 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
             </div>
             <div className="capture-info-stack">
                 <div className="capture-info-item camera-status-item">
-                    <span className="info-label">카메라</span>
-                    <span className={`camera-power-status ${status?.cameraPowerStatus || 'unknown'}`}>
+                    <span className="info-label">카메라 상태</span>
+                    <button
+                        className={`btn camera-status-button ${status?.cameraPowerStatus || 'unknown'}`}
+                        onClick={handleCameraPowerStatus}
+                        disabled={!isEnabled || status?.cameraPowerStatus === 'checking'}
+                        title={
+                            status?.cameraPowerStatus === 'on' ? '카메라 전원 켜져있음 (클릭하여 재확인)' :
+                            status?.cameraPowerStatus === 'off' ? '카메라 전원 꺼져있음 (클릭하여 재확인)' :
+                            status?.cameraPowerStatus === 'error' ? '카메라 오류 상태 (클릭하여 재확인)' :
+                            status?.cameraPowerStatus === 'checking' ? '상태 확인 중...' :
+                            '카메라 상태를 확인하려면 클릭하세요'
+                        }
+                    >
                         {status?.cameraPowerStatus === 'on' ? '전원켜짐' :
                          status?.cameraPowerStatus === 'off' ? '전원꺼짐' :
-                         status?.cameraPowerStatus === 'error' ? '오류' : '확인중'}
-                    </span>
-                    <button
-                        className="btn camera-power-status-refresh"
-                        onClick={handleCameraPowerStatus}
-                        disabled={!isEnabled}
-                        title="카메라 전원 상태 확인 요청"
-                    >
-                        상태 확인
+                         status?.cameraPowerStatus === 'error' ? '오류' :
+                         status?.cameraPowerStatus === 'checking' ? '확인중...' : '상태 확인 필요'}
                     </button>
                 </div>
                 <div className="capture-info-item">
