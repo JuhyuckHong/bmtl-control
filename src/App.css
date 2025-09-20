@@ -1335,6 +1335,8 @@ button {
     min-width: 0;
     font-size: 0.8em;
     line-height: 1.2;
+    align-items: center;
+    justify-content: center;
 }
 
 .time-settings-stack .interval-container {
@@ -1647,6 +1649,7 @@ button {
 .time-select-container {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 2px;
     width: 100%;
 }
