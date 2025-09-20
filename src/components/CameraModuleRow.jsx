@@ -505,13 +505,13 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
             <div className="settings-stack">
                 <div className="settings-stack-inner">
                     <button className="btn load" onClick={handleLoadSettings} disabled={!isEnabled} title="현재 설정 불러오기">
-                        현재 설정
+                        현재 설정 불러오기
                     </button>
                     <button className="btn load" onClick={handleLoadOptions} disabled={!isEnabled} title="사용 가능한 옵션 불러오기">
-                        옵션 로드
+                        카메라 옵션 불러오기
                     </button>
                     <button className="btn apply" onClick={handleApplySettings} disabled={!isEnabled} title="변경 사항 적용">
-                        변경 적용
+                        변경 옵션 적용
                     </button>
                 </div>
             </div>
