@@ -181,7 +181,6 @@ body {
     cursor: not-allowed;
 }
 
-/* ?�험 버튼 ?��???- disconnect-btn-header???�험 ?��????�용 */
 .app-header .disconnect-btn-header {
     border-color: var(--error);
     color: var(--error);
@@ -941,7 +940,20 @@ button {
 .modules-table-header,
 .camera-module-row {
     display: grid;
-    grid-template-columns: 110px 40px 160px 140px 110px 150px 160px 160px 140px 140px 240px 240px 160px;
+    grid-template-columns:
+        minmax(25px, 1fr) /* 모듈 */
+        minmax(25px, 0.4fr) /* 상태 */
+        minmax(80px, 1.5fr) /* 현장 이름 */
+        minmax(55px, 1fr) /* 저장공간 */
+        minmax(55px, 1fr) /* 온도 */
+        minmax(75px, 1.4fr) /* 촬영 현황 */
+        minmax(80px, 1.5fr) /* 마지막 촬영 */
+        minmax(80px, 1.5fr) /* 마지막 부팅 */
+        minmax(80px, 1.3fr) /* 모듈 제어 */
+        minmax(80px, 1.3fr) /* 소프트웨어 */
+        minmax(90px, 1.5fr) /* 운영 시간 */
+        minmax(100px, 2fr) /* 카메라 설정 */
+        minmax(80px, 1.5fr); /* 설정 관리 */
     gap: 0.5rem;
     padding: 0.375rem;
     border-bottom: 1px solid var(--border);
@@ -1008,6 +1020,34 @@ button {
 
 .capacity-progress.warning .capacity-progress-bar {
     background: var(--error);
+}
+
+.capacity-donut {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+}
+
+.donut-chart {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.donut-chart circle {
+    transition: stroke-dasharray 0.25s ease;
+}
+
+.donut-text {
+    position: absolute;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    line-height: 1;
 }
 
 .capacity-text {
@@ -2046,4 +2086,73 @@ button {
     border-color: var(--text-tertiary);
     color: var(--bg-primary);
     opacity: 0.6;
+}
+
+/* SW Version Refresh Button */
+.btn.sw-version-refresh {
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    min-width: 24px;
+    padding: 2px 4px;
+    font-size: 0.7rem;
+}
+
+.btn.sw-version-refresh:hover:not(:disabled) {
+    background: var(--bg-secondary);
+    border-color: var(--text-secondary);
+}
+
+.btn.sw-version-refresh:disabled {
+    background: var(--text-tertiary);
+    border-color: var(--text-tertiary);
+    color: var(--bg-primary);
+    opacity: 0.6;
+}
+
+/* Temperature and Battery Stack */
+.temp-battery-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+}
+
+.battery {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.battery.warning {
+    color: var(--error);
+    font-weight: 600;
+}
+
+/* Camera Power Status */
+.camera-power-status {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-align: center;
+    font-weight: 500;
+}
+
+.camera-power-status.on {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.camera-power-status.off {
+    color: var(--error);
+    font-weight: 600;
+}
+
+.camera-power-status.error {
+    color: var(--error);
+    font-weight: 600;
+}
+
+.camera-power-status.unknown {
+    color: var(--text-tertiary);
+    font-style: italic;
 }

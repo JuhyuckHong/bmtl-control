@@ -3,22 +3,9 @@ import { CameraModuleRow } from "../components/CameraModuleRow";
 import { LoginForm } from "../components/LoginForm";
 import { useCameraStatus } from "../hooks/useCameraStatus";
 
-const formatModuleId = (moduleId) => `bmotion${moduleId.toString().padStart(2, "0")}`;
+const formatModuleId = (moduleId) => moduleId.toString().padStart(2, "0");
 
-export const ModuleControl = ({
-    mqttClient,
-    connect,
-    isConnecting,
-    isConnected,
-    status,
-    subscribedTopics,
-    filter,
-    setFilter,
-    searchTerm,
-    setSearchTerm,
-    onGlobalCommand,
-    recordPublish,
-}) => {
+export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, status, subscribedTopics, filter, setFilter, searchTerm, setSearchTerm, onGlobalCommand, recordPublish }) => {
     const { moduleStatuses, moduleSettings, sendCommand, requestSettings } = useCameraStatus(mqttClient, subscribedTopics, recordPublish);
 
     const collectKnownModuleIds = () => {
@@ -110,17 +97,16 @@ export const ModuleControl = ({
                 modules.push({
                     id: 0,
                     status: dummyStatus,
-                    settings:
-                        moduleSettings[0] || {
-                            startTime: "08:00",
-                            endTime: "18:00",
-                            captureInterval: "10",
-                            imageSize: "1920x1080",
-                            quality: "85",
-                            iso: "auto",
-                            format: "jpeg",
-                            aperture: "f/2.8",
-                        },
+                    settings: moduleSettings[0] || {
+                        startTime: "08:00",
+                        endTime: "18:00",
+                        captureInterval: "10",
+                        imageSize: "1920x1080",
+                        quality: "85",
+                        iso: "auto",
+                        format: "jpeg",
+                        aperture: "f/2.8",
+                    },
                     isDummy: true,
                 });
             }
@@ -147,7 +133,7 @@ export const ModuleControl = ({
                 sendCommand("global", "reboot", {});
             }
         },
-        [sendCommand],
+        [sendCommand]
     );
 
     const getStatusCounts = () => {
@@ -197,8 +183,8 @@ export const ModuleControl = ({
                                 <div>모듈</div>
                                 <div>상태</div>
                                 <div>현장 이름</div>
-                                <div className="table-header">저장 사용률</div>
-                                <div className="table-header">장비 온도</div>
+                                <div className="table-header">저장공간</div>
+                                <div className="table-header">온도</div>
                                 <div className="table-header">촬영 현황</div>
                                 <div className="table-header">마지막 촬영</div>
                                 <div className="table-header">마지막 부팅</div>

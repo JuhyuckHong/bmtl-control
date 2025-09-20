@@ -115,6 +115,10 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
         onCommand(moduleId, "sw-rollback", {});
     }, [onCommand, moduleId]);
 
+    const handleSwVersionRequest = useCallback(() => {
+        onCommand(moduleId, "sw-version", {});
+    }, [onCommand, moduleId]);
+
     const getStatusClass = useCallback((isConnected) => {
         if (isConnected === null || isConnected === undefined) {
             return "status-unknown";
@@ -159,12 +163,23 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
             return { percentage: 0, display: "--", isWarning: false };
         }
 
-        const clamped = Math.max(0, Math.min(usage, 100));
-        return {
-            percentage: clamped,
-            display: `${clamped.toFixed(1)}%`,
-            isWarning: clamped >= 80,
-        };
+        // Check if the value is likely in MB (> 100) or percentage (≤ 100)
+        if (usage > 100) {
+            // Assume it's in MB, display as MB
+            return {
+                percentage: 0, // Can't calculate percentage without total capacity
+                display: `${usage.toFixed(1)}MB`,
+                isWarning: usage >= 8000, // Warning if > 8GB
+            };
+        } else {
+            // Assume it's already in percentage
+            const clamped = Math.max(0, Math.min(usage, 100));
+            return {
+                percentage: clamped,
+                display: `${clamped.toFixed(1)}%`,
+                isWarning: clamped >= 80,
+            };
+        }
     }, [status?.storageUsed]);
 
     const temperatureInfo = useMemo(() => {
@@ -179,6 +194,18 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
         };
     }, [status?.temperature]);
 
+    const batteryInfo = useMemo(() => {
+        const value = Number(status?.battery_level);
+        if (Number.isNaN(value)) {
+            return { display: "--", isWarning: false };
+        }
+
+        return {
+            display: `${value}%`,
+            isWarning: value <= 20,
+        };
+    }, [status?.battery_level]);
+
     return (
         <div className={`camera-module-row ${status?.isConnected === false ? "disconnected" : ""}`}>
             <span className="module-id">{moduleDisplayId || moduleId.toString().padStart(2, "0")}</span>
@@ -187,13 +214,55 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                 {status?.siteName || "미지정"}
             </span>
             <div className="capacity-container">
-                <div className={`capacity-progress ${storageInfo.isWarning ? "warning" : ""}`}>
-                    <div className="capacity-progress-bar" style={{ width: `${Math.min(storageInfo.percentage, 100)}%` }}></div>
-                    <span className="capacity-text">{storageInfo.display}</span>
+                <div className={`capacity-donut ${storageInfo.isWarning ? "warning" : ""}`}>
+                    <svg width="50" height="50" viewBox="0 0 50 50" className="donut-chart">
+                        {/* 전체 원 아웃라인 */}
+                        <circle
+                            cx="25"
+                            cy="25"
+                            r="22"
+                            fill="transparent"
+                            stroke="var(--border-strong)"
+                            strokeWidth="1"
+                        />
+                        {/* 배경 원 */}
+                        <circle
+                            cx="25"
+                            cy="25"
+                            r="18"
+                            fill="transparent"
+                            stroke="var(--border)"
+                            strokeWidth="8"
+                        />
+                        {/* 진행률 원 */}
+                        <circle
+                            cx="25"
+                            cy="25"
+                            r="18"
+                            fill="transparent"
+                            stroke={storageInfo.isWarning ? "var(--error)" : "var(--info)"}
+                            strokeWidth="8"
+                            strokeDasharray={`${Math.min(storageInfo.percentage, 100) * 1.131} 113.1`}
+                            strokeDashoffset="28.275"
+                            transform="rotate(-90 25 25)"
+                        />
+                    </svg>
+                    <span className="donut-text">{Math.round(storageInfo.percentage)}%</span>
                 </div>
             </div>
-            <div className={`temperature ${temperatureInfo.isWarning ? "warning" : ""}`}>{temperatureInfo.display}</div>
+            <div className="temp-battery-stack">
+                <div className={`temperature ${temperatureInfo.isWarning ? "warning" : ""}`}>{temperatureInfo.display}</div>
+                <div className={`battery ${batteryInfo.isWarning ? "warning" : ""}`}>{batteryInfo.display}</div>
+            </div>
             <div className="capture-info-stack">
+                <div className="capture-info-item">
+                    <span className="info-label">카메라</span>
+                    <span className={`camera-power-status ${status?.cameraPowerStatus || 'unknown'}`}>
+                        {status?.cameraPowerStatus === 'on' ? '전원켜짐' :
+                         status?.cameraPowerStatus === 'off' ? '전원꺼짐' :
+                         status?.cameraPowerStatus === 'error' ? '오류' : '확인중'}
+                    </span>
+                </div>
                 <div className="capture-info-item">
                     <span className="info-label">촬영</span>
                     <span className="capture-progress">{getCaptureProgress()}</span>
@@ -220,6 +289,9 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
 
             <div className="sw-stack">
                 <div className="sw-version">{status?.swVersion || "-"}</div>
+                <button className="btn sw-version-refresh" onClick={handleSwVersionRequest} disabled={!isEnabled} title="SW 버전 새로고침">
+                    🔄
+                </button>
                 <button className="btn sw-update" onClick={handleSwUpdate} disabled={!isEnabled} title="소프트웨어 업데이트 요청">
                     업데이트
                 </button>

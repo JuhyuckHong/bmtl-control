@@ -19,8 +19,10 @@ const CAMERA_CONTROL_TOPICS = [
     "bmtl/response/wiper/+",
     // 카메라 전원 응답
     "bmtl/response/camera-on-off/+",
+    // 카메라 전원 상태 확인 응답
+    "bmtl/response/camera-power-status/+",
     // 사이트명 응답
-    "bmtl/response/sitename/+",
+    "bmtl/response/set/sitename/+",
     // SW 업데이트 응답
     "bmtl/response/sw-update/+",
     // SW 버전 응답
@@ -267,7 +269,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
             if (!mqttClient?.connected) return;
 
             const topic = `bmtl/set/sitename/${moduleId.toString().padStart(2, "0")}`;
-            const payload = JSON.stringify({ sitename: siteName });
+            const payload = JSON.stringify({ site_name: siteName });
 
             mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
                 if (err) {
@@ -322,6 +324,54 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     console.error(`❌ [MQTT Publish] Failed to send SW rollback command to module ${moduleId}:`, err);
                 } else {
                     debugLog(`🚀 [MQTT Publish] SW rollback command sent to module ${moduleId}`);
+                    debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                    debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
+                }
+            });
+        },
+        [mqttClient]
+    );
+
+    // SW 버전 요청 명령
+    const sendSwVersionRequest = useCallback(
+        (moduleId) => {
+            if (!mqttClient?.connected) return;
+
+            const topic = `bmtl/request/sw-version/${moduleId.toString().padStart(2, "0")}`;
+            const payload = JSON.stringify({});
+
+            mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
+                if (err) {
+                    console.error(`❌ [MQTT Publish] Failed to send SW version request to module ${moduleId}:`, err);
+                } else {
+                    debugLog(`🚀 [MQTT Publish] SW version request sent to module ${moduleId}`);
+                    debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
+                    debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
+                    if (recordPublish) {
+                        recordPublish(topic, payload, 2);
+                    }
+                }
+            });
+        },
+        [mqttClient]
+    );
+
+    // 카메라 전원 상태 확인 요청
+    const sendCameraPowerStatusRequest = useCallback(
+        (moduleId) => {
+            if (!mqttClient?.connected) return;
+
+            const topic = `bmtl/request/camera-power-status/${moduleId.toString().padStart(2, "0")}`;
+            const payload = JSON.stringify({});
+
+            mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
+                if (err) {
+                    console.error(`❌ [MQTT Publish] Failed to send camera power status request to module ${moduleId}:`, err);
+                } else {
+                    debugLog(`🚀 [MQTT Publish] Camera power status request sent to module ${moduleId}`);
                     debugLog(`📡 [MQTT Publish] Topic: ${topic}`);
                     debugLog(`📦 [MQTT Publish] Payload: ${payload}`);
                     if (recordPublish) {
@@ -454,12 +504,18 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     case "sw-rollback":
                         sendSwRollbackCommand(moduleId);
                         break;
+                    case "sw-version":
+                        sendSwVersionRequest(moduleId);
+                        break;
+                    case "camera-power-status":
+                        sendCameraPowerStatusRequest(moduleId);
+                        break;
                     default:
                         console.warn(`Unknown command: ${command}`);
                 }
             }
         },
-        [sendRebootCommand, sendConfigureCommand, sendGlobalRebootCommand, requestAllSettings, requestAllOptions, requestSettings, requestOptions, sendWiperCommand, sendCameraPowerCommand, sendSiteNameCommand, sendSwUpdateCommand, sendSwRollbackCommand, requestStatus, requestAllStatus]
+        [sendRebootCommand, sendConfigureCommand, sendGlobalRebootCommand, requestAllSettings, requestAllOptions, requestSettings, requestOptions, sendWiperCommand, sendCameraPowerCommand, sendSiteNameCommand, sendSwUpdateCommand, sendSwRollbackCommand, sendSwVersionRequest, sendCameraPowerStatusRequest, requestStatus, requestAllStatus]
     );
 
     // 개별 모듈 설정 요청
@@ -493,6 +549,7 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         siteName: data.site_name,
                         storageUsed: data.storage_used,
                         temperature: data.temperature, // 온도 정보 추가
+                        battery_level: data.battery_level, // 배터리 레벨 추가
                         lastCaptureTime: data.last_capture_time,
                         lastBootTime: data.last_boot_time,
                         todayTotalCaptures: data.today_total_captures,
@@ -571,16 +628,31 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
                     debugLog(`🔌 [Camera Power Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `New state: ${data.new_state || 'Unknown'}`);
-                } else if (topic.startsWith("bmtl/response/sitename/")) {
-                    // 사이트 이름 변경 응답 처리
+                } else if (topic.startsWith("bmtl/response/camera-power-status/")) {
+                    // 카메라 전원 상태 확인 응답 처리
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
-                    debugLog(`🏷️ [Sitename Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `New sitename: ${data.sitename || 'Unknown'}`);
+                    debugLog(`🔍 [Camera Power Status Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `Status: ${data.power_status || 'Unknown'}`);
+
+                    if (data.success && data.power_status) {
+                        setModuleStatuses(prev => ({
+                            ...prev,
+                            [moduleId]: {
+                                ...prev[moduleId],
+                                cameraPowerStatus: data.power_status // 'on', 'off', 'error'
+                            }
+                        }));
+                    }
+                } else if (topic.startsWith("bmtl/response/set/sitename/")) {
+                    // 사이트 이름 변경 응답 처리
+                    const moduleIdStr = topicParts[4];
+                    const moduleId = parseInt(moduleIdStr, 10);
+                    debugLog(`🏷️ [Sitename Response] Module ${moduleId}:`, data.success ? "✅ Success" : "❌ Failed", `New sitename: ${data.site_name || 'Unknown'}`);
 
                     // 성공 시 모듈 상태 업데이트
-                    if (data.success && data.sitename) {
+                    if (data.success && data.site_name) {
                         updateModuleStatus(moduleId, {
-                            siteName: data.sitename,
+                            siteName: data.site_name,
                         });
                     }
                 } else if (topic.startsWith("bmtl/response/sw-update/")) {
