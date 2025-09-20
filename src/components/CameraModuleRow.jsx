@@ -198,7 +198,6 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
         };
     }, [status?.temperature]);
 
-
     return (
         <div className={`camera-module-row ${status?.isConnected === false ? "disconnected" : ""}`}>
             <span className="module-id">{moduleDisplayId || moduleId.toString().padStart(2, "0")}</span>
@@ -227,15 +226,25 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                             r="18"
                             fill="transparent"
                             stroke={
-                                storageInfo.percentage <= 10 ? "#16a34a" :
-                                storageInfo.percentage <= 20 ? "#22c55e" :
-                                storageInfo.percentage <= 30 ? "#65a30d" :
-                                storageInfo.percentage <= 40 ? "#84cc16" :
-                                storageInfo.percentage <= 50 ? "#ca8a04" :
-                                storageInfo.percentage <= 60 ? "#eab308" :
-                                storageInfo.percentage <= 70 ? "#f59e0b" :
-                                storageInfo.percentage <= 80 ? "#f97316" :
-                                storageInfo.percentage <= 90 ? "#ea580c" : "#ef4444"
+                                storageInfo.percentage <= 10
+                                    ? "#16a34a"
+                                    : storageInfo.percentage <= 20
+                                    ? "#22c55e"
+                                    : storageInfo.percentage <= 30
+                                    ? "#65a30d"
+                                    : storageInfo.percentage <= 40
+                                    ? "#84cc16"
+                                    : storageInfo.percentage <= 50
+                                    ? "#ca8a04"
+                                    : storageInfo.percentage <= 60
+                                    ? "#eab308"
+                                    : storageInfo.percentage <= 70
+                                    ? "#f59e0b"
+                                    : storageInfo.percentage <= 80
+                                    ? "#f97316"
+                                    : storageInfo.percentage <= 90
+                                    ? "#ea580c"
+                                    : "#ef4444"
                             }
                             strokeWidth="8"
                             strokeDasharray={`${Math.min(storageInfo.percentage, 100) * 1.131} ${113.1 - Math.min(storageInfo.percentage, 100) * 1.131}`}
@@ -425,7 +434,7 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
             <div className="sw-stack">
                 <div className="sw-version">{status?.swVersion || "-"}</div>
                 <button className="btn sw-version-refresh" onClick={handleSwVersionRequest} disabled={!isEnabled} title="SW 버전 새로고침">
-                    🔄
+                    SW 버전 불러오기
                 </button>
                 <button className="btn sw-update" onClick={handleSwUpdate} disabled={!isEnabled} title="소프트웨어 업데이트 요청">
                     업데이트
