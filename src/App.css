@@ -2164,3 +2164,243 @@ button {
     color: var(--text-tertiary);
     font-style: italic;
 }
+
+/* === ERROR BOUNDARY STYLES === */
+.error-boundary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    padding: 2rem;
+    background: var(--bg-primary);
+}
+
+.error-boundary-content {
+    max-width: 600px;
+    padding: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.error-boundary-content h2 {
+    color: var(--error);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.error-message {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.error-details {
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.error-details summary {
+    cursor: pointer;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.error-details summary:hover {
+    color: var(--text-primary);
+}
+
+.error-info {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.error-info strong {
+    display: block;
+    margin: 1rem 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.error-info pre {
+    background: var(--bg-primary);
+    padding: 0.75rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.error-actions .btn {
+    min-width: 120px;
+}
+
+.error-contact {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.error-contact a {
+    color: var(--info);
+    text-decoration: none;
+}
+
+.error-contact a:hover {
+    text-decoration: underline;
+}
+
+/* 다크 모드에서 에러 바운더리 스타일 조정 */
+.dark-mode .error-boundary-content {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+/* === LOADING SPINNER STYLES === */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.loading-spinner__circle {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.loading-spinner__bounce {
+    border-radius: 50%;
+    animation: loading-bounce 1.4s infinite ease-in-out both;
+}
+
+/* 크기 변형 */
+.loading-spinner--small .loading-spinner__bounce {
+    width: 8px;
+    height: 8px;
+}
+
+.loading-spinner--medium .loading-spinner__bounce {
+    width: 12px;
+    height: 12px;
+}
+
+.loading-spinner--large .loading-spinner__bounce {
+    width: 16px;
+    height: 16px;
+}
+
+/* 색상 변형 */
+.loading-spinner--default .loading-spinner__bounce {
+    background-color: var(--text-secondary);
+}
+
+.loading-spinner--primary .loading-spinner__bounce {
+    background-color: var(--info);
+}
+
+.loading-spinner--secondary .loading-spinner__bounce {
+    background-color: var(--text-tertiary);
+}
+
+/* 애니메이션 지연 */
+.loading-spinner__bounce--1 {
+    animation-delay: -0.32s;
+}
+
+.loading-spinner__bounce--2 {
+    animation-delay: -0.16s;
+}
+
+.loading-spinner__bounce--3 {
+    animation-delay: 0s;
+}
+
+/* 로딩 메시지 */
+.loading-spinner__message {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* 오버레이 모드 */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.dark-mode .loading-overlay {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.loading-spinner--overlay {
+    position: relative;
+    z-index: 1001;
+}
+
+/* 바운스 애니메이션 */
+@keyframes loading-bounce {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 로딩 상태의 버튼들 */
+.btn--loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn--loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: button-spin 1s linear infinite;
+}
+
+@keyframes button-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

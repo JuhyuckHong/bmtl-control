@@ -4,7 +4,10 @@ import { ModuleControl } from "./pages/ModuleControl";
 import { MQTTPage } from "./pages/MQTTPage";
 import { ApiDocsPage } from "./pages/ApiDocsPage";
 import { DarkModeToggle } from "./components/DarkModeToggle";
+import ErrorBoundary from "./components/ErrorBoundary";
+import LoadingSpinner from "./components/LoadingSpinner";
 import { useMQTT } from "./hooks/useMQTT";
+import { useLoadingState } from "./hooks/useLoadingState";
 import "./App.css";
 import "./styles/api-docs.css";
 
@@ -12,6 +15,23 @@ function App() {
     const { isConnected, isConnecting, status, messages, subscribedTopics, connect, disconnect, subscribe, publish, recordExternalPublish, clearMessages, client } = useMQTT();
     const navigate = useNavigate();
     const location = useLocation();
+
+    // 로딩 상태 관리
+    const {
+        startLoading,
+        stopLoading,
+        errorLoading,
+        isLoading,
+        withLoading
+    } = useLoadingState({
+        timeout: 30000,
+        onTimeout: (key, error) => {
+            console.warn(`작업 타임아웃: ${key}`, error);
+        },
+        onError: (key, error) => {
+            console.error(`로딩 에러: ${key}`, error);
+        }
+    });
 
     // Control states - 관련된 상태들을 그룹화하여 리렌더링 최적화
     const [controlState, setControlState] = useState({
@@ -69,13 +89,19 @@ function App() {
         }));
     }, []);
 
-    const handlePublish = useCallback((e) => {
+    const handlePublish = useCallback(async (e) => {
         e.preventDefault();
         if (mqttState.publishTopic.trim() && mqttState.publishPayload.trim()) {
-            publish(mqttState.publishTopic, mqttState.publishPayload, mqttState.publishQos);
-            setMqttState(prev => ({ ...prev, publishPayload: "" }));
+            try {
+                await withLoading('mqtt-publish', async () => {
+                    publish(mqttState.publishTopic, mqttState.publishPayload, mqttState.publishQos);
+                    setMqttState(prev => ({ ...prev, publishPayload: "" }));
+                }, '메시지 발행 중...');
+            } catch (error) {
+                console.error('MQTT 발행 실패:', error);
+            }
         }
-    }, [mqttState.publishTopic, mqttState.publishPayload, mqttState.publishQos, publish]);
+    }, [mqttState.publishTopic, mqttState.publishPayload, mqttState.publishQos, publish, withLoading]);
 
     const handleSubscribe = useCallback((e) => {
         e.preventDefault();
@@ -87,19 +113,44 @@ function App() {
     // MQTT 연결 시 control 페이지 유지 (이미 /에서 control로 설정됨)
 
     return (
-        <div className="App">
-            <div className="app-header">
-                <div className="header-title">
-                    <h1>
-                        {!isConnected
-                            ? "빌드모션 제어판"
-                            : currentPage === "control"
-                                ? "모듈 제어"
-                                : currentPage === "mqtt"
-                                    ? "메시지 제어"
-                                    : "API 명세서"
-                        }
-                    </h1>
+        <ErrorBoundary
+            userFriendlyMessage="애플리케이션에서 문제가 발생했습니다. 페이지를 새로고침하거나 잠시 후 다시 시도해주세요."
+            contactInfo="support@bmtl.co.kr"
+        >
+            <div className="App">
+                {isLoading('mqtt-publish') && (
+                    <LoadingSpinner
+                        overlay
+                        message="MQTT 메시지 발행 중..."
+                        variant="primary"
+                    />
+                )}
+
+                <ErrorBoundary
+                    userFriendlyMessage="헤더 영역에서 문제가 발생했습니다."
+                    fallback={(error, errorInfo, retry) => (
+                        <div className="app-header" style={{ padding: '1rem', background: 'var(--bg-secondary)' }}>
+                            <div className="header-title">
+                                <h1>빌드모션 제어판</h1>
+                                <button onClick={retry} className="btn btn-secondary">
+                                    헤더 다시 로드
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                >
+                    <div className="app-header">
+                        <div className="header-title">
+                            <h1>
+                                {!isConnected
+                                    ? "빌드모션 제어판"
+                                    : currentPage === "control"
+                                        ? "모듈 제어"
+                                        : currentPage === "mqtt"
+                                            ? "메시지 제어"
+                                            : "API 명세서"
+                                }
+                            </h1>
                     {isConnected && currentPage === "control" && (
                         <div className="status-summary">
                             <span className="status-item">
@@ -171,9 +222,34 @@ function App() {
                     </button>
                 </div>
             </div>
+            </ErrorBoundary>
 
-            <main className={`app-main ${currentPage === "docs" ? "docs-mode" : ""}`}>
-                <Routes>
+            <ErrorBoundary
+                userFriendlyMessage="페이지 콘텐츠를 로드하는 중 문제가 발생했습니다."
+                fallback={(error, errorInfo, retry) => (
+                    <main className="app-main" style={{ padding: '2rem', textAlign: 'center' }}>
+                        <div>
+                            <h2>⚠️ 페이지 로드 실패</h2>
+                            <p>페이지를 불러오는 중 문제가 발생했습니다.</p>
+                            <button onClick={retry} className="btn btn-primary">
+                                다시 시도
+                            </button>
+                        </div>
+                    </main>
+                )}
+            >
+                <main className={`app-main ${currentPage === "docs" ? "docs-mode" : ""}`}>
+                    {isConnecting && (
+                        <div style={{ position: 'relative', minHeight: '200px' }}>
+                            <LoadingSpinner
+                                overlay
+                                message="MQTT 브로커에 연결 중..."
+                                variant="primary"
+                                size="large"
+                            />
+                        </div>
+                    )}
+                    <Routes>
                     <Route
                         path="/"
                         element={
@@ -238,7 +314,9 @@ function App() {
                     <Route path="/docs" element={<ApiDocsPage />} />
                 </Routes>
             </main>
+            </ErrorBoundary>
         </div>
+        </ErrorBoundary>
     );
 }
 
