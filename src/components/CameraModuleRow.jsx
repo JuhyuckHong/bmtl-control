@@ -262,7 +262,7 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                 <div className="capture-info-item camera-status-item">
                     <span className="info-label">카메라 상태</span>
                     <button
-                        className={`btn ${status?.cameraPowerStatus || "unknown"}`}
+                        className={`btn camera-status-button ${status?.cameraPowerStatus || "unknown"}`}
                         onClick={handleCameraPowerStatus}
                         disabled={!isEnabled || status?.cameraPowerStatus === "checking"}
                         title={

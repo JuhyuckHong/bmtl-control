@@ -2167,32 +2167,57 @@ button {
     font-weight: 500;
 }
 
-/* Camera Status Button - status-specific colors for capture-info-stack buttons */
-.capture-info-stack .btn.on {
+/* Camera Status Button - same as control buttons but with status colors */
+.camera-status-button {
+    padding: 2px 4px;
+    font-size: 0.7rem;
+    min-height: 16px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--surface);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.1s ease;
+    width: 100%;
+    text-align: center;
+}
+
+.camera-status-button:hover:not(:disabled) {
+    background: var(--bg-secondary);
+    border-color: var(--text-secondary);
+}
+
+.camera-status-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Status-specific colors override default styles */
+.camera-status-button.on {
     background-color: var(--success);
     color: white;
     border-color: var(--success);
 }
 
-.capture-info-stack .btn.off {
+.camera-status-button.off {
     background-color: var(--error);
     color: white;
     border-color: var(--error);
 }
 
-.capture-info-stack .btn.error {
+.camera-status-button.error {
     background-color: var(--error);
     color: white;
     border-color: var(--error);
 }
 
-.capture-info-stack .btn.checking {
+.camera-status-button.checking {
     background-color: var(--info);
     color: white;
     border-color: var(--info);
 }
 
-.capture-info-stack .btn.unknown {
+.camera-status-button.unknown {
     background-color: var(--warning);
     color: var(--text-primary);
     border-color: var(--warning);
