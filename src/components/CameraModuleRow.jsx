@@ -147,7 +147,7 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
         const minute = date.getMinutes().toString().padStart(2, "0");
         const second = date.getSeconds().toString().padStart(2, "0");
 
-        return `${year}.${month}.${day} ${hour}:${minute}:${second}`;
+        return `${year}/${month}/${day} ${hour}:${minute}:${second}`;
     }, []);
 
     const captureProgress = useMemo(() => {
@@ -259,7 +259,7 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                 <div className={`battery ${batteryInfo.isWarning ? "warning" : ""}`}>{batteryInfo.display}</div>
             </div>
             <div className="capture-info-stack">
-                <div className="capture-info-item">
+                <div className="capture-info-item camera-status-item">
                     <span className="info-label">카메라</span>
                     <span className={`camera-power-status ${status?.cameraPowerStatus || 'unknown'}`}>
                         {status?.cameraPowerStatus === 'on' ? '전원켜짐' :
