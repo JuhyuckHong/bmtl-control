@@ -929,12 +929,14 @@ button {
     flex: 1;
     overflow-x: auto;
     overflow-y: auto;
+    min-width: 0;
 }
 
 .modules-table-content {
     display: flex;
     flex-direction: column;
-    min-width: 100%;
+    min-width: 1200px;
+    width: 100%;
 }
 
 .modules-table-header,
