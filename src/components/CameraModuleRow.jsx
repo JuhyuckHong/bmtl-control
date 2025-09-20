@@ -62,6 +62,7 @@ const CameraModuleRowComponent = ({
   }, [initialSettings])
 
   const [isSiteNameModalOpen, setIsSiteNameModalOpen] = useState(false)
+  const [loadType, setLoadType] = useState('current') // 'current' | 'options'
   const handleSettingChange = useCallback((key, value) => {
     setSettings((prev) => ({
       ...prev,
@@ -114,6 +115,14 @@ const CameraModuleRowComponent = ({
   const handleLoadOptions = useCallback(() => {
     onCommand(moduleId, 'options_request', {})
   }, [onCommand, moduleId])
+
+  const handleLoad = useCallback(() => {
+    if (loadType === 'options') {
+      handleLoadOptions()
+    } else {
+      handleLoadSettings()
+    }
+  }, [loadType, handleLoadOptions, handleLoadSettings])
 
   const handleSiteNameChange = useCallback(() => {
     setIsSiteNameModalOpen(true)
@@ -213,6 +222,8 @@ const CameraModuleRowComponent = ({
       isWarning: value >= 50,
     }
   }, [status?.temperature])
+
+  const isDirty = useMemo(() => !areSettingsEqual(settings, initialSettings), [settings, initialSettings])
 
   return (
     <div
@@ -633,27 +644,31 @@ const CameraModuleRowComponent = ({
 
       <div className='settings-stack'>
         <div className='settings-stack-inner'>
-          <button
-            className='btn load'
-            onClick={handleLoadSettings}
-            disabled={!isEnabled}
-            title='현재 설정 불러오기'
-          >
-            현재 설정 불러오기
-          </button>
-          <button
-            className='btn load'
-            onClick={handleLoadOptions}
-            disabled={!isEnabled}
-            title='사용 가능한 옵션 불러오기'
-          >
-            카메라 옵션 불러오기
-          </button>
+          <div className='settings-load-row'>
+            <select
+              value={loadType}
+              onChange={(e) => setLoadType(e.target.value)}
+              disabled={!isEnabled}
+              title='불러올 항목 선택'
+              className='settings-load-select'
+            >
+              <option value='current'>현재 설정</option>
+              <option value='options'>카메라 옵션</option>
+            </select>
+            <button
+              className='btn load'
+              onClick={handleLoad}
+              disabled={!isEnabled}
+              title='선택한 항목 불러오기'
+            >
+              불러오기
+            </button>
+          </div>
           <button
             className='btn apply'
             onClick={handleApplySettings}
-            disabled={!isEnabled}
-            title='변경 사항 적용'
+            disabled={!isEnabled || !isDirty}
+            title={isDirty ? '변경 사항 적용' : '변경된 항목이 없습니다'}
           >
             변경 옵션 적용
           </button>

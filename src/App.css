@@ -1040,6 +1040,14 @@ button {
   gap: 1px;
 }
 
+/* 설정관리: 불러오기 선택 + 버튼 가로 배열 */
+.settings-load-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
 .settings-stack .btn {
   padding: 1px 3px;
   font-size: 0.65rem;
