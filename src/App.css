@@ -877,6 +877,11 @@ button {
   text-align: center;
 }
 
+/* 줄무늬(지그재그) 행 배경: 가독성 향상 */
+.modules-table-content .camera-module-row:nth-child(even) {
+  background: var(--bg-secondary);
+}
+
 /* === CAMERA MODULE ROW COMPONENTS === */
 .capacity-container {
   display: flex;
