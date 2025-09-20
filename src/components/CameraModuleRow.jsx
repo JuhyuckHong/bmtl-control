@@ -80,6 +80,10 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
         onCommand(moduleId, "camera-on-off", {});
     }, [onCommand, moduleId]);
 
+    const handleCameraPowerStatus = useCallback(() => {
+        onCommand(moduleId, "camera-power-status", {});
+    }, [onCommand, moduleId]);
+
     const handleApplySettings = useCallback(() => {
         onCommand(moduleId, "configure", settings);
     }, [onCommand, moduleId, settings]);
@@ -262,6 +266,14 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                          status?.cameraPowerStatus === 'off' ? '전원꺼짐' :
                          status?.cameraPowerStatus === 'error' ? '오류' : '확인중'}
                     </span>
+                    <button
+                        className="btn camera-power-status-refresh"
+                        onClick={handleCameraPowerStatus}
+                        disabled={!isEnabled}
+                        title="카메라 전원 상태 확인 요청"
+                    >
+                        상태 확인
+                    </button>
                 </div>
                 <div className="capture-info-item">
                     <span className="info-label">촬영</span>
