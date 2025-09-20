@@ -102,6 +102,19 @@ export const useCameraStatusRefactored = (mqttClient, subscribedTopics, recordPu
                     updateModuleSettings(moduleId, data);
                 } else if (topic.includes('bmtl/response/options/')) {
                     updateModuleOptions(moduleId, data);
+                } else if (topic.includes('bmtl/response/sw-version/')) {
+                    // SW 버전 응답 처리
+                    const version = data.version || data.commit_hash || data.swVersion || data.sw_version;
+                    debugLog(`📋 [SW Version Response] Module ${moduleId}:`, `Version: ${version || 'Unknown'}`, 'Raw data:', data);
+
+                    if (version) {
+                        updateModuleStatus(moduleId, {
+                            swVersion: version,
+                            isConnected: true
+                        });
+                    } else {
+                        console.warn(`⚠️ [SW Version] No version field found for module ${moduleId}:`, data);
+                    }
                 } else if (topic.includes('bmtl/response/')) {
                     // 기타 응답들은 상태 업데이트
                     updateModuleStatus(moduleId, {

@@ -664,13 +664,18 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                     // SW 버전 응답 처리
                     const moduleIdStr = topicParts[3];
                     const moduleId = parseInt(moduleIdStr, 10);
-                    debugLog(`📋 [SW Version Response] Module ${moduleId}:`, `Commit Hash: ${data.commit_hash || 'Unknown'}`);
+
+                    // 여러 가능한 필드명 확인
+                    const version = data.version || data.commit_hash || data.swVersion || data.sw_version;
+                    debugLog(`📋 [SW Version Response] Module ${moduleId}:`, `Version: ${version || 'Unknown'}`, 'Raw data:', data);
 
                     // SW 버전 정보 업데이트
-                    if (data.commit_hash) {
+                    if (version) {
                         updateModuleStatus(moduleId, {
-                            swVersion: data.commit_hash,
+                            swVersion: version,
                         });
+                    } else {
+                        console.warn(`⚠️ [SW Version] No version field found for module ${moduleId}:`, data);
                     }
                 } else if (topic.startsWith("bmtl/response/sw-rollback/")) {
                     // SW 롤백 응답 처리
