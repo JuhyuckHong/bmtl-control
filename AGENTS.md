@@ -1,34 +1,45 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
+이 문서는 본 저장소의 구조, 빌드/개발 절차, 코드 스타일, 테스트, 협업 규칙을 간결히 안내합니다.
 
-This Vite-powered React app keeps runtime source in `src/`. `main.jsx` boots `App.jsx`; route-level views live in `src/pages/` (for example `ModuleControl.jsx`, `MQTTPage.jsx`). Shared UI stays in `src/components/`, data helpers in `src/hooks/`, and shared state in `src/contexts/`. Configuration constants sit in `src/constants/`; shared styles live under `src/styles/`. Static assets belong in `public/`, and Vite writes production builds to `dist/`, which should remain throwaway.
+## Project Structure & Module Organization
+- 런타임 소스는 `src/`에 위치. `main.jsx`가 `App.jsx`를 부팅합니다.
+- 페이지: `src/pages/` (예: `ModuleControl.jsx`, `MQTTPage.jsx`).
+- 공용 UI: `src/components/`; 데이터 헬퍼: `src/hooks/`; 전역 상태: `src/contexts/`.
+- 상수: `src/constants/`; 공유 스타일: `src/styles/`.
+- 정적 에셋: `public/`; 프로덕션 빌드 산출물: `dist/`(일회성, 추적 불필요).
+- 테스트는 코드 옆(`FeatureName.test.jsx`) 또는 `src/__tests__/`에 배치합니다.
 
 ## Build, Test, and Development Commands
-
-- `npm install`: restore dependencies whenever `package.json` changes.
-- `npm run dev`: start the Vite dev server on http://localhost:5173 with hot reloading.
-- `npm run build`: produce the optimized bundle in `dist/`; run before packaging or deploying.
-- `npm run preview`: serve the latest build to validate production behavior locally.
-  Bring your own test script (see below) until we wire Vitest into `package.json`.
+- `npm install`: 의존성 복원.
+- `npm run dev`: Vite 개발 서버 시작(`http://localhost:5173`).
+- `npm run build`: 최적화 번들 생성(`dist/`).
+- `npm run preview`: 최신 빌드 서빙(프로덕션 동작 검증).
+- 테스트: 아직 스크립트 미연결. PR에서 Vitest 도입 후 `npm test` 또는 `npx vitest`를 사용하세요.
 
 ## Coding Style & Naming Conventions
-
-Follow 4-space indentation, double quotes, and trailing semicolons. React components and files use PascalCase (`DarkModeToggle.jsx`), hooks use camelCase with a `use` prefix (`useMQTT.js`), and constant groups stay in UPPER_SNAKE_CASE. Prefer named exports for reusable elements; reserve default exports for pages. Keep CSS class names kebab-case and shareable styles in `src/styles/`.
+- 들여쓰기 4칸, 문자열은 double quotes, 세미콜론 유지.
+- 컴포넌트/파일: PascalCase (`DarkModeToggle.jsx`).
+- 훅: `use` 접두의 camelCase (`useMQTT.js`).
+- 상수: UPPER_SNAKE_CASE; CSS 클래스: kebab-case.
+- 재사용 요소는 named export, 페이지는 default export를 권장.
 
 ## Testing Guidelines
-
-Automated tests are not yet committed; new work should introduce Vitest plus React Testing Library. Place suites beside code (`FeatureName.test.jsx`) or mirror the structure under `src/__tests__/`. Focus on MQTT connection flows and command publishing, mocking broker calls to keep tests hermetic. Target about 80 percent line coverage for new modules and note intentional gaps in the pull request.
+- Vitest + React Testing Library 도입 권장.
+- 핵심 시나리오: MQTT 연결 흐름과 명령 발행; 브로커 호출은 mock 처리.
+- 커버리지 목표: 신규 모듈 기준 80% 내외. 의도적 공백은 PR에 명시.
+- 파일 명명: `FeatureName.test.jsx`; 위치는 코드 옆 또는 `src/__tests__/`.
 
 ## Commit & Pull Request Guidelines
-
-Recent history favors single-sentence, imperative commit subjects ("Consolidate camera MQTT topic management"). Keep bodies optional but include rationale for behavioral changes. For pull requests, supply a concise summary, screenshots or GIFs for UI shifts, linked issue IDs, and a checklist of manual or automated tests run. Use draft pull requests while features evolve.
+- 커밋 제목: 한 문장, 명령형(예: "Consolidate camera MQTT topic management").
+- 본문은 선택이지만 동작 변경의 이유를 간단히 설명.
+- PR: 간단 요약, 스크린샷/GIF, 연결 이슈 ID, 수행 테스트(수동/자동) 체크리스트 포함.
+- 기능 진행 중에는 Draft PR을 활용하세요.
 
 ## Environment & Configuration
+- `.env.example`를 `.env`로 복사하고 브로커 호스트/포트/자격을 설정.
+- 비밀은 커밋하지 말고 로컬/CI 변수로 관리. 환경 키 추가 시 `.env.example`와 README를 함께 갱신.
 
-Copy `.env.example` to `.env` and provide broker host, port, and credentials before running `npm run dev`. Never commit secrets; rely on local overrides or CI variables. When you add environment keys, update `.env.example` along with any setup notes in the README.
+## Communication
+- 기본 문서화와 커뮤니케이션은 한국어를 사용합니다. 영어 요약은 요청 시 제공하세요.
 
-## Communication Guidelines
-
-Default to Korean in all written responses and discussions, matching user tone and formality unless they explicitly request another language. Provide English summaries only when asked, and document any language-specific decisions in pull requests or issue comments.
-한글로 대답하세요.
