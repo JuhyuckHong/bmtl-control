@@ -2199,10 +2199,22 @@ button {
     border-color: var(--success);
 }
 
+.camera-status-button.on:hover:not(:disabled) {
+    background-color: var(--success);
+    border-color: var(--success);
+    opacity: 0.9;
+}
+
 .camera-status-button.off {
     background-color: var(--error);
     color: white;
     border-color: var(--error);
+}
+
+.camera-status-button.off:hover:not(:disabled) {
+    background-color: var(--error);
+    border-color: var(--error);
+    opacity: 0.9;
 }
 
 .camera-status-button.error {
@@ -2211,16 +2223,34 @@ button {
     border-color: var(--error);
 }
 
+.camera-status-button.error:hover:not(:disabled) {
+    background-color: var(--error);
+    border-color: var(--error);
+    opacity: 0.9;
+}
+
 .camera-status-button.checking {
     background-color: var(--info);
     color: white;
     border-color: var(--info);
 }
 
+.camera-status-button.checking:hover:not(:disabled) {
+    background-color: var(--info);
+    border-color: var(--info);
+    opacity: 0.9;
+}
+
 .camera-status-button.unknown {
     background-color: var(--warning);
     color: var(--text-primary);
     border-color: var(--warning);
+}
+
+.camera-status-button.unknown:hover:not(:disabled) {
+    background-color: var(--warning);
+    border-color: var(--warning);
+    opacity: 0.9;
 }
 
 /* === ERROR BOUNDARY STYLES === */
