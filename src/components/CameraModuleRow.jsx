@@ -250,7 +250,11 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                     <span className={`battery ${batteryInfo.isWarning ? "warning" : ""}`}>{batteryInfo.display}</span>
                 </div>
                 <div className="capture-info-item">
-                    <span className="info-label">마지막 부팅</span>
+                    <span className="info-label">
+                        마지막
+                        <br />
+                        부팅
+                    </span>
                     <span className="last-boot-time">{formatDateTime(status?.lastBootTime)}</span>
                 </div>
             </div>
@@ -274,14 +278,14 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                         }
                     >
                         {status?.cameraPowerStatus === "on"
-                            ? "전원켜짐"
+                            ? "정상"
                             : status?.cameraPowerStatus === "off"
                             ? "전원꺼짐"
                             : status?.cameraPowerStatus === "error"
                             ? "오류"
                             : status?.cameraPowerStatus === "checking"
                             ? "확인중..."
-                            : "상태 확인"}
+                            : "카메라 상태 확인"}
                     </button>
                 </div>
                 <div className="capture-info-item">
@@ -289,7 +293,11 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                     <span className="capture-progress">{captureProgress}</span>
                 </div>
                 <div className="capture-info-item">
-                    <span className="info-label">마지막<br />촬영</span>
+                    <span className="info-label">
+                        마지막
+                        <br />
+                        촬영
+                    </span>
                     <span className="last-capture-time">{formatDateTime(status?.lastCaptureTime)}</span>
                 </div>
                 <div className="capture-info-item">
