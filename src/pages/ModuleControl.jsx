@@ -184,7 +184,7 @@ export const ModuleControl = ({ mqttClient, connect, isConnecting, isConnected, 
                                 <div>상태</div>
                                 <div>현장 이름</div>
                                 <div className="table-header">저장공간</div>
-                                <div className="table-header">디바이스 상태</div>
+                                <div className="table-header">디바이스</div>
                                 <div className="table-header">촬영 현황</div>
                                 <div className="table-header">모듈 제어</div>
                                 <div className="table-header">소프트웨어</div>

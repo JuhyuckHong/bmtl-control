@@ -1217,6 +1217,14 @@ button {
     justify-content: center;
 }
 
+/* Device status stack - similar to capture-info-stack */
+.device-status-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    align-items: center;
+}
+
 /* 카메라 상태 아이템은 세로 배치 */
 .capture-info-item.camera-status-item {
     flex-direction: column;
@@ -2139,10 +2147,11 @@ button {
 
 .last-boot-time,
 .last-capture-time {
-    font-size: 0.6rem;
-    color: var(--text-tertiary);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
     text-align: center;
-    line-height: 1.3;
+    line-height: 1.2;
+    font-weight: 500;
 }
 
 /* Camera Status Button - unified with control buttons style */

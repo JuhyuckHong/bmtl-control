@@ -108,7 +108,7 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
             onCommand(moduleId, "sitename", { sitename: newSiteName });
             setIsSiteNameModalOpen(false);
         },
-        [onCommand, moduleId],
+        [onCommand, moduleId]
     );
 
     const handleSwUpdate = useCallback(() => {
@@ -221,23 +221,9 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                 <div className={`capacity-donut ${storageInfo.isWarning ? "warning" : ""}`}>
                     <svg width="50" height="50" viewBox="0 0 50 50" className="donut-chart">
                         {/* 전체 원 아웃라인 */}
-                        <circle
-                            cx="25"
-                            cy="25"
-                            r="22"
-                            fill="transparent"
-                            stroke="var(--border-strong)"
-                            strokeWidth="1"
-                        />
+                        <circle cx="25" cy="25" r="22" fill="transparent" stroke="var(--border-strong)" strokeWidth="1" />
                         {/* 배경 원 */}
-                        <circle
-                            cx="25"
-                            cy="25"
-                            r="18"
-                            fill="transparent"
-                            stroke="var(--border)"
-                            strokeWidth="8"
-                        />
+                        <circle cx="25" cy="25" r="18" fill="transparent" stroke="var(--border)" strokeWidth="8" />
                         {/* 진행률 원 */}
                         <circle
                             cx="25"
@@ -254,30 +240,48 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                     <span className="donut-text">{Math.round(storageInfo.percentage)}%</span>
                 </div>
             </div>
-            <div className="temp-battery-stack">
-                <div className={`temperature ${temperatureInfo.isWarning ? "warning" : ""}`}>{temperatureInfo.display}</div>
-                <div className={`battery ${batteryInfo.isWarning ? "warning" : ""}`}>{batteryInfo.display}</div>
-                <div className="last-boot-time">{formatDateTime(status?.lastBootTime)}</div>
+            <div className="device-status-stack">
+                <div className="capture-info-item">
+                    <span className="info-label">온도</span>
+                    <span className={`temperature ${temperatureInfo.isWarning ? "warning" : ""}`}>{temperatureInfo.display}</span>
+                </div>
+                <div className="capture-info-item">
+                    <span className="info-label">배터리</span>
+                    <span className={`battery ${batteryInfo.isWarning ? "warning" : ""}`}>{batteryInfo.display}</span>
+                </div>
+                <div className="capture-info-item">
+                    <span className="info-label">마지막 부팅</span>
+                    <span className="last-boot-time">{formatDateTime(status?.lastBootTime)}</span>
+                </div>
             </div>
             <div className="capture-info-stack">
                 <div className="capture-info-item camera-status-item">
                     <span className="info-label">카메라 상태</span>
                     <button
-                        className={`btn camera-status-button ${status?.cameraPowerStatus || 'unknown'}`}
+                        className={`btn camera-status-button ${status?.cameraPowerStatus || "unknown"}`}
                         onClick={handleCameraPowerStatus}
-                        disabled={!isEnabled || status?.cameraPowerStatus === 'checking'}
+                        disabled={!isEnabled || status?.cameraPowerStatus === "checking"}
                         title={
-                            status?.cameraPowerStatus === 'on' ? '카메라 전원 켜져있음 (클릭하여 재확인)' :
-                            status?.cameraPowerStatus === 'off' ? '카메라 전원 꺼져있음 (클릭하여 재확인)' :
-                            status?.cameraPowerStatus === 'error' ? '카메라 오류 상태 (클릭하여 재확인)' :
-                            status?.cameraPowerStatus === 'checking' ? '상태 확인 중...' :
-                            '카메라 상태를 확인하려면 클릭하세요'
+                            status?.cameraPowerStatus === "on"
+                                ? "카메라 전원 켜져있음 (클릭하여 재확인)"
+                                : status?.cameraPowerStatus === "off"
+                                ? "카메라 전원 꺼져있음 (클릭하여 재확인)"
+                                : status?.cameraPowerStatus === "error"
+                                ? "카메라 오류 상태 (클릭하여 재확인)"
+                                : status?.cameraPowerStatus === "checking"
+                                ? "상태 확인 중..."
+                                : "카메라 상태를 확인하려면 클릭하세요"
                         }
                     >
-                        {status?.cameraPowerStatus === 'on' ? '전원켜짐' :
-                         status?.cameraPowerStatus === 'off' ? '전원꺼짐' :
-                         status?.cameraPowerStatus === 'error' ? '오류' :
-                         status?.cameraPowerStatus === 'checking' ? '확인중...' : '상태 확인 필요'}
+                        {status?.cameraPowerStatus === "on"
+                            ? "전원켜짐"
+                            : status?.cameraPowerStatus === "off"
+                            ? "전원꺼짐"
+                            : status?.cameraPowerStatus === "error"
+                            ? "오류"
+                            : status?.cameraPowerStatus === "checking"
+                            ? "확인중..."
+                            : "상태 확인"}
                     </button>
                 </div>
                 <div className="capture-info-item">
@@ -285,7 +289,7 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                     <span className="capture-progress">{captureProgress}</span>
                 </div>
                 <div className="capture-info-item">
-                    <span className="info-label">마지막 촬영</span>
+                    <span className="info-label">마지막<br />촬영</span>
                     <span className="last-capture-time">{formatDateTime(status?.lastCaptureTime)}</span>
                 </div>
                 <div className="capture-info-item">
