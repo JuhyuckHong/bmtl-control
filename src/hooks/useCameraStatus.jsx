@@ -549,7 +549,6 @@ export const useCameraStatus = (mqttClient, subscribedTopics, recordPublish) => 
                         siteName: data.site_name,
                         storageUsed: data.storage_used,
                         temperature: data.temperature, // 온도 정보 추가
-                        battery_level: data.battery_level, // 배터리 레벨 추가
                         lastCaptureTime: data.last_capture_time,
                         lastBootTime: data.last_boot_time,
                         todayTotalCaptures: data.today_total_captures,

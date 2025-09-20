@@ -198,17 +198,6 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
         };
     }, [status?.temperature]);
 
-    const batteryInfo = useMemo(() => {
-        const value = Number(status?.battery_level);
-        if (Number.isNaN(value)) {
-            return { display: "--", isWarning: false };
-        }
-
-        return {
-            display: `${value}%`,
-            isWarning: value <= 20,
-        };
-    }, [status?.battery_level]);
 
     return (
         <div className={`camera-module-row ${status?.isConnected === false ? "disconnected" : ""}`}>
@@ -261,10 +250,6 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                 <div className="capture-info-item">
                     <span className="info-label">온도</span>
                     <span className={`temperature ${temperatureInfo.isWarning ? "warning" : ""}`}>{temperatureInfo.display}</span>
-                </div>
-                <div className="capture-info-item">
-                    <span className="info-label">배터리</span>
-                    <span className={`battery ${batteryInfo.isWarning ? "warning" : ""}`}>{batteryInfo.display}</span>
                 </div>
                 <div className="capture-info-item">
                     <span className="info-label">
