@@ -306,31 +306,6 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                 </div>
             </div>
 
-            <div className="control-buttons">
-                <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled} title="모듈 재부팅">
-                    재부팅
-                </button>
-                <button className="btn wiper" onClick={handleWiper} disabled={!isEnabled} title="와이퍼 30초 작동">
-                    와이퍼
-                </button>
-                <button className="btn camera-power" onClick={handleCameraPower} disabled={!isEnabled} title="카메라 전원 토글">
-                    카메라 전원
-                </button>
-            </div>
-
-            <div className="sw-stack">
-                <div className="sw-version">{status?.swVersion || "-"}</div>
-                <button className="btn sw-version-refresh" onClick={handleSwVersionRequest} disabled={!isEnabled} title="SW 버전 새로고침">
-                    🔄
-                </button>
-                <button className="btn sw-update" onClick={handleSwUpdate} disabled={!isEnabled} title="소프트웨어 업데이트 요청">
-                    업데이트
-                </button>
-                <button className="btn sw-rollback" onClick={handleSwRollback} disabled={!isEnabled} title="이전 버전으로 롤백">
-                    롤백
-                </button>
-            </div>
-
             <div className="time-settings-stack">
                 <div className="setting-group">
                     <span className="setting-label">시작</span>
@@ -431,6 +406,31 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                         <span className="time-unit">분</span>
                     </div>
                 </div>
+            </div>
+
+            <div className="control-buttons">
+                <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled} title="모듈 재부팅">
+                    재부팅
+                </button>
+                <button className="btn wiper" onClick={handleWiper} disabled={!isEnabled} title="와이퍼 30초 작동">
+                    와이퍼
+                </button>
+                <button className="btn camera-power" onClick={handleCameraPower} disabled={!isEnabled} title="카메라 전원 토글">
+                    카메라 전원
+                </button>
+            </div>
+
+            <div className="sw-stack">
+                <div className="sw-version">{status?.swVersion || "-"}</div>
+                <button className="btn sw-version-refresh" onClick={handleSwVersionRequest} disabled={!isEnabled} title="SW 버전 새로고침">
+                    🔄
+                </button>
+                <button className="btn sw-update" onClick={handleSwUpdate} disabled={!isEnabled} title="소프트웨어 업데이트 요청">
+                    업데이트
+                </button>
+                <button className="btn sw-rollback" onClick={handleSwRollback} disabled={!isEnabled} title="이전 버전으로 롤백">
+                    롤백
+                </button>
             </div>
 
             <div className="camera-settings-stack">

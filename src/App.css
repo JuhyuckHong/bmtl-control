@@ -948,9 +948,9 @@ button {
         minmax(60px, 1fr) /* 저장공간 */
         minmax(80px, 1fr) /* 디바이스 상태 (온도+배터리+마지막부팅) */
         minmax(80px, 1fr) /* 촬영 현황 (카메라상태+촬영+마지막촬영+실패) */
+        minmax(80px, 1fr) /* 운영 시간 */
         minmax(80px, 1fr) /* 모듈 제어 */
         minmax(80px, 1fr) /* 소프트웨어 */
-        minmax(80px, 1fr) /* 운영 시간 */
         minmax(100px, 1.2fr) /* 카메라 설정 */
         minmax(80px, 1fr); /* 설정 관리 */
     gap: 1rem;
