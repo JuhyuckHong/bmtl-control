@@ -1,3 +1,4 @@
+import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import ErrorBoundary from '../ErrorBoundary'
@@ -26,7 +27,7 @@ describe('ErrorBoundary', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     render(
-      <ErrorBoundary userFriendlyMessage="Something went wrong">
+      <ErrorBoundary userFriendlyMessage='Something went wrong'>
         <ThrowError shouldError={true} />
       </ErrorBoundary>
     )

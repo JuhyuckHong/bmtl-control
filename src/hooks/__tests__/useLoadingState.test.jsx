@@ -24,7 +24,7 @@ describe('useLoadingState', () => {
       loading: true,
       message: 'Loading test...',
       startTime: expect.any(Number),
-      error: null
+      error: null,
     })
     expect(result.current.isAnyLoading).toBe(true)
     expect(result.current.loadingCount).toBe(1)
@@ -42,7 +42,9 @@ describe('useLoadingState', () => {
     })
 
     expect(result.current.loadingStates['test-key'].loading).toBe(false)
-    expect(result.current.loadingStates['test-key'].result).toEqual({ data: 'success' })
+    expect(result.current.loadingStates['test-key'].result).toEqual({
+      data: 'success',
+    })
     expect(result.current.loadingStates['test-key'].duration).toBeGreaterThan(0)
     expect(result.current.isAnyLoading).toBe(false)
   })
@@ -100,7 +102,11 @@ describe('useLoadingState', () => {
 
     let promiseResult
     await act(async () => {
-      promiseResult = await result.current.withLoading('test-key', mockPromise, 'Loading...')
+      promiseResult = await result.current.withLoading(
+        'test-key',
+        mockPromise,
+        'Loading...'
+      )
     })
 
     expect(promiseResult).toBe('success')
@@ -142,10 +148,12 @@ describe('useLoadingState', () => {
     vi.useFakeTimers()
 
     const onTimeout = vi.fn()
-    const { result } = renderHook(() => useLoadingState({
-      timeout: 1000,
-      onTimeout
-    }))
+    const { result } = renderHook(() =>
+      useLoadingState({
+        timeout: 1000,
+        onTimeout,
+      })
+    )
 
     act(() => {
       result.current.startLoading('test-key')
