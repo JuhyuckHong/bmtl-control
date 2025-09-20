@@ -826,19 +826,18 @@ button {
 .modules-table-header,
 .camera-module-row {
   display: grid;
-  /* 첫 두 열은 고정폭으로 두어 sticky 처리 용이 */
   grid-template-columns:
-    64px /* 모듈 */
-    64px /* 상태 */
-    minmax(140px, 1.2fr) /* 현장 이름 */
-    minmax(100px, 0.8fr) /* 저장공간 */
-    minmax(140px, 1fr) /* 디바이스 상태 */
-    minmax(140px, 1fr) /* 촬영 현황 */
-    minmax(120px, 1fr) /* 운영 시간 */
-    minmax(120px, 1fr) /* 모듈 제어 */
-    minmax(120px, 1fr) /* 소프트웨어 */
-    minmax(180px, 1.2fr) /* 카메라 설정 */
-    minmax(120px, 1fr); /* 설정 관리 */
+    minmax(40px, 0.5fr) /* 모듈 */
+    minmax(40px, 0.5fr) /* 상태 */
+    minmax(80px, 1fr) /* 현장 이름 */
+    minmax(60px, 0.8fr) /* 저장공간 */
+    minmax(80px, 1fr) /* 디바이스 상태 (온도+배터리+마지막부팅) */
+    minmax(80px, 1fr) /* 촬영 현황 (카메라상태+촬영+마지막촬영+실패) */
+    minmax(80px, 1fr) /* 운영 시간 */
+    minmax(80px, 1fr) /* 모듈 제어 */
+    minmax(80px, 1fr) /* 소프트웨어 */
+    minmax(100px, 1.2fr) /* 카메라 설정 */
+    minmax(80px, 1fr); /* 설정 관리 */
   gap: 1rem;
   padding: 0.375rem;
   border-bottom: 1px solid var(--border);
@@ -856,31 +855,6 @@ button {
   white-space: normal;
   line-height: 1.2;
   padding: 0 0.25rem;
-}
-
-/* 첫 두 열 고정(sticky)으로 가로 스크롤 시 가독성 개선 */
-.modules-table-header > :nth-child(1),
-.camera-module-row > :nth-child(1) {
-  position: sticky;
-  left: 0;
-  background: var(--surface);
-  z-index: 3;
-}
-
-.modules-table-header > :nth-child(2),
-.camera-module-row > :nth-child(2) {
-  position: sticky;
-  left: calc(64px + 1rem); /* 첫 열(64px) + gap(1rem) */
-  background: var(--surface);
-  z-index: 2;
-}
-
-/* 헤더 시각 구분 강화 */
-.modules-table-header {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  box-shadow: 0 1px 0 0 var(--border);
 }
 
 .modules-table-scrollable > *,
@@ -901,11 +875,6 @@ button {
   cursor: pointer;
   transition: all 0.1s ease;
   text-align: center;
-}
-
-/* 지그재그(줄무늬) 행 배경으로 가독성 향상 */
-.modules-table-content .camera-module-row:nth-child(even) {
-  background: var(--bg-secondary);
 }
 
 /* === CAMERA MODULE ROW COMPONENTS === */
@@ -1383,23 +1352,6 @@ button {
 
 .camera-module-row:hover {
   background: var(--bg-secondary);
-}
-
-/* 오프라인 행 강조 */
-.camera-module-row.disconnected {
-  background: rgba(239, 68, 68, 0.06); /* error 색상 틴트 */
-}
-.dark-mode .camera-module-row.disconnected {
-  background: rgba(244, 67, 54, 0.12);
-}
-
-/* 현장 이름 셀: 길어질 때 말줄임표 처리 */
-.site-name {
-  display: block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .time-input {
