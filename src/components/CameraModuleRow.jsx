@@ -257,6 +257,7 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
             <div className="temp-battery-stack">
                 <div className={`temperature ${temperatureInfo.isWarning ? "warning" : ""}`}>{temperatureInfo.display}</div>
                 <div className={`battery ${batteryInfo.isWarning ? "warning" : ""}`}>{batteryInfo.display}</div>
+                <div className="last-boot-time">{formatDateTime(status?.lastBootTime)}</div>
             </div>
             <div className="capture-info-stack">
                 <div className="capture-info-item camera-status-item">
@@ -284,14 +285,13 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                     <span className="capture-progress">{captureProgress}</span>
                 </div>
                 <div className="capture-info-item">
+                    <span className="info-label">마지막 촬영</span>
+                    <span className="last-capture-time">{formatDateTime(status?.lastCaptureTime)}</span>
+                </div>
+                <div className="capture-info-item">
                     <span className="info-label">실패</span>
                     <span className="missed-captures">{missedCaptures}</span>
                 </div>
-            </div>
-            <div className="recent-activity">
-                <div className="activity-title">최근 활동</div>
-                <div className="activity-item">촬영: {formatDateTime(status?.lastCaptureTime)}</div>
-                <div className="activity-item">부팅: {formatDateTime(status?.lastBootTime)}</div>
             </div>
 
             <div className="control-buttons">
