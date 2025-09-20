@@ -43,7 +43,7 @@ const CaptureInfoDisplay = ({ status, onCameraPowerStatus, isEnabled }) => {
     return (
         <>
             <div className="capture-info-stack">
-                <div className="capture-info-item">
+                <div className="capture-info-item camera-status-item">
                     <span className="info-label">카메라</span>
                     <span className={`camera-power-status ${status?.cameraPowerStatus || 'unknown'}`}>
                         {status?.cameraPowerStatus === 'on' ? '전원켜짐' :

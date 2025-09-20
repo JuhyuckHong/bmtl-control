@@ -1217,6 +1217,13 @@ button {
     justify-content: center;
 }
 
+/* 카메라 상태 아이템은 세로 배치 */
+.capture-info-item.camera-status-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+}
+
 .info-label {
     font-weight: 100;
     color: var(--text-secondary);
@@ -2135,14 +2142,18 @@ button {
     color: var(--text-secondary);
     text-align: center;
     font-weight: 500;
+    display: block;
+    margin-bottom: 4px;
 }
 
 .camera-power-status-refresh {
-    margin-left: 8px;
-    padding: 0.35rem 0.75rem;
-    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.65rem;
     line-height: 1.2;
     min-width: auto;
+    display: block;
+    width: 100%;
+    margin-top: 2px;
 }
 
 .camera-power-status.on {
