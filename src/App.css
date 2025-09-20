@@ -882,6 +882,11 @@ button {
   background: var(--bg-secondary);
 }
 
+/* 다크 모드에서 줄무늬 대비 강화 */
+.dark-mode .modules-table-rows .camera-module-row:nth-child(even) {
+  background: var(--gray-700);
+}
+
 /* === CAMERA MODULE ROW COMPONENTS === */
 .capacity-container {
   display: flex;
