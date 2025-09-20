@@ -934,25 +934,25 @@ button {
 .modules-table-content {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    min-width: 100%;
 }
 
 .modules-table-header,
 .camera-module-row {
     display: grid;
     grid-template-columns:
-        minmax(25px, 1fr) /* 모듈 */
-        minmax(25px, 0.4fr) /* 상태 */
+        minmax(40px, 0.5fr) /* 모듈 */
+        minmax(40px, 0.5fr) /* 상태 */
         minmax(80px, 1.5fr) /* 현장 이름 */
-        minmax(55px, 1fr) /* 저장공간 */
-        minmax(75px, 1.2fr) /* 디바이스 상태 (온도+배터리+마지막부팅) */
-        minmax(85px, 1.6fr) /* 촬영 현황 (카메라상태+촬영+마지막촬영+실패) */
-        minmax(80px, 1.3fr) /* 모듈 제어 */
-        minmax(80px, 1.3fr) /* 소프트웨어 */
-        minmax(90px, 1.5fr) /* 운영 시간 */
-        minmax(100px, 2fr) /* 카메라 설정 */
-        minmax(80px, 1.5fr); /* 설정 관리 */
-    gap: 0.75rem;
+        minmax(60px, 1fr) /* 저장공간 */
+        minmax(80px, 1fr) /* 디바이스 상태 (온도+배터리+마지막부팅) */
+        minmax(80px, 1fr) /* 촬영 현황 (카메라상태+촬영+마지막촬영+실패) */
+        minmax(80px, 1fr) /* 모듈 제어 */
+        minmax(80px, 1fr) /* 소프트웨어 */
+        minmax(80px, 1fr) /* 운영 시간 */
+        minmax(100px, 1.2fr) /* 카메라 설정 */
+        minmax(80px, 1fr); /* 설정 관리 */
+    gap: 1rem;
     padding: 0.375rem;
     border-bottom: 1px solid var(--border);
     align-items: center;
@@ -961,6 +961,7 @@ button {
     flex-shrink: 0;
     text-align: center;
     justify-content: space-evenly;
+    width: 100%;
 }
 
 .modules-table-header .table-header {
