@@ -878,7 +878,7 @@ button {
 }
 
 /* 줄무늬(지그재그) 행 배경: 가독성 향상 */
-.modules-table-content .camera-module-row:nth-child(even) {
+.modules-table-rows .camera-module-row:nth-child(even) {
   background: var(--bg-secondary);
 }
 

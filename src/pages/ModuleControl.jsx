@@ -225,18 +225,20 @@ export const ModuleControl = ({
                   <p>표시할 모듈이 없습니다.</p>
                 </div>
               ) : (
-                filteredModules.map((module) => (
-                  <CameraModuleRow
-                    key={module.id}
-                    moduleId={module.id}
-                    moduleDisplayId={formatModuleId(module.id)}
-                    status={module.status}
-                    onCommand={handleCommand}
-                    onLoadSettings={handleLoadSettings}
-                    isDummy={module.isDummy}
-                    initialSettings={module.settings}
-                  />
-                ))
+                <div className='modules-table-rows'>
+                  {filteredModules.map((module) => (
+                    <CameraModuleRow
+                      key={module.id}
+                      moduleId={module.id}
+                      moduleDisplayId={formatModuleId(module.id)}
+                      status={module.status}
+                      onCommand={handleCommand}
+                      onLoadSettings={handleLoadSettings}
+                      isDummy={module.isDummy}
+                      initialSettings={module.settings}
+                    />
+                  ))}
+                </div>
               )}
             </div>
           </div>
