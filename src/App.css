@@ -945,10 +945,8 @@ button {
         minmax(25px, 0.4fr) /* 상태 */
         minmax(80px, 1.5fr) /* 현장 이름 */
         minmax(55px, 1fr) /* 저장공간 */
-        minmax(55px, 1fr) /* 온도 */
-        minmax(75px, 1.4fr) /* 촬영 현황 */
-        minmax(80px, 1.5fr) /* 마지막 촬영 */
-        minmax(80px, 1.5fr) /* 마지막 부팅 */
+        minmax(75px, 1.2fr) /* 디바이스 상태 (온도+배터리+마지막부팅) */
+        minmax(85px, 1.6fr) /* 촬영 현황 (카메라상태+촬영+마지막촬영+실패) */
         minmax(80px, 1.3fr) /* 모듈 제어 */
         minmax(80px, 1.3fr) /* 소프트웨어 */
         minmax(90px, 1.5fr) /* 운영 시간 */
