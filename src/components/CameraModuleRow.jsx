@@ -288,8 +288,11 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                     <span className="missed-captures">{missedCaptures}</span>
                 </div>
             </div>
-            <div className="last-capture">{formatDateTime(status?.lastCaptureTime)}</div>
-            <div className="last-boot">{formatDateTime(status?.lastBootTime)}</div>
+            <div className="recent-activity">
+                <div className="activity-title">최근 활동</div>
+                <div className="activity-item">촬영: {formatDateTime(status?.lastCaptureTime)}</div>
+                <div className="activity-item">부팅: {formatDateTime(status?.lastBootTime)}</div>
+            </div>
 
             <div className="control-buttons">
                 <button className="btn reboot" onClick={handleReboot} disabled={!isEnabled} title="모듈 재부팅">
