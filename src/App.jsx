@@ -104,15 +104,15 @@ function App() {
                         <div className="status-summary">
                             <span className="status-item">
                                 <div className="status-dot status-online"></div>
-                                {statusCounts.online}
+                                {controlState.statusCounts.online}
                             </span>
                             <span className="status-item">
                                 <div className="status-dot status-offline"></div>
-                                {statusCounts.offline}
+                                {controlState.statusCounts.offline}
                             </span>
                             <span className="status-item">
                                 <div className="status-dot status-unknown"></div>
-                                {statusCounts.unknown}
+                                {controlState.statusCounts.unknown}
                             </span>
                         </div>
                     )}
@@ -122,7 +122,7 @@ function App() {
                     <>
                         <div className="filter-controls">
                             <label htmlFor="filter-select">필터</label>
-                            <select id="filter-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
+                            <select id="filter-select" value={controlState.filter} onChange={(e) => setControlState(prev => ({ ...prev, filter: e.target.value }))}>
                                 <option value="all">전체</option>
                                 <option value="online">온라인</option>
                                 <option value="offline">오프라인</option>
@@ -131,7 +131,7 @@ function App() {
 
                         <div className="search-controls">
                             <label htmlFor="search-input">검색</label>
-                            <input id="search-input" type="text" placeholder="모듈 번호 또는 현장 이름" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                            <input id="search-input" type="text" placeholder="모듈 번호 또는 현장 이름" value={controlState.searchTerm} onChange={(e) => setControlState(prev => ({ ...prev, searchTerm: e.target.value }))} />
                         </div>
 
                         <button onClick={() => handleGlobalCommand("status_request")} className="subscribe-btn-header">
