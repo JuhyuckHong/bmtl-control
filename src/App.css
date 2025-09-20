@@ -1224,6 +1224,15 @@ button {
     gap: 0;
 }
 
+/* Replace label text to '카메라 상태' for camera status item */
+.capture-info-item.camera-status-item .info-label {
+    font-size: 0; /* hide original text without affecting layout */
+}
+.capture-info-item.camera-status-item .info-label::after {
+    content: "카메라 상태";
+    font-size: 0.7em; /* match original .info-label size */
+}
+
 .info-label {
     font-weight: 100;
     color: var(--text-secondary);
