@@ -220,17 +220,34 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
             <div className="capacity-container">
                 <div className={`capacity-donut ${storageInfo.isWarning ? "warning" : ""}`}>
                     <svg width="50" height="50" viewBox="0 0 50 50" className="donut-chart">
+                        <defs>
+                            <linearGradient id={`storageGradient-${moduleId}`} x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
+                                <stop offset="0%" stopColor="#22c55e" />
+                                <stop offset="50%" stopColor="#eab308" />
+                                <stop offset="100%" stopColor="#ef4444" />
+                            </linearGradient>
+                        </defs>
                         {/* 전체 원 아웃라인 */}
                         <circle cx="25" cy="25" r="22" fill="transparent" stroke="var(--border-strong)" strokeWidth="1" />
                         {/* 배경 원 */}
                         <circle cx="25" cy="25" r="18" fill="transparent" stroke="var(--border)" strokeWidth="8" />
-                        {/* 진행률 원 */}
+                        {/* 진행률 원 - 10단계 색상 그라디언트 */}
                         <circle
                             cx="25"
                             cy="25"
                             r="18"
                             fill="transparent"
-                            stroke={storageInfo.isWarning ? "var(--error)" : "var(--info)"}
+                            stroke={
+                                storageInfo.percentage <= 10 ? "#16a34a" :
+                                storageInfo.percentage <= 20 ? "#22c55e" :
+                                storageInfo.percentage <= 30 ? "#65a30d" :
+                                storageInfo.percentage <= 40 ? "#84cc16" :
+                                storageInfo.percentage <= 50 ? "#ca8a04" :
+                                storageInfo.percentage <= 60 ? "#eab308" :
+                                storageInfo.percentage <= 70 ? "#f59e0b" :
+                                storageInfo.percentage <= 80 ? "#f97316" :
+                                storageInfo.percentage <= 90 ? "#ea580c" : "#ef4444"
+                            }
                             strokeWidth="8"
                             strokeDasharray={`${Math.min(storageInfo.percentage, 100) * 1.131} ${113.1 - Math.min(storageInfo.percentage, 100) * 1.131}`}
                             strokeDashoffset="0"
