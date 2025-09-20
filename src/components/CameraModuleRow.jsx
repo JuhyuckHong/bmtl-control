@@ -246,7 +246,7 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                             fill="transparent"
                             stroke={storageInfo.isWarning ? "var(--error)" : "var(--info)"}
                             strokeWidth="8"
-                            strokeDasharray={`${Math.min(storageInfo.percentage, 100) * 1.131} 113.1`}
+                            strokeDasharray={`${Math.min(storageInfo.percentage, 100) * 1.131} ${113.1 - Math.min(storageInfo.percentage, 100) * 1.131}`}
                             strokeDashoffset="28.275"
                             transform="rotate(-90 25 25)"
                         />
