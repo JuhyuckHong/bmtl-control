@@ -935,7 +935,6 @@ button {
 .modules-table-content {
     display: flex;
     flex-direction: column;
-    min-width: 1200px;
     width: 100%;
 }
 
@@ -964,6 +963,7 @@ button {
     text-align: center;
     justify-content: space-evenly;
     width: 100%;
+    min-width: fit-content;
 }
 
 .modules-table-header .table-header {
