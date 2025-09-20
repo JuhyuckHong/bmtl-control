@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { ModuleControl } from "./pages/ModuleControl";
 import { MQTTPage } from "./pages/MQTTPage";
@@ -13,30 +13,32 @@ function App() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // States
-    const [filter, setFilter] = useState("all");
-    const [searchTerm, setSearchTerm] = useState("");
-    const [statusCounts, setStatusCounts] = useState({ online: 0, offline: 0, unknown: 0 });
-    const [globalCommandHandler, setGlobalCommandHandler] = useState(null);
+    // Control states - 관련된 상태들을 그룹화하여 리렌더링 최적화
+    const [controlState, setControlState] = useState({
+        filter: "all",
+        searchTerm: "",
+        statusCounts: { online: 0, offline: 0, unknown: 0 },
+        globalCommandHandler: null
+    });
 
-    // MQTT Control states
-    const [publishTopic, setPublishTopic] = useState("device/command");
-    const [publishPayload, setPublishPayload] = useState("");
-    const [publishQos, setPublishQos] = useState("0");
-    const [subscribeTopic, setSubscribeTopic] = useState("device/status");
+    // MQTT Control states - MQTT 관련 상태들을 별도 그룹화
+    const [mqttState, setMqttState] = useState({
+        publishTopic: "device/command",
+        publishPayload: "",
+        publishQos: "0",
+        subscribeTopic: "device/status"
+    });
 
-    // 현재 페이지 감지 (URL 기반)
-    const getCurrentPage = () => {
+    // 현재 페이지 감지 (URL 기반) - useMemo로 최적화
+    const currentPage = useMemo(() => {
         const path = location.pathname;
         if (path === "/" || path === "/control") return "control";
         if (path === "/docs") return "docs";
         if (path === "/mqtt") return "mqtt";
         return "control"; // 기본값은 control
-    };
+    }, [location.pathname]);
 
-    const currentPage = getCurrentPage();
-
-    const togglePage = () => {
+    const togglePage = useCallback(() => {
         const currentPath = location.pathname;
         if (currentPath === "/control") {
             navigate("/mqtt");
@@ -48,36 +50,39 @@ function App() {
             // 기본 경로 (/) 에서는 mqtt로
             navigate("/mqtt");
         }
-    };
+    }, [location.pathname, navigate]);
 
-    const handleGlobalCommand = (command) => {
-        if (globalCommandHandler) {
+    const handleGlobalCommand = useCallback((command) => {
+        if (controlState.globalCommandHandler) {
             if (command === "reboot" && !confirm("모든 연결된 모듈을 재부팅하시겠습니까?")) {
                 return;
             }
-            globalCommandHandler(command);
+            controlState.globalCommandHandler(command);
         }
-    };
+    }, [controlState.globalCommandHandler]);
 
     const onModuleControlReady = useCallback((commandHandler, counts) => {
-        setGlobalCommandHandler(() => commandHandler);
-        setStatusCounts(counts);
+        setControlState(prev => ({
+            ...prev,
+            globalCommandHandler: commandHandler,
+            statusCounts: counts
+        }));
     }, []);
 
-    const handlePublish = (e) => {
+    const handlePublish = useCallback((e) => {
         e.preventDefault();
-        if (publishTopic.trim() && publishPayload.trim()) {
-            publish(publishTopic, publishPayload, publishQos);
-            setPublishPayload("");
+        if (mqttState.publishTopic.trim() && mqttState.publishPayload.trim()) {
+            publish(mqttState.publishTopic, mqttState.publishPayload, mqttState.publishQos);
+            setMqttState(prev => ({ ...prev, publishPayload: "" }));
         }
-    };
+    }, [mqttState.publishTopic, mqttState.publishPayload, mqttState.publishQos, publish]);
 
-    const handleSubscribe = (e) => {
+    const handleSubscribe = useCallback((e) => {
         e.preventDefault();
-        if (subscribeTopic.trim()) {
-            subscribe(subscribeTopic);
+        if (mqttState.subscribeTopic.trim()) {
+            subscribe(mqttState.subscribeTopic);
         }
-    };
+    }, [mqttState.subscribeTopic, subscribe]);
 
     // MQTT 연결 시 control 페이지 유지 (이미 /에서 control로 설정됨)
 
@@ -144,8 +149,8 @@ function App() {
                 {isConnected && currentPage === "mqtt" && (
                     <div className="mqtt-header-controls">
                         <div className="mqtt-quick-actions">
-                            <input type="text" placeholder="Subscribe topic" value={subscribeTopic} onChange={(e) => setSubscribeTopic(e.target.value)} className="subscribe-input-header" />
-                            <button onClick={handleSubscribe} className="subscribe-btn-header" disabled={!subscribeTopic.trim()}>
+                            <input type="text" placeholder="Subscribe topic" value={mqttState.subscribeTopic} onChange={(e) => setMqttState(prev => ({ ...prev, subscribeTopic: e.target.value }))} className="subscribe-input-header" />
+                            <button onClick={handleSubscribe} className="subscribe-btn-header" disabled={!mqttState.subscribeTopic.trim()}>
                                 📥 구독
                             </button>
                         </div>
@@ -175,10 +180,10 @@ function App() {
                             <ModuleControl
                                 mqttClient={client}
                                 subscribedTopics={subscribedTopics}
-                                filter={filter}
-                                setFilter={setFilter}
-                                searchTerm={searchTerm}
-                                setSearchTerm={setSearchTerm}
+                                filter={controlState.filter}
+                                setFilter={(value) => setControlState(prev => ({ ...prev, filter: value }))}
+                                searchTerm={controlState.searchTerm}
+                                setSearchTerm={(value) => setControlState(prev => ({ ...prev, searchTerm: value }))}
                                 onGlobalCommand={onModuleControlReady}
                                 connect={connect}
                                 isConnecting={isConnecting}
@@ -202,12 +207,12 @@ function App() {
                                 subscribe={subscribe}
                                 publish={publish}
                                 clearMessages={clearMessages}
-                                publishTopic={publishTopic}
-                                setPublishTopic={setPublishTopic}
-                                publishPayload={publishPayload}
-                                setPublishPayload={setPublishPayload}
-                                publishQos={publishQos}
-                                setPublishQos={setPublishQos}
+                                publishTopic={mqttState.publishTopic}
+                                setPublishTopic={(value) => setMqttState(prev => ({ ...prev, publishTopic: value }))}
+                                publishPayload={mqttState.publishPayload}
+                                setPublishPayload={(value) => setMqttState(prev => ({ ...prev, publishPayload: value }))}
+                                publishQos={mqttState.publishQos}
+                                setPublishQos={(value) => setMqttState(prev => ({ ...prev, publishQos: value }))}
                             />
                         }
                     />
@@ -217,10 +222,10 @@ function App() {
                             <ModuleControl
                                 mqttClient={client}
                                 subscribedTopics={subscribedTopics}
-                                filter={filter}
-                                setFilter={setFilter}
-                                searchTerm={searchTerm}
-                                setSearchTerm={setSearchTerm}
+                                filter={controlState.filter}
+                                setFilter={(value) => setControlState(prev => ({ ...prev, filter: value }))}
+                                searchTerm={controlState.searchTerm}
+                                setSearchTerm={(value) => setControlState(prev => ({ ...prev, searchTerm: value }))}
                                 onGlobalCommand={onModuleControlReady}
                                 connect={connect}
                                 isConnecting={isConnecting}

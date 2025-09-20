@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
-export const DarkModeToggle = () => {
+const DarkModeToggleComponent = () => {
     const { isDarkMode, toggleDarkMode } = useTheme();
 
     return (
@@ -14,3 +14,5 @@ export const DarkModeToggle = () => {
         </button>
     );
 };
+
+export const DarkModeToggle = React.memo(DarkModeToggleComponent);

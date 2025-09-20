@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
-export const SiteNameModal = ({ isOpen, onClose, onSubmit, currentSiteName, moduleId }) => {
+const SiteNameModalComponent = ({ isOpen, onClose, onSubmit, currentSiteName, moduleId }) => {
     const [siteName, setSiteName] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -12,8 +12,8 @@ export const SiteNameModal = ({ isOpen, onClose, onSubmit, currentSiteName, modu
         }
     }, [isOpen, currentSiteName]);
 
-    // 사이트 이름 유효성 검사
-    const validateSiteName = (name) => {
+    // 사이트 이름 유효성 검사 (useCallback으로 메모이제이션)
+    const validateSiteName = useCallback((name) => {
         if (!name.trim()) {
             return "사이트 이름을 입력해주세요.";
         }
@@ -33,18 +33,18 @@ export const SiteNameModal = ({ isOpen, onClose, onSubmit, currentSiteName, modu
         }
 
         return "";
-    };
+    }, []);
 
-    const handleInputChange = (e) => {
+    const handleInputChange = useCallback((e) => {
         const value = e.target.value;
         setSiteName(value);
 
         // 실시간 유효성 검사
         const error = validateSiteName(value);
         setErrorMessage(error);
-    };
+    }, [validateSiteName]);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
 
         const error = validateSiteName(siteName);
@@ -63,13 +63,13 @@ export const SiteNameModal = ({ isOpen, onClose, onSubmit, currentSiteName, modu
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [siteName, validateSiteName, onSubmit, onClose]);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         if (!isSubmitting) {
             onClose();
         }
-    };
+    }, [isSubmitting, onClose]);
 
     if (!isOpen) return null;
 
@@ -141,3 +141,20 @@ export const SiteNameModal = ({ isOpen, onClose, onSubmit, currentSiteName, modu
         </div>
     );
 };
+
+// 모달이 열려있지 않을 때는 리렌더링하지 않도록 최적화
+export const SiteNameModal = React.memo(SiteNameModalComponent, (prevProps, nextProps) => {
+    // 모달이 닫혀있다면 다른 props 변경을 무시
+    if (!prevProps.isOpen && !nextProps.isOpen) {
+        return true;
+    }
+
+    // 모달이 열려있을 때는 모든 props 비교
+    return (
+        prevProps.isOpen === nextProps.isOpen &&
+        prevProps.currentSiteName === nextProps.currentSiteName &&
+        prevProps.moduleId === nextProps.moduleId &&
+        prevProps.onClose === nextProps.onClose &&
+        prevProps.onSubmit === nextProps.onSubmit
+    );
+});

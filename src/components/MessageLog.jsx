@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-export const MessageLog = ({ messages, onClear, isCompact = false }) => {
+const MessageLogComponent = ({ messages, onClear, isCompact = false }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
   const messagesEndRef = useRef(null);
-  const formatTime = (date) => {
+  const formatTime = useCallback((date) => {
     return date.toLocaleTimeString('ko-KR');
-  };
+  }, []);
 
-  const getMessageClass = (type) => {
+  const getMessageClass = useCallback((type) => {
     switch (type) {
       case 'sent':
         return 'message-sent';
@@ -19,7 +19,7 @@ export const MessageLog = ({ messages, onClear, isCompact = false }) => {
       default:
         return '';
     }
-  };
+  }, []);
 
   // 자동 스크롤 처리
   useEffect(() => {
@@ -28,18 +28,18 @@ export const MessageLog = ({ messages, onClear, isCompact = false }) => {
     }
   }, [messages, autoScroll]);
 
-  const formatCompactTime = (date) => {
-    return date.toLocaleTimeString('ko-KR', { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      second: '2-digit' 
+  const formatCompactTime = useCallback((date) => {
+    return date.toLocaleTimeString('ko-KR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
     });
-  };
+  }, []);
 
-  const truncatePayload = (payload, maxLength = 50) => {
+  const truncatePayload = useCallback((payload, maxLength = 50) => {
     if (payload.length <= maxLength) return payload;
     return payload.substring(0, maxLength) + '...';
-  };
+  }, []);
 
   return (
     <div className={`message-log ${isCompact ? 'compact' : ''}`}>
@@ -109,3 +109,15 @@ export const MessageLog = ({ messages, onClear, isCompact = false }) => {
     </div>
   );
 };
+
+// 메시지 배열 길이가 변경되거나 isCompact 상태가 변경될 때만 리렌더링
+export const MessageLog = React.memo(MessageLogComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.messages.length === nextProps.messages.length &&
+    prevProps.isCompact === nextProps.isCompact &&
+    prevProps.onClear === nextProps.onClear &&
+    // 마지막 메시지가 같은지 확인 (새 메시지 추가 감지)
+    (prevProps.messages.length === 0 ||
+     (prevProps.messages[prevProps.messages.length - 1] === nextProps.messages[nextProps.messages.length - 1]))
+  );
+});

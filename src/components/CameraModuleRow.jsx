@@ -150,13 +150,13 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
         return `${year}.${month}.${day} ${hour}:${minute}:${second}`;
     }, []);
 
-    const getCaptureProgress = useCallback(() => {
+    const captureProgress = useMemo(() => {
         const totalToday = Number(status?.todayTotalCaptures) || 0;
         const captured = Number(status?.todayCapturedCount) || 0;
         return `${captured}/${totalToday}`;
     }, [status?.todayTotalCaptures, status?.todayCapturedCount]);
 
-    const getMissedCaptures = useCallback(() => {
+    const missedCaptures = useMemo(() => {
         const missed = Number(status?.missedCaptures);
         return Number.isNaN(missed) ? 0 : missed;
     }, [status?.missedCaptures]);
@@ -277,11 +277,11 @@ const CameraModuleRowComponent = ({ moduleId, moduleDisplayId, status, onCommand
                 </div>
                 <div className="capture-info-item">
                     <span className="info-label">촬영</span>
-                    <span className="capture-progress">{getCaptureProgress()}</span>
+                    <span className="capture-progress">{captureProgress}</span>
                 </div>
                 <div className="capture-info-item">
                     <span className="info-label">실패</span>
-                    <span className="missed-captures">{getMissedCaptures()}</span>
+                    <span className="missed-captures">{missedCaptures}</span>
                 </div>
             </div>
             <div className="last-capture">{formatDateTime(status?.lastCaptureTime)}</div>

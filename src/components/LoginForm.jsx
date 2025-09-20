@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
-export const LoginForm = ({ onConnect, isConnecting, isConnected, status }) => {
+const LoginFormComponent = ({ onConnect, isConnecting, isConnected, status }) => {
     const [config, setConfig] = useState({
         broker: import.meta.env.VITE_MQTT_BROKER_HOST || "broker.hivemq.com",
         port: parseInt(import.meta.env.VITE_MQTT_BROKER_PORT) || 8000,
@@ -10,19 +10,19 @@ export const LoginForm = ({ onConnect, isConnecting, isConnected, status }) => {
 
     const [error, setError] = useState(null);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = useCallback((e) => {
         e.preventDefault();
-        setError(null); // 재시도 시 이전 오류 메시지 제거
+        setError(null);
         onConnect(config);
-    };
+    }, [config, onConnect]);
 
-    const handleInputChange = (field, value) => {
-        setError(null); // 사용자가 입력을 시작하면 오류 메시지 제거
+    const handleInputChange = useCallback((field, value) => {
+        setError(null);
         setConfig((prev) => ({
             ...prev,
             [field]: value,
         }));
-    };
+    }, []);
 
     useEffect(() => {
         const isError = !isConnecting && !isConnected && status && (status.includes("Error") || status.includes("failed"));
@@ -71,3 +71,6 @@ export const LoginForm = ({ onConnect, isConnecting, isConnected, status }) => {
         </div>
     );
 };
+
+// props가 실제로 변경되었을 때만 리렌더링
+export const LoginForm = React.memo(LoginFormComponent);
