@@ -2142,8 +2142,9 @@ button {
     color: var(--text-secondary);
     text-align: center;
     font-weight: 500;
-    display: block;
+    display: inline-block;
     margin-bottom: 4px;
+    white-space: nowrap;
 }
 
 .camera-power-status-refresh {
