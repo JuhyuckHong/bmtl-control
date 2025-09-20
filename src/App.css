@@ -884,7 +884,8 @@ button {
 
 /* 다크 모드에서 줄무늬 대비 강화 */
 .dark-mode .modules-table-rows .camera-module-row:nth-child(even) {
-  background: var(--gray-700);
+  /* 다크 모드에서는 기본 surface(#424242)보다 살짝 더 어둡게 */
+  background: #3a3a3a;
 }
 
 /* === CAMERA MODULE ROW COMPONENTS === */
