@@ -6,11 +6,11 @@ This Vite-powered React app keeps runtime source in `src/`. `main.jsx` boots `Ap
 
 ## Build, Test, and Development Commands
 
--   `npm install`: restore dependencies whenever `package.json` changes.
--   `npm run dev`: start the Vite dev server on http://localhost:5173 with hot reloading.
--   `npm run build`: produce the optimized bundle in `dist/`; run before packaging or deploying.
--   `npm run preview`: serve the latest build to validate production behavior locally.
-    Bring your own test script (see below) until we wire Vitest into `package.json`.
+- `npm install`: restore dependencies whenever `package.json` changes.
+- `npm run dev`: start the Vite dev server on http://localhost:5173 with hot reloading.
+- `npm run build`: produce the optimized bundle in `dist/`; run before packaging or deploying.
+- `npm run preview`: serve the latest build to validate production behavior locally.
+  Bring your own test script (see below) until we wire Vitest into `package.json`.
 
 ## Coding Style & Naming Conventions
 
