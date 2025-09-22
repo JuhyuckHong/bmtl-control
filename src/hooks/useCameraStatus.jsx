@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useToast } from '../contexts/ToastContext'
 
 const CAMERA_CONTROL_TOPICS = [
   // 서비스 상태
@@ -46,6 +47,7 @@ export const useCameraStatus = (
   subscribedTopics,
   recordPublish
 ) => {
+  const { showToast } = useToast()
   const [moduleStatuses, setModuleStatuses] = useState({})
   const [moduleSettings, setModuleSettings] = useState({})
   const [moduleOptions, setModuleOptions] = useState({})
@@ -647,7 +649,7 @@ export const useCameraStatus = (
             todayTotalCaptures: data.today_total_captures,
             todayCapturedCount: data.today_captured_count,
             missedCaptures: data.missed_captures,
-            swVersion: data.sw_version || data.swVersion, // SW 버전 정보 추가
+            swVersion: data.version || data.sw_version || data.swVersion, // SW 버전 정보 추가
           })
         } else if (topic.startsWith('bmtl/response/settings/')) {
           // 설정 응답 처리
@@ -682,6 +684,18 @@ export const useCameraStatus = (
             `🔧 [Config Response] Module ${moduleId}:`,
             data.success ? '✅ Success' : '❌ Failed'
           )
+          // 설정 변경 결과 토스트 알림
+          try {
+            if (data && typeof data.success !== 'undefined') {
+              if (data.success) {
+                const mm = moduleId.toString().padStart(2, '0')
+                showToast(`모듈 ${mm} 설정이 적용되었습니다.`, { type: 'success', duration: 3000 })
+              } else {
+                const reason = data && data.message ? `: ${data.message}` : ''
+                showToast(`설정 적용 실패${reason}`, { type: 'error', duration: 4000 })
+              }
+            }
+          } catch (_) {}
         } else if (topic.startsWith('bmtl/response/reboot/')) {
           // 재부팅 응답 처리
           const moduleIdStr = topicParts[3]

@@ -10,6 +10,9 @@ import { useMQTT } from './hooks/useMQTT'
 import { useLoadingState } from './hooks/useLoadingState'
 import './App.css'
 import './styles/api-docs.css'
+import './styles/toast.css'
+import { ToastProvider } from './contexts/ToastContext'
+import { ToastContainer } from './components/ToastContainer'
 
 function App() {
   const {
@@ -116,6 +119,7 @@ function App() {
   // MQTT 연결 시 control 페이지 유지 (이미 /에서 control로 설정됨)
 
   return (
+    <ToastProvider>
     <ErrorBoundary
       userFriendlyMessage='애플리케이션에서 문제가 발생했습니다. 페이지를 새로고침하거나 잠시 후 다시 시도해주세요.'
       contactInfo='support@bmtl.co.kr'
@@ -403,8 +407,10 @@ function App() {
             </Routes>
           </main>
         </ErrorBoundary>
+        <ToastContainer />
       </div>
     </ErrorBoundary>
+    </ToastProvider>
   )
 }
 

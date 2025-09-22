@@ -1,32 +1,32 @@
-import React from 'react'
+﻿import React from 'react'
 
 export const ApiDocsPage = () => {
   const mqttEndpoints = [
-    // 발행 메시지 (Publish)
+    // 諛쒗뻾 硫붿떆吏 (Publish)
     {
       type: 'Publish',
       topic: 'bmtl/request/settings/all',
       description:
-        '전체 설정 불러오기 요청 (각 모듈이 bmtl/status/health/{device_id}로 개별 응답)',
+        '?꾩껜 ?ㅼ젙 遺덈윭?ㅺ린 ?붿껌 (媛?紐⑤뱢??bmtl/status/health/{device_id}濡?媛쒕퀎 ?묐떟)',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/request/settings/01',
-      description: '개별 모듈 현재설정 불러오기 요청',
+      description: '媛쒕퀎 紐⑤뱢 ?꾩옱?ㅼ젙 遺덈윭?ㅺ린 ?붿껌',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/set/settings/01',
-      description: '개별 모듈 설정 변경',
+      description: '媛쒕퀎 紐⑤뱢 ?ㅼ젙 蹂寃?,
       qos: '2',
       payload: {
         start_time: '08:00',
         end_time: '18:00',
         capture_interval: 10,
         image_size: '1920x1080',
-        quality: '높음',
+        quality: '?믪쓬',
         iso: '400',
         format: 'JPG',
         aperture: 'f/2.8',
@@ -35,78 +35,78 @@ export const ApiDocsPage = () => {
     {
       type: 'Publish',
       topic: 'bmtl/request/reboot/all',
-      description: '전체 재부팅 명령',
+      description: '?꾩껜 ?щ???紐낅졊',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/request/reboot/01',
-      description: '개별 모듈 재부팅 (01번 모듈 예시)',
+      description: '媛쒕퀎 紐⑤뱢 ?щ???(01踰?紐⑤뱢 ?덉떆)',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/request/options/01',
-      description: '개별 모듈 options 요청',
+      description: '媛쒕퀎 紐⑤뱢 options ?붿껌',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/request/options/all',
-      description: '전체 모듈 options 요청',
+      description: '?꾩껜 紐⑤뱢 options ?붿껌',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/request/wiper/01',
-      description: '개별 모듈 와이퍼 30초 동작 (01번 모듈 예시)',
+      description: '媛쒕퀎 紐⑤뱢 ??댄띁 30珥??숈옉 (01踰?紐⑤뱢 ?덉떆)',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/request/camera-on-off/01',
-      description: '개별 모듈 카메라 전원 On/Off (01번 모듈 예시)',
+      description: '媛쒕퀎 紐⑤뱢 移대찓???꾩썝 On/Off (01踰?紐⑤뱢 ?덉떆)',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/set/sitename/01',
-      description: '개별 모듈 사이트 이름 변경 (01번 모듈 예시)',
+      description: '媛쒕퀎 紐⑤뱢 ?ъ씠???대쫫 蹂寃?(01踰?紐⑤뱢 ?덉떆)',
       qos: '2',
       payload: {
-        sitename: '새로운 사이트명',
+        sitename: '?덈줈???ъ씠?몃챸',
       },
     },
     {
       type: 'Publish',
       topic: 'bmtl/sw-update/01',
-      description: '개별 모듈 소프트웨어 업데이트 (01번 모듈 예시)',
+      description: '媛쒕퀎 紐⑤뱢 ?뚰봽?몄썾???낅뜲?댄듃 (01踰?紐⑤뱢 ?덉떆)',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/sw-rollback/01',
-      description: '개별 모듈 소프트웨어 롤백 (01번 모듈 예시)',
+      description: '媛쒕퀎 紐⑤뱢 ?뚰봽?몄썾??濡ㅻ갚 (01踰?紐⑤뱢 ?덉떆)',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/request/status/01',
-      description: '개별 모듈 상태 요청 (01번 모듈 예시)',
+      description: '媛쒕퀎 紐⑤뱢 ?곹깭 ?붿껌 (01踰?紐⑤뱢 ?덉떆)',
       qos: '2',
     },
     {
       type: 'Publish',
       topic: 'bmtl/request/status/all',
       description:
-        '전체 모듈 상태 요청 (각 모듈이 bmtl/status/health/{device_id}로 응답)',
+        '?꾩껜 紐⑤뱢 ?곹깭 ?붿껌 (媛?紐⑤뱢??bmtl/status/health/{device_id}濡??묐떟)',
       qos: '2',
     },
-    // 구독 메시지 (Subscribe)
+    // 援щ룆 硫붿떆吏 (Subscribe)
     {
       type: 'Subscribe',
       topic: 'bmtl/status/health/+',
-      description: '디바이스 헬스 상태 수신',
+      description: '?붾컮?댁뒪 ?ъ뒪 ?곹깭 ?섏떊',
       qos: '0-1',
       payload: {
         module_id: 'bmotion01',
@@ -114,7 +114,7 @@ export const ApiDocsPage = () => {
         temperature: 42.3,
         last_capture_time: '2024-01-01T12:30:00Z',
         last_boot_time: '2024-01-01T08:15:00Z',
-        site_name: '현장명',
+        site_name: '?꾩옣紐?,
         today_total_captures: 100,
         today_captured_count: 85,
         missed_captures: 3,
@@ -124,7 +124,7 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/settings/+',
-      description: '개별 설정 응답 수신',
+      description: '媛쒕퀎 ?ㅼ젙 ?묐떟 ?섏떊',
       qos: '1',
       payload: {
         response_type: 'settings',
@@ -134,7 +134,7 @@ export const ApiDocsPage = () => {
           end_time: '18:00',
           capture_interval: 10,
           image_size: '1920x1080',
-          quality: '높음',
+          quality: '?믪쓬',
           iso: '400',
           format: 'JPG',
           aperture: 'f/2.8',
@@ -145,7 +145,7 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/set/settings/+',
-      description: '설정 변경 응답 수신',
+      description: '?ㅼ젙 蹂寃??묐떟 ?섏떊',
       qos: '1',
       payload: {
         response_type: 'set_settings_result',
@@ -163,7 +163,7 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/reboot/01',
-      description: '개별 모듈 재부팅 응답 수신 (01번 모듈 예시)',
+      description: '媛쒕퀎 紐⑤뱢 ?щ????묐떟 ?섏떊 (01踰?紐⑤뱢 ?덉떆)',
       qos: '1',
       payload: {
         response_type: 'reboot_result',
@@ -176,7 +176,7 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/reboot/all',
-      description: '전체 재부팅 응답 수신',
+      description: '?꾩껜 ?щ????묐떟 ?섏떊',
       qos: '1',
       payload: {
         response_type: 'reboot_all_result',
@@ -189,7 +189,7 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/options/+',
-      description: '개별 모듈 options 응답 수신',
+      description: '媛쒕퀎 紐⑤뱢 options ?묐떟 ?섏떊',
       qos: '1',
       payload: {
         response_type: 'options',
@@ -206,7 +206,7 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/options/all',
-      description: '전체 모듈 options 응답 수신',
+      description: '?꾩껜 紐⑤뱢 options ?묐떟 ?섏떊',
       qos: '1',
       payload: {
         response_type: 'all_options',
@@ -224,7 +224,7 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/wiper/+',
-      description: '와이퍼 동작 응답 수신',
+      description: '??댄띁 ?숈옉 ?묐떟 ?섏떊',
       qos: '1',
       payload: {
         response_type: 'wiper_result',
@@ -237,7 +237,7 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/camera-on-off/+',
-      description: '카메라 전원 제어 응답 수신',
+      description: '移대찓???꾩썝 ?쒖뼱 ?묐떟 ?섏떊',
       qos: '1',
       payload: {
         response_type: 'camera_power_result',
@@ -251,20 +251,20 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/sitename/+',
-      description: '사이트 이름 변경 응답 수신',
+      description: '?ъ씠???대쫫 蹂寃??묐떟 ?섏떊',
       qos: '1',
       payload: {
         response_type: 'sitename_result',
         module_id: 'camera_01',
         success: true,
         message: 'Sitename changed successfully',
-        sitename: '새로운 사이트명',
+        sitename: '?덈줈???ъ씠?몃챸',
       },
     },
     {
       type: 'Subscribe',
       topic: 'bmtl/response/sw-update/+',
-      description: '소프트웨어 업데이트 응답 수신',
+      description: '?뚰봽?몄썾???낅뜲?댄듃 ?묐떟 ?섏떊',
       qos: '1',
       payload: {
         success: true,
@@ -275,7 +275,7 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/sw-version/+',
-      description: '소프트웨어 버전 정보 수신',
+      description: '?뚰봽?몄썾??踰꾩쟾 ?뺣낫 ?섏떊',
       qos: '1',
       payload: {
         version: 'a1b2c3d4',
@@ -284,7 +284,7 @@ export const ApiDocsPage = () => {
     {
       type: 'Subscribe',
       topic: 'bmtl/response/sw-rollback/+',
-      description: '소프트웨어 롤백 응답 수신',
+      description: '?뚰봽?몄썾??濡ㅻ갚 ?묐떟 ?섏떊',
       qos: '1',
       payload: {
         success: true,
@@ -298,13 +298,13 @@ export const ApiDocsPage = () => {
   return (
     <div className='api-docs-page'>
       <div className='docs-header'>
-        <h1>📚 MQTT API 명세서</h1>
-        <p>BMTL Control System의 MQTT 통신 프로토콜 문서</p>
+        <h1>?뱴 MQTT API 紐낆꽭??/h1>
+        <p>BMTL Control System??MQTT ?듭떊 ?꾨줈?좎퐳 臾몄꽌</p>
       </div>
 
       {/* Endpoints */}
       <section className='endpoints-section'>
-        <h2>📡 MQTT 토픽 & 메시지</h2>
+        <h2>?뱻 MQTT ?좏뵿 & 硫붿떆吏</h2>
         <div className='endpoints-tiles'>
           {mqttEndpoints.map((endpoint, index) => (
             <div key={index} className='endpoint-card'>
@@ -318,13 +318,13 @@ export const ApiDocsPage = () => {
 
               <div className='endpoint-details'>
                 <div className='description'>
-                  <strong>설명:</strong> {endpoint.description}
+                  <strong>?ㅻ챸:</strong> {endpoint.description}
                 </div>
 
                 {endpoint.payload &&
                   Object.keys(endpoint.payload).length > 0 && (
                     <div className='payload-section'>
-                      <strong>페이로드 예시:</strong>
+                      <strong>?섏씠濡쒕뱶 ?덉떆:</strong>
                       <pre className='payload-code'>
                         {JSON.stringify(endpoint.payload, null, 2)}
                       </pre>
@@ -335,141 +335,143 @@ export const ApiDocsPage = () => {
           ))}
           <div className='pattern-item'>
             <code>bmtl/response/camera-power-status/+</code>
-            <span>카메라 전원 상태 응답 (모듈번호)</span>
+            <span>移대찓???꾩썝 ?곹깭 ?묐떟 (紐⑤뱢踰덊샇)</span>
           </div>
         </div>
       </section>
 
       {/* Topic Patterns */}
       <section className='patterns-section'>
-        <h2>🎯 토픽 패턴</h2>
+        <h2>?렞 ?좏뵿 ?⑦꽩</h2>
         <div className='pattern-list'>
           <div className='pattern-item'>
             <code>bmtl/status/health/+</code>
-            <span>모든 카메라 모듈의 헬스 상태</span>
+            <span>紐⑤뱺 移대찓??紐⑤뱢???ъ뒪 ?곹깭</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/request/settings/+</code>
-            <span>설정 요청 (all은 헬스체크로 응답, 모듈번호는 개별 응답)</span>
+            <span>?ㅼ젙 ?붿껌 (all? ?ъ뒪泥댄겕濡??묐떟, 紐⑤뱢踰덊샇??媛쒕퀎 ?묐떟)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/response/settings/+</code>
-            <span>개별 설정 응답 (모듈번호)</span>
+            <span>媛쒕퀎 ?ㅼ젙 ?묐떟 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/set/settings/+</code>
-            <span>설정 변경 요청</span>
+            <span>?ㅼ젙 蹂寃??붿껌</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/response/set/settings/+</code>
-            <span>설정 변경 응답</span>
+            <span>?ㅼ젙 蹂寃??묐떟</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/request/options/+</code>
-            <span>개별 모듈 options 요청 (모듈번호 또는 all)</span>
+            <span>媛쒕퀎 紐⑤뱢 options ?붿껌 (紐⑤뱢踰덊샇 ?먮뒗 all)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/response/options/+</code>
-            <span>개별 모듈 options 응답 (모듈번호 또는 all)</span>
+            <span>媛쒕퀎 紐⑤뱢 options ?묐떟 (紐⑤뱢踰덊샇 ?먮뒗 all)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/request/reboot/+</code>
-            <span>재부팅 요청 (모듈번호 또는 all)</span>
+            <span>?щ????붿껌 (紐⑤뱢踰덊샇 ?먮뒗 all)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/response/reboot/+</code>
-            <span>재부팅 응답 (모듈번호 또는 all)</span>
+            <span>?щ????묐떟 (紐⑤뱢踰덊샇 ?먮뒗 all)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/request/wiper/+</code>
-            <span>와이퍼 동작 요청 (모듈번호)</span>
+            <span>??댄띁 ?숈옉 ?붿껌 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/response/wiper/+</code>
-            <span>와이퍼 동작 응답 (모듈번호)</span>
+            <span>??댄띁 ?숈옉 ?묐떟 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/request/camera-on-off/+</code>
-            <span>카메라 전원 제어 요청 (모듈번호)</span>
+            <span>移대찓???꾩썝 ?쒖뼱 ?붿껌 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/response/camera-on-off/+</code>
-            <span>카메라 전원 제어 응답 (모듈번호)</span>
+            <span>移대찓???꾩썝 ?쒖뼱 ?묐떟 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/set/sitename/+</code>
-            <span>사이트 이름 변경 요청 (모듈번호)</span>
+            <span>?ъ씠???대쫫 蹂寃??붿껌 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/response/set/sitename/+</code>
-            <span>사이트 이름 변경 응답 (모듈번호)</span>
+            <span>?ъ씠???대쫫 蹂寃??묐떟 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/sw-update/+</code>
-            <span>소프트웨어 업데이트 요청 (모듈번호)</span>
+            <span>?뚰봽?몄썾???낅뜲?댄듃 ?붿껌 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/response/sw-update/+</code>
-            <span>소프트웨어 업데이트 응답 (모듈번호)</span>
+            <span>?뚰봽?몄썾???낅뜲?댄듃 ?묐떟 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/response/sw-version/+</code>
-            <span>소프트웨어 버전 정보 (모듈번호)</span>
+            <span>?뚰봽?몄썾??踰꾩쟾 ?뺣낫 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/sw-rollback/+</code>
-            <span>소프트웨어 롤백 요청 (모듈번호)</span>
+            <span>?뚰봽?몄썾??濡ㅻ갚 ?붿껌 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/response/sw-rollback/+</code>
-            <span>소프트웨어 롤백 응답 (모듈번호)</span>
+            <span>?뚰봽?몄썾??濡ㅻ갚 ?묐떟 (紐⑤뱢踰덊샇)</span>
           </div>
           <div className='pattern-item'>
             <code>bmtl/request/status/+</code>
-            <span>상태 요청 (all 또는 모듈번호, 헬스체크로 응답)</span>
+            <span>?곹깭 ?붿껌 (all ?먮뒗 紐⑤뱢踰덊샇, ?ъ뒪泥댄겕濡??묐떟)</span>
           </div>
         </div>
       </section>
 
       {/* Error Codes */}
       <section className='errors-section'>
-        <h2>⚠️ 에러 코드</h2>
+        <h2>?좑툘 ?먮윭 肄붾뱶</h2>
         <div className='error-table'>
           <div className='error-row header'>
-            <div>코드</div>
-            <div>설명</div>
-            <div>해결방법</div>
+            <div>肄붾뱶</div>
+            <div>?ㅻ챸</div>
+            <div>?닿껐諛⑸쾿</div>
           </div>
           <div className='error-row'>
             <div>
               <code>CONN_ERR</code>
             </div>
-            <div>브로커 연결 실패</div>
-            <div>브로커 주소와 포트 확인</div>
+            <div>釉뚮줈而??곌껐 ?ㅽ뙣</div>
+            <div>釉뚮줈而?二쇱냼? ?ы듃 ?뺤씤</div>
           </div>
           <div className='error-row'>
             <div>
               <code>AUTH_ERR</code>
             </div>
-            <div>인증 실패</div>
-            <div>사용자명/비밀번호 확인</div>
+            <div>?몄쬆 ?ㅽ뙣</div>
+            <div>?ъ슜?먮챸/鍮꾨?踰덊샇 ?뺤씤</div>
           </div>
           <div className='error-row'>
             <div>
               <code>SUB_ERR</code>
             </div>
-            <div>구독 실패</div>
-            <div>토픽 권한 확인</div>
+            <div>援щ룆 ?ㅽ뙣</div>
+            <div>?좏뵿 沅뚰븳 ?뺤씤</div>
           </div>
           <div className='error-row'>
             <div>
               <code>PUB_ERR</code>
             </div>
-            <div>발행 실패</div>
-            <div>페이로드 크기 및 형식 확인</div>
+            <div>諛쒗뻾 ?ㅽ뙣</div>
+            <div>?섏씠濡쒕뱶 ?ш린 諛??뺤떇 ?뺤씤</div>
           </div>
         </div>
       </section>
     </div>
   )
 }
+
+
