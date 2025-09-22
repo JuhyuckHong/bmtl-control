@@ -56,14 +56,14 @@ export const MQTTPage = ({
                 className='publish-btn'
                 disabled={!publishTopic.trim() || !publishPayload.trim()}
               >
-                ?�� ?�송
+                메시지 전송
               </button>
             </div>
 
             {subscribedTopics.length > 0 && (
               <div className='subscribed-topics'>
                 <div className='topics-header'>
-                  ?�� 구독 중인 ?�픽 ({subscribedTopics.length})
+                  현재 구독 중인 토픽 ({subscribedTopics.length})
                 </div>
                 <div className='topics-list'>
                   {subscribedTopics.map((topic, index) => (

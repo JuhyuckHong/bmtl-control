@@ -152,7 +152,7 @@ body {
   box-sizing: border-box;
 }
 
-/* ?�더??모든 버튼??공통 ?��????�용 */
+/* 헤더에서 모든 버튼에 공통 스타일 적용 */
 .app-header .subscribe-btn-header,
 .app-header .disconnect-btn-header {
   padding: 0.5rem 1rem;

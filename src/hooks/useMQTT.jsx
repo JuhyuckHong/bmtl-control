@@ -307,7 +307,7 @@ export const useMQTT = () => {
     [addMessage, addSystemMessage]
   )
 
-  // ?��??�서 publish ?�벤?��? 받아??메시지 로그??추�?
+  // 외부에서 들어온 publish 이벤트를 메시지 로그에 기록
   const recordExternalPublish = useCallback(
     (topic, payload, qos) => {
       addMessage(topic, payload, 'sent')
