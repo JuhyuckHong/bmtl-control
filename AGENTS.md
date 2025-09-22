@@ -1,6 +1,14 @@
+﻿---
+encoding: utf-8
+lang: ko
+---
+
 # Repository Guidelines
 
 이 문서는 본 저장소의 구조, 빌드/개발 절차, 코드 스타일, 테스트, 협업 규칙을 간결히 안내합니다.
+
+## Encoding Notice
+- 문서는 UTF-8 인코딩을 유지하고 BOM 없이 저장하여 한글 깨짐을 방지하세요.
 
 ## Project Structure & Module Organization
 - 런타임 소스는 `src/`에 위치. `main.jsx`가 `App.jsx`를 부팅합니다.
@@ -42,4 +50,3 @@
 
 ## Communication
 - 기본 문서화와 커뮤니케이션은 한국어를 사용합니다. 영어 요약은 요청 시 제공하세요.
-
