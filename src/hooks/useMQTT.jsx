@@ -63,6 +63,7 @@ export const useMQTT = () => {
               setIsConnecting(false)
               setStatus('Connected')
               addMessage('System', 'Connected to MQTT broker', 'system')
+              console.log('🔌 MQTT Connected to broker')
 
               if (subscribedTopicsRef.current.size > 0) {
                 subscribedTopicsRef.current.forEach((topic) => {
@@ -73,6 +74,9 @@ export const useMQTT = () => {
                         `Resubscribe error: ${err.message}`,
                         'system'
                       )
+                      console.error('❌ MQTT Resubscribe error:', topic, err.message)
+                    } else {
+                      console.log('🔔 MQTT Resubscribed to:', topic)
                     }
                   })
                 })
@@ -101,7 +105,9 @@ export const useMQTT = () => {
             })
 
             client.on('message', (topic, payload) => {
-              addMessage(topic, payload.toString(), 'received')
+              const payloadStr = payload.toString()
+              addMessage(topic, payloadStr, 'received')
+              console.log('📥 MQTT Received:', topic, '→', payloadStr)
             })
           } catch (error) {
             setIsConnecting(false)
@@ -183,12 +189,16 @@ export const useMQTT = () => {
           setIsConnecting(false)
           setStatus('Connected')
           addSystemMessage('Connected to MQTT broker')
+          console.log('🔌 MQTT Connected to broker')
 
           if (subscribedTopicsRef.current.size > 0) {
             subscribedTopicsRef.current.forEach((topic) => {
               client.subscribe(topic, (err) => {
                 if (err) {
                   addSystemMessage(`Resubscribe error: ${err.message}`)
+                  console.error('❌ MQTT Resubscribe error:', topic, err.message)
+                } else {
+                  console.log('🔔 MQTT Resubscribed to:', topic)
                 }
               })
             })
@@ -217,7 +227,9 @@ export const useMQTT = () => {
         })
 
         client.on('message', (topic, payload) => {
-          addMessage(topic, payload.toString(), 'received')
+          const payloadStr = payload.toString()
+          addMessage(topic, payloadStr, 'received')
+          console.log('📥 MQTT Received:', topic, '→', payloadStr)
         })
 
         syncSubscribedTopics()
@@ -259,8 +271,10 @@ export const useMQTT = () => {
               subscribedTopicsRef.current.add(topic)
               syncSubscribedTopics()
               addSystemMessage(`Subscribed to ${topic}`)
+              console.log('🔔 MQTT Subscribed to:', topic)
             } else {
               addSystemMessage(`Subscription error: ${err.message}`)
+              console.error('❌ MQTT Subscription error:', topic, err.message)
             }
           })
         }
@@ -281,8 +295,10 @@ export const useMQTT = () => {
             subscribedTopicsRef.current.delete(topic)
             syncSubscribedTopics()
             addSystemMessage(`Unsubscribed from ${topic}`)
+            console.log('🔕 MQTT Unsubscribed from:', topic)
           } else {
             addSystemMessage(`Unsubscribe error: ${err.message}`)
+            console.error('❌ MQTT Unsubscribe error:', topic, err.message)
           }
         })
       }
@@ -298,8 +314,10 @@ export const useMQTT = () => {
           if (!err) {
             addMessage(topic, payload, 'sent')
             addSystemMessage(`Published to ${topic} (QoS: ${qos})`)
+            console.log('📤 MQTT Published:', topic, '→', payload, `(QoS: ${qos})`)
           } else {
             addSystemMessage(`Publish error: ${err.message}`)
+            console.error('❌ MQTT Publish error:', topic, err.message)
           }
         })
       }
@@ -312,6 +330,7 @@ export const useMQTT = () => {
     (topic, payload, qos) => {
       addMessage(topic, payload, 'sent')
       addSystemMessage(`Published to ${topic} (QoS: ${qos})`)
+      console.log('📤 MQTT Published (external):', topic, '→', payload, `(QoS: ${qos})`)
     },
     [addMessage, addSystemMessage]
   )
