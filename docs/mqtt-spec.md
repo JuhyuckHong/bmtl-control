@@ -26,7 +26,8 @@
 - 목적: 모든 디바이스 설정 조회(개별 응답으로 수신)
 - QoS: 2, retain: false
 - 페이로드: {}
-- 응답: 각 디바이스가 bmtl/response/settings/{MM}으로 개별 설정 송신
+- 응답: 각 디바이스가 `bmtl/response/settings/{MM}`으로 설정 송신(일괄 응답 주제는 사용하지 않음)
+- 비고: 컨트롤 서버가 응답을 수집해 UI에 반영하며, 별도의 관리 게이트웨이는 존재하지 않음.
 
 ### bmtl/request/settings/{MM}
 
@@ -60,6 +61,8 @@
 - 목적: 모든 디바이스의 지원 옵션(해상도/포맷/범위 등) 조회
 - QoS: 2, retain: false
 - 페이로드: {}
+- 응답: 각 디바이스가 `bmtl/response/options/{MM}`으로 지원 옵션 송신(일괄 응답 주제는 사용하지 않음)
+- 비고: 컨트롤 서버가 응답을 취합해 UI에 노출하며, 별도의 관리 게이트웨이는 존재하지 않음.
 
 ### bmtl/request/options/{MM}
 
@@ -236,6 +239,23 @@
 
 - 비고: 최종 재부팅 완료 여부는 LWT/하트비트 혹은 후속 부팅 이벤트/상태로 판단.
 
+### bmtl/response/reboot/{MM}
+
+- 목적: 개별 디바이스 재부팅 실행 결과(성공/실패 여부)
+- QoS: 1, retain: false
+- 페이로드:
+
+```json
+{
+  "response_type": "reboot_result",
+  "success": true,
+  "message": "Reboot initiated",
+  "timestamp": "2024-01-01T00:00:00Z"
+}
+```
+
+- 비고: `request_id`를 포함할 경우 서버가 요청-응답을 추적 가능.
+
 ### bmtl/event/boot/{MM}
 
 - 목적: 부팅 완료 이벤트(재부팅 포함)
@@ -253,22 +273,6 @@
 ```
 
 - 비고: reason 예시는 power_on, watchdog, reboot_cmd. 서버는 request_id와 상관관계를 확인.
-
-### bmtl/response/reboot/all
-
-- 목적: 전체 재부팅 결과(요청 접수/적용 범위)
-- QoS: 1, retain: false
-- 페이로드:
-
-```json
-{
-  "response_type": "reboot_all_result",
-  "success": true,
-  "message": "Global reboot initiated",
-  "affected_modules": ["bmotion01", "bmotion02"],
-  "timestamp": "..."
-}
-```
 
 ### bmtl/response/wiper/{MM}
 
@@ -347,6 +351,7 @@
 ## 구현 세부/권고
 
 - 모듈 ID/주제: {MM}는 2자리 문자 ID. 예: 01. 전체 대상은 all 리터럴 사용.
+- 토폴로지: 컨트롤 서버와 디바이스가 직접 MQTT 브로커를 통해 통신하며, 별도의 관리 게이트웨이는 구성되어 있지 않음.
 - 응답 포맷: 서버 UI 설정 값은 카멜케이스 사용. 디바이스의 설정 변경 응답/설정 조회 응답에서 카멜케이스로 반환 권장.
 - 품질/ISO 값: quality는 "높음/보통/낮음" 또는 정수(1~100) 모두 허용. iso는 "auto" 또는 정수 허용.
 - 상태 필드: storage_used는 %, temperature는 섭씨(C). last_* 필드는 ISO 8601 권장.
