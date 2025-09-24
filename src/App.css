@@ -1935,16 +1935,18 @@ button {
 
 /* SW Version Display */
 .sw-version {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-weight: 500;
   color: var(--text-primary);
   background: var(--bg-secondary);
-  padding: 0.15rem;
+  padding: 0.15rem 0.5rem;
   border-radius: 3px;
   min-height: 20px;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.2;
 }
 
 /* SW Update Button - Control Panel Size */

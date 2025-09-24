@@ -23,6 +23,14 @@ const DEFAULT_SETTINGS = {
 
 const CAMERA_OPTION_ORDER = ['resolution', 'iso', 'aperture', 'image_quality', 'focus_mode']
 
+const CAMERA_OPTION_LABELS = {
+  'Image Size': '크기',
+  'ISO Speed': 'ISO',
+  'Exposure Compensation': '노출',
+  'Image Quality': '품질',
+  'Focus Mode 2': '초점',
+}
+
 const extractOptionValues = (options = {}) => {
   const values = {}
 
@@ -181,10 +189,11 @@ const CameraModuleRowComponent = ({
           choices.unshift(currentValue)
         }
 
-        const label =
+        const originalLabel =
           typeof option.label === 'string' && option.label.trim().length > 0
             ? option.label.trim()
             : key
+        const label = CAMERA_OPTION_LABELS[originalLabel] || originalLabel
         const type =
           typeof option.type === 'string'
             ? option.type.trim().toLowerCase()
