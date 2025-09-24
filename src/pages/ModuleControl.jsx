@@ -17,8 +17,13 @@ export const ModuleControl = ({
   onGlobalCommand,
   recordPublish,
 }) => {
-  const { moduleStatuses, moduleSettings, sendCommand, requestSettings } =
-    useCameraStatus(mqttClient, subscribedTopics, recordPublish)
+  const {
+    moduleStatuses,
+    moduleSettings,
+    moduleOptions,
+    sendCommand,
+    requestSettings,
+  } = useCameraStatus(mqttClient, subscribedTopics, recordPublish)
 
   const collectKnownModuleIds = () => {
     const ids = new Set()
@@ -31,6 +36,13 @@ export const ModuleControl = ({
     })
 
     Object.keys(moduleSettings || {}).forEach((key) => {
+      const numericId = Number(key)
+      if (!Number.isNaN(numericId)) {
+        ids.add(numericId)
+      }
+    })
+
+    Object.keys(moduleOptions || {}).forEach((key) => {
       const numericId = Number(key)
       if (!Number.isNaN(numericId)) {
         ids.add(numericId)
@@ -80,6 +92,7 @@ export const ModuleControl = ({
         id: moduleId,
         status: moduleStatus,
         settings: moduleSettings[moduleId],
+        options: moduleOptions[moduleId],
       })
     })
 
@@ -126,6 +139,7 @@ export const ModuleControl = ({
             format: 'jpeg',
             aperture: 'f/2.8',
           },
+          options: moduleOptions[0],
           isDummy: true,
         })
       }
@@ -236,6 +250,7 @@ export const ModuleControl = ({
                       onLoadSettings={handleLoadSettings}
                       isDummy={module.isDummy}
                       initialSettings={module.settings}
+                      availableOptions={module.options}
                     />
                   ))}
                 </div>

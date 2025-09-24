@@ -61,6 +61,43 @@ const CAMERA_CONTROL_TOPICS = [
 
 
 
+const LEGACY_OPTION_KEYS = [
+  'supported_resolutions',
+  'iso_range',
+  'aperture_range',
+  'shutterspeed_range',
+  'whitebalance_options',
+  'supported_formats',
+]
+
+const extractOptionsPayload = (payload) => {
+  if (!payload || typeof payload !== 'object') {
+    return null
+  }
+
+  if (payload.options && typeof payload.options === 'object') {
+    return payload.options
+  }
+
+  const nestedKeys = ['data', 'payload', 'result']
+  for (const key of nestedKeys) {
+    const nestedCandidate = payload[key]
+    if (nestedCandidate && typeof nestedCandidate === 'object') {
+      const nested = extractOptionsPayload(nestedCandidate)
+      if (nested) {
+        return nested
+      }
+    }
+  }
+
+  const hasLegacyKeys = LEGACY_OPTION_KEYS.some((key) => key in payload)
+  if (hasLegacyKeys) {
+    return payload
+  }
+
+  return null
+}
+
 const hasStatusDiff = (existingModule, statusData = {}) => {
   if (!existingModule) {
     return true
@@ -744,28 +781,43 @@ export const useCameraStatus = (
             )
           }
         } else if (topic.startsWith('bmtl/response/options/')) {
-          // 옵션 응답 처리
           const moduleIdStr = topicParts[3]
 
           if (moduleIdStr === 'all') {
-            // 전체 옵션 응답
             debugLog(`📋 [Options] All modules options received`)
-            if (data.response_type === 'all_options') {
-              Object.entries(data.modules).forEach(([moduleKey, options]) => {
-                const moduleId = parseInt(moduleKey.replace('bmotion', ''), 10)
-                debugLog(`📋 [Options] Module ${moduleId} options:`, options)
-                updateModuleOptions(moduleId, options)
+
+            const modulesPayload =
+              (data.response_type === 'all_options' && data.modules && typeof data.modules === 'object' && data.modules) ||
+              (data.modules && typeof data.modules === 'object' && data.modules) ||
+              null
+
+            if (modulesPayload) {
+              Object.entries(modulesPayload).forEach(([moduleKey, rawOptions]) => {
+                const moduleId = parseInt(String(moduleKey).replace('bmotion', ''), 10)
+                if (Number.isNaN(moduleId)) {
+                  debugLog(`📋 [Options] Skipping unrecognized module key`, moduleKey)
+                  return
+                }
+
+                const optionsPayload = extractOptionsPayload(rawOptions) || rawOptions
+                debugLog(`📋 [Options] Module ${moduleId} options:`, optionsPayload)
+                updateModuleOptions(moduleId, optionsPayload)
               })
+            } else {
+              debugLog('📋 [Options] Unable to parse all-modules payload', data)
             }
           } else {
-            // 개별 옵션 응답
             const moduleId = parseInt(moduleIdStr, 10)
+            const optionsPayload = extractOptionsPayload(data)
+
             debugLog(
               `📋 [Options] Module ${moduleId} options received:`,
-              data.options
+              optionsPayload || data
             )
 
-            if (data.response_type === 'options') {
+            if (optionsPayload) {
+              updateModuleOptions(moduleId, optionsPayload)
+            } else if (data.options && typeof data.options === 'object') {
               updateModuleOptions(moduleId, data.options)
             }
           }
