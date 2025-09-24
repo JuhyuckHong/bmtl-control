@@ -21,6 +21,47 @@ const DEFAULT_SETTINGS = {
   aperture: 'f/2.8',
 }
 
+const CAMERA_OPTION_ORDER = ['resolution', 'iso', 'aperture', 'image_quality', 'focus_mode']
+
+const extractOptionValues = (options = {}) => {
+  const values = {}
+
+  Object.entries(options || {}).forEach(([key, option]) => {
+    if (!option || typeof option !== 'object') {
+      return
+    }
+
+    if (typeof option.current === 'undefined') {
+      return
+    }
+
+    const rawCurrent = option.current
+    let currentValue
+
+    if (rawCurrent !== null && typeof rawCurrent === 'object') {
+      if (Object.prototype.hasOwnProperty.call(rawCurrent, 'value')) {
+        currentValue = String(rawCurrent.value)
+      } else if (Object.prototype.hasOwnProperty.call(rawCurrent, 'label')) {
+        currentValue = String(rawCurrent.label)
+      } else {
+        currentValue = JSON.stringify(rawCurrent)
+      }
+    } else {
+      currentValue = String(rawCurrent)
+    }
+
+    values[key] = currentValue
+
+    if (key === 'resolution') {
+      values.imageSize = currentValue
+    } else if (key === 'image_quality') {
+      values.quality = currentValue
+    }
+  })
+
+  return values
+}
+
 /**
  * Camera Module Row Component
  * @param {Object} props - Component props
@@ -52,21 +93,147 @@ const CameraModuleRowComponent = ({
   onLoadSettings,
   isDummy,
   initialSettings,
+  availableOptions,
 }) => {
   const [settings, setSettings] = useState(initialSettings || DEFAULT_SETTINGS)
   useEffect(() => {
-    const nextSettings = initialSettings || DEFAULT_SETTINGS
+    const baseSettings = initialSettings || DEFAULT_SETTINGS
+    const optionDefaults = extractOptionValues(availableOptions)
+    const nextSettings = {
+      ...DEFAULT_SETTINGS,
+      ...baseSettings,
+      ...optionDefaults,
+    }
+
     setSettings((prev) =>
       areSettingsEqual(prev, nextSettings) ? prev : nextSettings
     )
-  }, [initialSettings])
+  }, [initialSettings, availableOptions])
+
+  const cameraOptionList = useMemo(() => {
+    if (!availableOptions) {
+      return []
+    }
+
+    const normalizeChoice = (choice) => {
+      if (choice === null || typeof choice === 'undefined') {
+        return ''
+      }
+
+      if (typeof choice === 'object') {
+        if (Object.prototype.hasOwnProperty.call(choice, 'value')) {
+          return String(choice.value)
+        }
+        if (Object.prototype.hasOwnProperty.call(choice, 'label')) {
+          return String(choice.label)
+        }
+        return JSON.stringify(choice)
+      }
+
+      return String(choice)
+    }
+
+    const pickChoices = (option) => {
+      if (!option) {
+        return []
+      }
+
+      if (Array.isArray(option)) {
+        return option
+      }
+
+      const candidates = [option.choices, option.values, option.options]
+
+      for (const candidate of candidates) {
+        if (Array.isArray(candidate)) {
+          return candidate
+        }
+        if (candidate && typeof candidate === 'object') {
+          return Object.values(candidate)
+        }
+      }
+
+      return []
+    }
+
+    return Object.entries(availableOptions)
+      .map(([key, option]) => {
+        if (!option || typeof option !== 'object') {
+          return null
+        }
+
+        const rawChoices = pickChoices(option)
+        const choices = Array.from(
+          new Set(
+            rawChoices
+              .map((choice) => normalizeChoice(choice))
+              .filter((value) => value && value.length > 0)
+          )
+        )
+
+        const rawCurrent = option.current
+        const currentValue =
+          typeof rawCurrent === 'undefined'
+            ? undefined
+            : normalizeChoice(rawCurrent)
+
+        if (currentValue && !choices.includes(currentValue)) {
+          choices.unshift(currentValue)
+        }
+
+        const label =
+          typeof option.label === 'string' && option.label.trim().length > 0
+            ? option.label.trim()
+            : key
+        const type =
+          typeof option.type === 'string'
+            ? option.type.trim().toLowerCase()
+            : 'menu'
+        const readOnly =
+          typeof option.readOnly === 'boolean'
+            ? option.readOnly
+            : Boolean(option.read_only)
+
+        return {
+          key,
+          label,
+          type,
+          readOnly,
+          choices,
+          current: currentValue,
+        }
+      })
+      .filter(Boolean)
+      .sort((a, b) => {
+        const indexA = CAMERA_OPTION_ORDER.indexOf(a.key)
+        const indexB = CAMERA_OPTION_ORDER.indexOf(b.key)
+        const safeA = indexA === -1 ? CAMERA_OPTION_ORDER.length : indexA
+        const safeB = indexB === -1 ? CAMERA_OPTION_ORDER.length : indexB
+
+        if (safeA === safeB) {
+          return a.label.localeCompare(b.label)
+        }
+
+        return safeA - safeB
+      })
+  }, [availableOptions])
 
   const [isSiteNameModalOpen, setIsSiteNameModalOpen] = useState(false)
   const handleSettingChange = useCallback((key, value) => {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: value,
-    }))
+    setSettings((prev) => {
+      const next = {
+        ...prev,
+        [key]: value,
+      }
+
+      if (key === 'resolution') {
+        next.imageSize = value
+      } else if (key === 'image_quality') {
+        next.quality = value
+      }
+
+      return next
+    })
   }, [])
 
   const handleTimeChange = useCallback((timeKey, component, value) => {
@@ -549,86 +716,56 @@ const CameraModuleRowComponent = ({
       </div>
 
       <div className='camera-settings-stack'>
-        <div className='setting-group'>
-          <span className='setting-label'>Size</span>
-          <select
-            value={settings.imageSize}
-            onChange={(e) => handleSettingChange('imageSize', e.target.value)}
-            disabled={!isEnabled}
-            title='이미지 해상도'
-          >
-            <option value='640x480'>640x480</option>
-            <option value='1280x720'>1280x720</option>
-            <option value='1920x1080'>1920x1080</option>
-            <option value='2560x1440'>2560x1440</option>
-            <option value='3840x2160'>3840x2160</option>
-          </select>
-        </div>
+        {cameraOptionList.length === 0 ? (
+          <div className='setting-group'>
+            <span className='setting-label'>Camera Options</span>
+            <span>Request camera options from the device.</span>
+          </div>
+        ) : (
+          cameraOptionList.map((option) => {
+            const hasSettingValue = Object.prototype.hasOwnProperty.call(
+              settings,
+              option.key
+            )
+            let resolvedValue
+            if (hasSettingValue) {
+              resolvedValue = settings[option.key]
+            } else if (typeof option.current !== 'undefined') {
+              resolvedValue = option.current
+            } else if (option.choices.length > 0) {
+              resolvedValue = option.choices[0]
+            } else {
+              resolvedValue = ''
+            }
+            const currentValue =
+              resolvedValue === undefined ? '' : String(resolvedValue)
+            const disabled = !isEnabled || option.readOnly
 
-        <div className='setting-group'>
-          <span className='setting-label'>Quality</span>
-          <select
-            value={settings.quality}
-            onChange={(e) => handleSettingChange('quality', e.target.value)}
-            disabled={!isEnabled}
-            title='이미지 품질'
-          >
-            <option value='최고'>최고</option>
-            <option value='보통'>보통</option>
-            <option value='낮음'>낮음</option>
-          </select>
-        </div>
 
-        <div className='setting-group'>
-          <span className='setting-label'>ISO</span>
-          <select
-            value={settings.iso}
-            onChange={(e) => handleSettingChange('iso', e.target.value)}
-            disabled={!isEnabled}
-            title='ISO 감도'
-          >
-            <option value='100'>100</option>
-            <option value='200'>200</option>
-            <option value='400'>400</option>
-            <option value='800'>800</option>
-            <option value='1600'>1600</option>
-            <option value='3200'>3200</option>
-            <option value='6400'>6400</option>
-          </select>
-        </div>
-
-        <div className='setting-group'>
-          <span className='setting-label'>Format</span>
-          <select
-            value={settings.format}
-            onChange={(e) => handleSettingChange('format', e.target.value)}
-            disabled={!isEnabled}
-            title='이미지 포맷'
-          >
-            <option value='JPG'>JPG</option>
-            <option value='RAW'>RAW</option>
-            <option value='JPG+RAW'>JPG+RAW</option>
-          </select>
-        </div>
-
-        <div className='setting-group'>
-          <span className='setting-label'>Aperture</span>
-          <select
-            value={settings.aperture}
-            onChange={(e) => handleSettingChange('aperture', e.target.value)}
-            disabled={!isEnabled}
-            title='조리개 값'
-          >
-            <option value='f/1.4'>1.4</option>
-            <option value='f/2.0'>2.0</option>
-            <option value='f/2.8'>2.8</option>
-            <option value='f/4.0'>4.0</option>
-            <option value='f/5.6'>5.6</option>
-            <option value='f/8.0'>8.0</option>
-            <option value='f/11'>11</option>
-            <option value='f/16'>16</option>
-          </select>
-        </div>
+            return (
+              <div className='setting-group' key={option.key}>
+                <span className='setting-label'>{option.label}</span>
+                <select
+                  value={currentValue}
+                  onChange={(event) =>
+                    handleSettingChange(option.key, event.target.value)
+                  }
+                  disabled={disabled}
+                  title={option.label}
+                >
+                  {option.choices.map((choice) => {
+                    const choiceValue = String(choice)
+                    return (
+                      <option key={choiceValue} value={choiceValue}>
+                        {choiceValue}
+                      </option>
+                    )
+                  })}
+                </select>
+              </div>
+            )
+          })
+        )}
       </div>
 
       <div className='settings-stack'>
