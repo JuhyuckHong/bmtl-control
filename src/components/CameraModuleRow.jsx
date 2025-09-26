@@ -11,10 +11,10 @@ const INTERVAL_OPTIONS = Array.from({ length: 60 }, (_, index) =>
   (index + 1).toString().padStart(2, '0')
 )
 const DEFAULT_SETTINGS = {
-  startTime: '08:00',
-  endTime: '18:00',
-  captureInterval: '10',
-  imageSize: '1920x1080',
+  start_time: '08:00',
+  end_time: '18:00',
+  capture_interval: '10',
+  image_size: '1920x1080',
   quality: '보통',
   iso: '400',
   format: 'JPG',
@@ -61,7 +61,7 @@ const extractOptionValues = (options = {}) => {
     values[key] = currentValue
 
     if (key === 'resolution') {
-      values.imageSize = currentValue
+      values.image_size = currentValue
     } else if (key === 'image_quality') {
       values.quality = currentValue
     }
@@ -236,7 +236,7 @@ const CameraModuleRowComponent = ({
       }
 
       if (key === 'resolution') {
-        next.imageSize = value
+        next.image_size = value
       } else if (key === 'image_quality') {
         next.quality = value
       }
@@ -287,9 +287,6 @@ const CameraModuleRowComponent = ({
     onLoadSettings(moduleId)
   }, [onLoadSettings, moduleId])
 
-  const handleLoadOptions = useCallback(() => {
-    onCommand(moduleId, 'options_request', {})
-  }, [onCommand, moduleId])
 
   const handleSiteNameChange = useCallback(() => {
     setIsSiteNameModalOpen(true)
@@ -562,9 +559,9 @@ const CameraModuleRowComponent = ({
           <span className='setting-label'>시작</span>
           <div className='time-select-container'>
             <select
-              value={(settings.startTime || '08:00').split(':')[0]}
+              value={(settings.start_time || '08:00').split(':')[0]}
               onChange={(e) =>
-                handleTimeChange('startTime', 'hour', e.target.value)
+                handleTimeChange('start_time', 'hour', e.target.value)
               }
               disabled={!isEnabled}
               title='시작 시간 (시)'
@@ -584,9 +581,9 @@ const CameraModuleRowComponent = ({
           <span className='setting-label'></span>
           <div className='time-select-container'>
             <select
-              value={(settings.startTime || '08:00').split(':')[1]}
+              value={(settings.start_time || '08:00').split(':')[1]}
               onChange={(e) =>
-                handleTimeChange('startTime', 'minute', e.target.value)
+                handleTimeChange('start_time', 'minute', e.target.value)
               }
               disabled={!isEnabled}
               title='시작 시간 (분)'
@@ -606,9 +603,9 @@ const CameraModuleRowComponent = ({
           <span className='setting-label'>종료</span>
           <div className='time-select-container'>
             <select
-              value={(settings.endTime || '18:00').split(':')[0]}
+              value={(settings.end_time || '18:00').split(':')[0]}
               onChange={(e) =>
-                handleTimeChange('endTime', 'hour', e.target.value)
+                handleTimeChange('end_time', 'hour', e.target.value)
               }
               disabled={!isEnabled}
               title='종료 시간 (시)'
@@ -628,9 +625,9 @@ const CameraModuleRowComponent = ({
           <span className='setting-label'></span>
           <div className='time-select-container'>
             <select
-              value={(settings.endTime || '18:00').split(':')[1]}
+              value={(settings.end_time || '18:00').split(':')[1]}
               onChange={(e) =>
-                handleTimeChange('endTime', 'minute', e.target.value)
+                handleTimeChange('end_time', 'minute', e.target.value)
               }
               disabled={!isEnabled}
               title='종료 시간 (분)'
@@ -650,9 +647,9 @@ const CameraModuleRowComponent = ({
           <span className='setting-label'>간격</span>
           <div className='time-select-container'>
             <select
-              value={settings.captureInterval || '10'}
+              value={settings.capture_interval || '10'}
               onChange={(e) =>
-                handleSettingChange('captureInterval', e.target.value)
+                handleSettingChange('capture_interval', e.target.value)
               }
               disabled={!isEnabled}
               title='촬영 간격 (분)'
@@ -783,17 +780,9 @@ const CameraModuleRowComponent = ({
             className='btn load'
             onClick={handleLoadSettings}
             disabled={!isEnabled}
-            title='현재 설정 불러오기'
+            title='현재 설정 및 카메라 옵션 불러오기'
           >
             현재 설정 불러오기
-          </button>
-          <button
-            className='btn load'
-            onClick={handleLoadOptions}
-            disabled={!isEnabled}
-            title='사용 가능한 옵션 불러오기'
-          >
-            카메라 옵션 불러오기
           </button>
           <button
             className='btn apply'

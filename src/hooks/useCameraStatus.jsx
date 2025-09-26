@@ -1,6 +1,52 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useToast } from '../contexts/ToastContext'
 
+// 카멜케이스를 스네이크케이스로 변환
+const camelToSnake = (str) => {
+  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+}
+
+// 스네이크케이스를 카멜케이스로 변환
+const snakeToCamel = (str) => {
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+}
+
+// 객체의 키를 스네이크케이스로 변환
+const convertKeysToSnake = (obj) => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    return obj
+  }
+
+  const converted = {}
+  Object.entries(obj).forEach(([key, value]) => {
+    const snakeKey = camelToSnake(key)
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      converted[snakeKey] = convertKeysToSnake(value)
+    } else {
+      converted[snakeKey] = value
+    }
+  })
+  return converted
+}
+
+// 객체의 키를 카멜케이스로 변환 (수신 시 사용)
+const convertKeysToCamel = (obj) => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    return obj
+  }
+
+  const converted = {}
+  Object.entries(obj).forEach(([key, value]) => {
+    const camelKey = snakeToCamel(key)
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      converted[camelKey] = convertKeysToCamel(value)
+    } else {
+      converted[camelKey] = value
+    }
+  })
+  return converted
+}
+
 const CAMERA_CONTROL_TOPICS = [
 
   // 서비스 헬스 상태
@@ -195,7 +241,9 @@ export const useCameraStatus = (
       if (!mqttClient?.connected) return
 
       const topic = `bmtl/set/settings/${moduleId.toString().padStart(2, '0')}`
-      const payload = JSON.stringify(settings)
+      // 설정을 스네이크케이스로 변환
+      const snakeSettings = convertKeysToSnake(settings)
+      const payload = JSON.stringify(snakeSettings)
 
       mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
         if (err) {
@@ -371,7 +419,9 @@ export const useCameraStatus = (
       if (!mqttClient?.connected) return
 
       const topic = `bmtl/set/sitename/${moduleId.toString().padStart(2, '0')}`
-      const payload = JSON.stringify({ site_name: siteName })
+      // 사이트명 데이터를 스네이크케이스로 변환
+      const snakeData = convertKeysToSnake({ siteName: siteName })
+      const payload = JSON.stringify(snakeData)
 
       mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
         if (err) {
@@ -699,23 +749,26 @@ export const useCameraStatus = (
           // 헬스 상태 처리 (메시지를 받으면 온라인으로 간주)
           const moduleIdStr = topicParts[3]
           const moduleId = parseInt(moduleIdStr, 10)
+          // 수신된 데이터를 카멜케이스로 변환
+          const camelData = convertKeysToCamel(data)
+
           if (import.meta.env.MODE === 'development') {
             debugLog(
-              `💚 [Health Update] Module ${moduleId} - Online, Site: ${data.site_name}`
+              `💚 [Health Update] Module ${moduleId} - Online, Site: ${camelData.siteName || data.site_name}`
             )
           }
 
           updateModuleStatus(moduleId, {
             isConnected: true, // 메시지를 받으면 온라인으로 처리
-            siteName: data.site_name,
-            storageUsed: data.storage_used,
-            temperature: data.temperature, // 온도 정보 추가
-            lastCaptureTime: data.last_capture_time,
-            lastBootTime: data.last_boot_time,
-            todayTotalCaptures: data.today_total_captures,
-            todayCapturedCount: data.today_captured_count,
-            missedCaptures: data.missed_captures,
-            swVersion: data.version || data.sw_version || data.swVersion, // SW 버전 정보 추가
+            siteName: camelData.siteName || data.site_name,
+            storageUsed: camelData.storageUsed || data.storage_used,
+            temperature: camelData.temperature || data.temperature,
+            lastCaptureTime: camelData.lastCaptureTime || data.last_capture_time,
+            lastBootTime: camelData.lastBootTime || data.last_boot_time,
+            todayTotalCaptures: camelData.todayTotalCaptures || data.today_total_captures,
+            todayCapturedCount: camelData.todayCapturedCount || data.today_captured_count,
+            missedCaptures: camelData.missedCaptures || data.missed_captures,
+            swVersion: camelData.version || camelData.swVersion || data.version || data.sw_version || data.swVersion,
           })
         } else if (topic.startsWith('bmtl/response/settings/')) {
           // 설정 응답 처리
@@ -723,10 +776,20 @@ export const useCameraStatus = (
             // 전체 설정 응답
             debugLog(`⚙️ [Settings] All modules settings received`)
             if (data.response_type === 'all_settings') {
-              Object.entries(data.modules).forEach(([moduleKey, settings]) => {
+              Object.entries(data.modules).forEach(([moduleKey, moduleData]) => {
                 const moduleId = parseInt(moduleKey.replace('bmotion', ''), 10)
+                // 설정 데이터를 카멜케이스로 변환
+                const camelModuleData = convertKeysToCamel(moduleData)
+                const settings = camelModuleData.settings || camelModuleData
                 debugLog(`⚙️ [Settings] Module ${moduleId} settings:`, settings)
                 updateModuleSettings(moduleId, settings)
+
+                // 카메라 옵션이 함께 오는 경우 처리
+                const cameraOptions = camelModuleData.cameraOptions || moduleData.camera_options
+                if (cameraOptions) {
+                  debugLog(`📋 [Options] Module ${moduleId} camera options from all settings response:`, cameraOptions)
+                  updateModuleOptions(moduleId, cameraOptions)
+                }
               })
             }
           } else {
@@ -738,7 +801,17 @@ export const useCameraStatus = (
             )
 
             if (data.response_type === 'settings') {
-              updateModuleSettings(moduleId, data.settings)
+              // 설정 데이터를 카멜케이스로 변환
+              const camelData = convertKeysToCamel(data)
+              const settings = camelData.settings
+              updateModuleSettings(moduleId, settings)
+
+              // 카메라 옵션이 함께 오는 경우 처리
+              const cameraOptions = camelData.cameraOptions || data.camera_options
+              if (cameraOptions) {
+                debugLog(`📋 [Options] Module ${moduleId} camera options from settings response:`, cameraOptions)
+                updateModuleOptions(moduleId, cameraOptions)
+              }
             }
           }
         } else if (topic.startsWith('bmtl/response/set/settings/')) {
@@ -848,12 +921,15 @@ export const useCameraStatus = (
             `Status: ${data.power_status || 'Unknown'}`
           )
 
-          if (data.success && data.power_status) {
+          const camelData = convertKeysToCamel(data)
+          const powerStatus = camelData.powerStatus || data.power_status
+
+          if (data.success && powerStatus) {
             setModuleStatuses((prev) => ({
               ...prev,
               [moduleId]: {
                 ...prev[moduleId],
-                cameraPowerStatus: data.power_status, // 'on', 'off', 'error'
+                cameraPowerStatus: powerStatus, // 'on', 'off', 'error'
               },
             }))
           }
@@ -868,9 +944,11 @@ export const useCameraStatus = (
           )
 
           // 해당 모듈 상태 업데이트
-          if (data.success && data.site_name) {
+          const camelData = convertKeysToCamel(data)
+          const siteName = camelData.siteName || data.site_name
+          if (data.success && siteName) {
             updateModuleStatus(moduleId, {
-              siteName: data.site_name,
+              siteName: siteName,
             })
           }
         } else if (topic.startsWith('bmtl/response/sw-update/')) {
@@ -886,8 +964,14 @@ export const useCameraStatus = (
           const moduleIdStr = topicParts[3]
           const moduleId = parseInt(moduleIdStr, 10)
 
+          // 수신 데이터를 카멜케이스로 변환
+          const camelData = convertKeysToCamel(data)
+
           // 여러 가능한 필드명 확인
           const version =
+            camelData.version ||
+            camelData.commitHash ||
+            camelData.swVersion ||
             data.version ||
             data.commit_hash ||
             data.swVersion ||

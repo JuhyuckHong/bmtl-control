@@ -1945,7 +1945,8 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
   line-height: 1.2;
 }
 
