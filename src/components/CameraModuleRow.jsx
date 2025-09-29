@@ -113,9 +113,25 @@ const CameraModuleRowComponent = ({
       ...optionDefaults,
     }
 
-    setSettings((prev) =>
-      areSettingsEqual(prev, nextSettings) ? prev : nextSettings
-    )
+    setSettings((prev) => {
+      // 이미 설정이 있고 사용자가 변경했을 가능성이 있다면, 기존 값을 유지
+      if (prev && Object.keys(prev).length > 0) {
+        // 운영 시간 설정은 사용자가 변경했을 수 있으므로 기존 값 유지
+        const preservedUserSettings = {
+          start_time: prev.start_time,
+          end_time: prev.end_time,
+          capture_interval: prev.capture_interval,
+        }
+
+        // 새로운 옵션만 추가하고, 기존 설정은 유지
+        return {
+          ...nextSettings,
+          ...preservedUserSettings,
+        }
+      }
+
+      return areSettingsEqual(prev, nextSettings) ? prev : nextSettings
+    })
   }, [initialSettings, availableOptions])
 
   const cameraOptionList = useMemo(() => {
@@ -277,6 +293,7 @@ const CameraModuleRowComponent = ({
   }, [onCommand, moduleId])
 
   const handleApplySettings = useCallback(() => {
+    console.log(`🔧 [Apply Settings] Module ${moduleId} - Sending settings:`, settings)
     onCommand(moduleId, 'configure', settings)
   }, [onCommand, moduleId, settings])
 

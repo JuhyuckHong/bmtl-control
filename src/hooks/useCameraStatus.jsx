@@ -18,14 +18,36 @@ const convertKeysToSnake = (obj) => {
   }
 
   const converted = {}
+  const snakeKeys = new Set()
+
+  // 먼저 이미 스네이크케이스인 키들을 처리
   Object.entries(obj).forEach(([key, value]) => {
-    const snakeKey = camelToSnake(key)
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      converted[snakeKey] = convertKeysToSnake(value)
-    } else {
-      converted[snakeKey] = value
+    if (key.includes('_')) {
+      // 이미 스네이크케이스인 키
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        converted[key] = convertKeysToSnake(value)
+      } else {
+        converted[key] = value
+      }
+      snakeKeys.add(key)
     }
   })
+
+  // 그 다음 카멜케이스 키들을 변환 (이미 스네이크케이스로 존재하지 않는 경우만)
+  Object.entries(obj).forEach(([key, value]) => {
+    if (!key.includes('_')) {
+      // 카멜케이스 키
+      const snakeKey = camelToSnake(key)
+      if (!snakeKeys.has(snakeKey)) {
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          converted[snakeKey] = convertKeysToSnake(value)
+        } else {
+          converted[snakeKey] = value
+        }
+      }
+    }
+  })
+
   return converted
 }
 
@@ -776,6 +798,7 @@ export const useCameraStatus = (
             // 전체 설정 응답
             debugLog(`⚙️ [Settings] All modules settings received`)
             if (data.response_type === 'all_settings') {
+              let loadedCount = 0
               Object.entries(data.modules).forEach(([moduleKey, moduleData]) => {
                 const moduleId = parseInt(moduleKey.replace('bmotion', ''), 10)
                 // 설정 데이터를 카멜케이스로 변환
@@ -783,6 +806,7 @@ export const useCameraStatus = (
                 const settings = camelModuleData.settings || camelModuleData
                 debugLog(`⚙️ [Settings] Module ${moduleId} settings:`, settings)
                 updateModuleSettings(moduleId, settings)
+                loadedCount++
 
                 // 카메라 옵션이 함께 오는 경우 처리
                 const cameraOptions = camelModuleData.cameraOptions || moduleData.camera_options
@@ -791,6 +815,11 @@ export const useCameraStatus = (
                   updateModuleOptions(moduleId, cameraOptions)
                 }
               })
+
+              // 전체 설정 불러오기 성공 토스트
+              if (loadedCount > 0) {
+                showToast(`전체 모듈 설정을 불러왔습니다 (${loadedCount}개)`, { type: 'success', duration: 2000 })
+              }
             }
           } else {
             // 개별 설정 응답
@@ -805,6 +834,10 @@ export const useCameraStatus = (
               const camelData = convertKeysToCamel(data)
               const settings = camelData.settings
               updateModuleSettings(moduleId, settings)
+
+              // 개별 설정 불러오기 성공 토스트
+              const mm = moduleId.toString().padStart(2, '0')
+              showToast(`모듈 ${mm} 설정을 불러왔습니다`, { type: 'success', duration: 2000 })
 
               // 카메라 옵션이 함께 오는 경우 처리
               const cameraOptions = camelData.cameraOptions || data.camera_options
