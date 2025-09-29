@@ -15,7 +15,6 @@ const DEFAULT_SETTINGS = {
   end_time: '18:00',
   capture_interval: '10',
   image_size: '1920x1080',
-  quality: '보통',
   iso: '400',
   format: 'JPG',
   aperture: 'f/2.8',
@@ -62,8 +61,6 @@ const extractOptionValues = (options = {}) => {
 
     if (key === 'resolution') {
       values.image_size = currentValue
-    } else if (key === 'image_quality') {
-      values.quality = currentValue
     }
   })
 
@@ -123,14 +120,22 @@ const CameraModuleRowComponent = ({
           capture_interval: prev.capture_interval,
         }
 
+        // quality가 있다면 제거 (image_quality 사용)
+        const cleanedNextSettings = { ...nextSettings }
+        delete cleanedNextSettings.quality
+
         // 새로운 옵션만 추가하고, 기존 설정은 유지
         return {
-          ...nextSettings,
+          ...cleanedNextSettings,
           ...preservedUserSettings,
         }
       }
 
-      return areSettingsEqual(prev, nextSettings) ? prev : nextSettings
+      // quality가 있다면 제거 (image_quality 사용)
+      const cleanedNextSettings = { ...nextSettings }
+      delete cleanedNextSettings.quality
+
+      return areSettingsEqual(prev, cleanedNextSettings) ? prev : cleanedNextSettings
     })
   }, [initialSettings, availableOptions])
 
@@ -293,7 +298,6 @@ const CameraModuleRowComponent = ({
   }, [onCommand, moduleId])
 
   const handleApplySettings = useCallback(() => {
-    console.log(`🔧 [Apply Settings] Module ${moduleId} - Sending settings:`, settings)
     onCommand(moduleId, 'configure', settings)
   }, [onCommand, moduleId, settings])
 

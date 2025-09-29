@@ -134,7 +134,6 @@ export const ModuleControl = ({
             end_time: '18:00',
             capture_interval: '10',
             image_size: '1920x1080',
-            quality: '85',
             iso: 'auto',
             format: 'jpeg',
             aperture: 'f/2.8',
