@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useToast } from '../contexts/ToastContext'
 
 // 카멜케이스를 스네이크케이스로 변환
@@ -186,6 +186,8 @@ export const useCameraStatus = (
   const [moduleSettings, setModuleSettings] = useState({})
   const [moduleOptions, setModuleOptions] = useState({})
   const [localSubscribedTopics, setLocalSubscribedTopics] = useState(new Set())
+  const autoRequestedSettingsRef = useRef(new Set())
+  const moduleSettingsRef = useRef({})
   const isDevelopment = import.meta.env.MODE === 'development'
   const debugLog = (...args) => {
     if (isDevelopment) {
@@ -792,9 +794,29 @@ export const useCameraStatus = (
             missedCaptures: camelData.missedCaptures || data.missed_captures,
             swVersion: camelData.version || camelData.swVersion || data.version || data.sw_version || data.swVersion,
           })
+
+          // Health 수신 시, 이번 브로커 연결 동안 아직 설정을 받아오지 않았다면 1회 자동 요청
+          try {
+            const alreadyRequested = autoRequestedSettingsRef.current.has(moduleId)
+            const hasSettings = Boolean(moduleSettingsRef.current[moduleId])
+            if (!alreadyRequested && !hasSettings && mqttClient?.connected) {
+              const mm = moduleId.toString().padStart(2, '0')
+              const requestTopic = `bmtl/request/settings/${mm}`
+              const requestPayload = JSON.stringify({})
+              mqttClient.publish(requestTopic, requestPayload, { qos: 2 }, (err) => {
+                if (!err) {
+                  autoRequestedSettingsRef.current.add(moduleId)
+                  debugLog('🔄 [Auto Settings Request] Sent for module', mm)
+                  if (recordPublish) {
+                    recordPublish(requestTopic, requestPayload, 2)
+                  }
+                }
+              })
+            }
+          } catch {}
         } else if (topic.startsWith('bmtl/response/settings/')) {
           // 설정 응답 처리
-          if (topicParts[3] === 'all') {
+          if (false && topicParts[3] === 'all') {
             // 전체 설정 응답
             debugLog(`⚙️ [Settings] All modules settings received`)
             if (data.response_type === 'all_settings') {
@@ -832,8 +854,9 @@ export const useCameraStatus = (
             if (data.response_type === 'settings') {
               // 설정 데이터를 카멜케이스로 변환
               const camelData = convertKeysToCamel(data)
-              const settings = camelData.settings
-              updateModuleSettings(moduleId, settings)
+              const rawSettings = camelData.settings || data.settings || {}
+              const snakeSettings = convertKeysToSnake(rawSettings)
+              updateModuleSettings(moduleId, snakeSettings)
 
               // 개별 설정 불러오기 성공 토스트
               const mm = moduleId.toString().padStart(2, '0')
@@ -1148,6 +1171,23 @@ export const useCameraStatus = (
 
     return () => clearInterval(interval)
   }, [localSubscribedTopics]) // moduleStatuses 의존성 제거
+
+  // 브로커 연결 시 자동 설정 자동요청 플래그 초기화
+  useEffect(() => {
+    if (!mqttClient) return
+    const onConnectClear = () => {
+      try { autoRequestedSettingsRef.current.clear() } catch {}
+    }
+    mqttClient.on('connect', onConnectClear)
+    return () => {
+      mqttClient.off('connect', onConnectClear)
+    }
+  }, [mqttClient])
+
+  // 최신 moduleSettings를 ref에 동기화하여 메시지 핸들러에서 참조
+  useEffect(() => {
+    moduleSettingsRef.current = moduleSettings || {}
+  }, [moduleSettings])
 
   return {
     moduleStatuses,
