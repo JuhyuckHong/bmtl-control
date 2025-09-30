@@ -20,14 +20,20 @@ const DEFAULT_SETTINGS = {
   aperture: 'f/2.8',
 }
 
-const CAMERA_OPTION_ORDER = ['resolution', 'iso', 'aperture', 'image_quality', 'focus_mode']
+const CAMERA_OPTION_ORDER = [
+  'resolution',
+  'iso',
+  'aperture',
+  'image_quality',
+  'focus_mode',
+]
 
 const CAMERA_OPTION_LABELS = {
-  'Image Size': '크기',
+  'Image Size': '사이즈',
   'ISO Speed': 'ISO',
   'Exposure Compensation': '노출',
-  'Image Quality': '품질',
-  'Focus Mode 2': '초점',
+  'Image Quality': '퀄리티',
+  'Focus Mode 2': '포커스',
 }
 
 const extractOptionValues = (options = {}) => {
@@ -111,31 +117,33 @@ const CameraModuleRowComponent = ({
     }
 
     setSettings((prev) => {
-      // 이미 설정이 있고 사용자가 변경했을 가능성이 있다면, 기존 값을 유지
+      // 옵션이 로드되었을 때만 기본값을 업데이트하고 사용자가 변경한 설정은 유지
       if (prev && Object.keys(prev).length > 0) {
-        // 운영 시간 설정은 사용자가 변경했을 수 있으므로 기존 값 유지
+        // 운영 시간 설정은 사용자가 변경한 기본값을 우선으로 사용
         const preservedUserSettings = {
-          start_time: prev.start_time,
-          end_time: prev.end_time,
-          capture_interval: prev.capture_interval,
+          start_time: baseSettings.start_time,
+          end_time: baseSettings.end_time,
+          capture_interval: baseSettings.capture_interval,
         }
 
-        // quality가 있다면 제거 (image_quality 사용)
+        // quality는 제거 (image_quality 사용)
         const cleanedNextSettings = { ...nextSettings }
         delete cleanedNextSettings.quality
 
-        // 새로운 옵션만 추가하고, 기존 설정은 유지
+        // 카메라 옵션만 업데이트하고 사용자 설정은 유지
         return {
           ...cleanedNextSettings,
           ...preservedUserSettings,
         }
       }
 
-      // quality가 있다면 제거 (image_quality 사용)
+      // quality는 제거 (image_quality 사용)
       const cleanedNextSettings = { ...nextSettings }
       delete cleanedNextSettings.quality
 
-      return areSettingsEqual(prev, cleanedNextSettings) ? prev : cleanedNextSettings
+      return areSettingsEqual(prev, cleanedNextSettings)
+        ? prev
+        : cleanedNextSettings
     })
   }, [initialSettings, availableOptions])
 
@@ -301,13 +309,12 @@ const CameraModuleRowComponent = ({
     onCommand(moduleId, 'configure', settings)
   }, [onCommand, moduleId, settings])
 
-  // 개발 환경에서는 연결 상태와 무관하게 제어 가능하도록 유지
+  // 더미 모듈이거나 연결된 상태일 때만 활성화, 옵션 로딩 중에는 비활성화
   const isEnabled = status?.isConnected || isDummy
 
   const handleLoadSettings = useCallback(() => {
     onLoadSettings(moduleId)
   }, [onLoadSettings, moduleId])
-
 
   const handleSiteNameChange = useCallback(() => {
     setIsSiteNameModalOpen(true)
@@ -342,12 +349,12 @@ const CameraModuleRowComponent = ({
 
   const formatDateTime = useCallback((timestamp) => {
     if (!timestamp) {
-      return '없음'
+      return '정보 없음'
     }
 
     const date = new Date(timestamp)
     if (Number.isNaN(date.getTime())) {
-      return '없음'
+      return '정보 없음'
     }
 
     const year = date.getFullYear().toString().slice(-2)
@@ -377,7 +384,7 @@ const CameraModuleRowComponent = ({
       return { percentage: 0, display: '--', isWarning: false }
     }
 
-    // Check if the value is likely in MB (> 100) or percentage (≤ 100)
+    // Check if the value is likely in MB (> 100) or percentage (<=100)
     if (usage > 100) {
       // Assume it's in MB, display as MB
       return {
@@ -399,7 +406,7 @@ const CameraModuleRowComponent = ({
   const temperatureInfo = useMemo(() => {
     const value = Number(status?.temperature)
     if (Number.isNaN(value)) {
-      return { display: '없음', isWarning: false }
+      return { display: '정보 없음', isWarning: false }
     }
 
     return {
@@ -420,10 +427,10 @@ const CameraModuleRowComponent = ({
       ></div>
       <span
         className='site-name clickable'
-        title={`현장 이름 ${status?.siteName || '미지정'} (클릭하여 수정)`}
+        title={`Site name: ${status?.siteName || 'unset'} (click to set)`}
         onClick={handleSiteNameChange}
       >
-        {status?.siteName || '미지정'}
+        {status?.siteName || 'unset'}
       </span>
       <div className='capacity-container'>
         <div
@@ -449,7 +456,7 @@ const CameraModuleRowComponent = ({
                 <stop offset='100%' stopColor='#ef4444' />
               </linearGradient>
             </defs>
-            {/* 전체 원 아웃라인 */}
+            {/* 외곽 테두리 */}
             <circle
               cx='25'
               cy='25'
@@ -458,7 +465,7 @@ const CameraModuleRowComponent = ({
               stroke='var(--border-strong)'
               strokeWidth='1'
             />
-            {/* 배경 원 */}
+            {/* 진도 배경 */}
             <circle
               cx='25'
               cy='25'
@@ -467,7 +474,7 @@ const CameraModuleRowComponent = ({
               stroke='var(--border)'
               strokeWidth='8'
             />
-            {/* 진행률 원 - 10단계 색상 그라디언트 */}
+            {/* 실제 사용량 표시 - 10% 단위로 색상 변경 */}
             <circle
               cx='25'
               cy='25'
@@ -534,24 +541,24 @@ const CameraModuleRowComponent = ({
             disabled={!isEnabled || status?.cameraPowerStatus === 'checking'}
             title={
               status?.cameraPowerStatus === 'on'
-                ? '카메라 전원 켜져있음 (클릭하여 재확인)'
+                ? '카메라 전원이 켜져있습니다 (클릭하여 확인)'
                 : status?.cameraPowerStatus === 'off'
-                  ? '카메라 전원 꺼져있음 (클릭하여 재확인)'
+                  ? '카메라 전원이 꺼져있습니다 (클릭하여 확인)'
                   : status?.cameraPowerStatus === 'error'
-                    ? '카메라 오류 상태 (클릭하여 재확인)'
+                    ? '카메라 상태 오류 (클릭하여 확인)'
                     : status?.cameraPowerStatus === 'checking'
-                      ? '상태 확인 중...'
-                      : '카메라 상태를 확인하려면 클릭하세요'
+                      ? '상태 확인중..'
+                      : '카메라 상태 확인을 요청하려면 클릭하세요'
             }
           >
             {status?.cameraPowerStatus === 'on'
-              ? '정상'
+              ? '켜짐'
               : status?.cameraPowerStatus === 'off'
-                ? '전원꺼짐'
+                ? '꺼짐'
                 : status?.cameraPowerStatus === 'error'
                   ? '오류'
                   : status?.cameraPowerStatus === 'checking'
-                    ? '확인중...'
+                    ? '확인중..'
                     : '카메라 확인'}
           </button>
         </div>
@@ -570,121 +577,143 @@ const CameraModuleRowComponent = ({
           </span>
         </div>
         <div className='capture-info-item'>
-          <span className='info-label'>실패</span>
+          <span className='info-label'>미촬영</span>
           <span className='missed-captures'>{missedCaptures}</span>
         </div>
       </div>
 
       <div className='time-settings-stack'>
-        <div className='setting-group'>
-          <span className='setting-label'>시작</span>
-          <div className='time-select-container'>
-            <select
-              value={(settings.start_time || '08:00').split(':')[0]}
-              onChange={(e) =>
-                handleTimeChange('start_time', 'hour', e.target.value)
-              }
-              disabled={!isEnabled}
-              title='시작 시간 (시)'
-              className='time-select'
-            >
-              {HOUR_OPTIONS.map((hour) => (
-                <option key={`start-hour-${hour}`} value={hour}>
-                  {hour}
-                </option>
-              ))}
-            </select>
-            <span className='time-unit'>시</span>
+        {!isDummy &&
+        (!initialSettings || Object.keys(initialSettings).length === 0) ? (
+          <div className='setting-group' style={{ display: 'none' }}>
+            <span className='setting-label'>운영 시간</span>
+            <div className='interval-container'>
+              <button
+                className='btn load'
+                onClick={handleLoadSettings}
+                disabled={!isEnabled}
+                title='모듈의 설정 불러오기'
+              >
+                모듈의 설정 불러오기
+              </button>
+              <span style={{ marginLeft: '8px' }}>
+                운영 시간 설정을 보려면 모듈의 설정을 불러오세요
+              </span>
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className='setting-group'>
+              <span className='setting-label'>시작</span>
+              <div className='time-select-container'>
+                <select
+                  value={(settings.start_time || '08:00').split(':')[0]}
+                  onChange={(e) =>
+                    handleTimeChange('start_time', 'hour', e.target.value)
+                  }
+                  disabled={!isEnabled}
+                  title='시작시간 설정 (시)'
+                  className='time-select'
+                >
+                  {HOUR_OPTIONS.map((hour) => (
+                    <option key={`start-hour-${hour}`} value={hour}>
+                      {hour}
+                    </option>
+                  ))}
+                </select>
+                <span className='time-unit'>시</span>
+              </div>
+            </div>
 
-        <div className='setting-group'>
-          <span className='setting-label'></span>
-          <div className='time-select-container'>
-            <select
-              value={(settings.start_time || '08:00').split(':')[1]}
-              onChange={(e) =>
-                handleTimeChange('start_time', 'minute', e.target.value)
-              }
-              disabled={!isEnabled}
-              title='시작 시간 (분)'
-              className='time-select'
-            >
-              {MINUTE_OPTIONS.map((minute) => (
-                <option key={`start-minute-${minute}`} value={minute}>
-                  {minute}
-                </option>
-              ))}
-            </select>
-            <span className='time-unit'>분</span>
-          </div>
-        </div>
+            <div className='setting-group'>
+              <span className='setting-label'></span>
+              <div className='time-select-container'>
+                <select
+                  value={(settings.start_time || '08:00').split(':')[1]}
+                  onChange={(e) =>
+                    handleTimeChange('start_time', 'minute', e.target.value)
+                  }
+                  disabled={!isEnabled}
+                  title='시작시간 설정 (분)'
+                  className='time-select'
+                >
+                  {MINUTE_OPTIONS.map((minute) => (
+                    <option key={`start-minute-${minute}`} value={minute}>
+                      {minute}
+                    </option>
+                  ))}
+                </select>
+                <span className='time-unit'>분</span>
+              </div>
+            </div>
 
-        <div className='setting-group'>
-          <span className='setting-label'>종료</span>
-          <div className='time-select-container'>
-            <select
-              value={(settings.end_time || '18:00').split(':')[0]}
-              onChange={(e) =>
-                handleTimeChange('end_time', 'hour', e.target.value)
-              }
-              disabled={!isEnabled}
-              title='종료 시간 (시)'
-              className='time-select'
-            >
-              {HOUR_OPTIONS.map((hour) => (
-                <option key={`end-hour-${hour}`} value={hour}>
-                  {hour}
-                </option>
-              ))}
-            </select>
-            <span className='time-unit'>시</span>
-          </div>
-        </div>
+            <div className='setting-group'>
+              <span className='setting-label'>종료</span>
+              <div className='time-select-container'>
+                <select
+                  value={(settings.end_time || '18:00').split(':')[0]}
+                  onChange={(e) =>
+                    handleTimeChange('end_time', 'hour', e.target.value)
+                  }
+                  disabled={!isEnabled}
+                  title='종료시간 설정 (시)'
+                  className='time-select'
+                >
+                  {HOUR_OPTIONS.map((hour) => (
+                    <option key={`end-hour-${hour}`} value={hour}>
+                      {hour}
+                    </option>
+                  ))}
+                </select>
+                <span className='time-unit'>시</span>
+              </div>
+            </div>
 
-        <div className='setting-group'>
-          <span className='setting-label'></span>
-          <div className='time-select-container'>
-            <select
-              value={(settings.end_time || '18:00').split(':')[1]}
-              onChange={(e) =>
-                handleTimeChange('end_time', 'minute', e.target.value)
-              }
-              disabled={!isEnabled}
-              title='종료 시간 (분)'
-              className='time-select'
-            >
-              {MINUTE_OPTIONS.map((minute) => (
-                <option key={`end-minute-${minute}`} value={minute}>
-                  {minute}
-                </option>
-              ))}
-            </select>
-            <span className='time-unit'>분</span>
-          </div>
-        </div>
+            <div className='setting-group'>
+              <span className='setting-label'></span>
+              <div className='time-select-container'>
+                <select
+                  value={(settings.end_time || '18:00').split(':')[1]}
+                  onChange={(e) =>
+                    handleTimeChange('end_time', 'minute', e.target.value)
+                  }
+                  disabled={!isEnabled}
+                  title='종료시간 설정 (분)'
+                  className='time-select'
+                >
+                  {MINUTE_OPTIONS.map((minute) => (
+                    <option key={`end-minute-${minute}`} value={minute}>
+                      {minute}
+                    </option>
+                  ))}
+                </select>
+                <span className='time-unit'>분</span>
+              </div>
+            </div>
 
-        <div className='setting-group'>
-          <span className='setting-label'>간격</span>
-          <div className='time-select-container'>
-            <select
-              value={settings.capture_interval || '10'}
-              onChange={(e) =>
-                handleSettingChange('capture_interval', e.target.value)
-              }
-              disabled={!isEnabled}
-              title='촬영 간격 (분)'
-              className='time-select'
-            >
-              {INTERVAL_OPTIONS.map((interval) => (
-                <option key={`interval-${interval}`} value={interval}>
-                  {interval}
-                </option>
-              ))}
-            </select>
-            <span className='time-unit'>분</span>
-          </div>
-        </div>
+            <div className='setting-group'>
+              <span className='setting-label'>간격</span>
+              <div className='time-select-container'>
+                <select
+                  value={settings.capture_interval || '10'}
+                  onChange={(e) =>
+                    handleSettingChange('capture_interval', e.target.value)
+                  }
+                  disabled={!isEnabled}
+                  title='촬영건수 촬영간격(분)'
+                  className='time-select'
+                >
+                  {INTERVAL_OPTIONS.map((interval) => (
+                    <option key={`interval-${interval}`} value={interval}>
+                      {interval}
+                    </option>
+                  ))}
+                </select>
+                <span className='time-unit'>분</span>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className='control-buttons'>
@@ -720,7 +749,7 @@ const CameraModuleRowComponent = ({
           className='btn sw-version-refresh'
           onClick={handleSwVersionRequest}
           disabled={!isEnabled}
-          title='SW 버전 새로고침'
+          title='SW 버전 정보 요청'
         >
           SW 버전 불러오기
         </button>
@@ -728,7 +757,7 @@ const CameraModuleRowComponent = ({
           className='btn sw-update'
           onClick={handleSwUpdate}
           disabled={!isEnabled}
-          title='소프트웨어 업데이트 요청'
+          title='최신버전으로 업데이트 시작'
         >
           업데이트
         </button>
@@ -736,17 +765,28 @@ const CameraModuleRowComponent = ({
           className='btn sw-rollback'
           onClick={handleSwRollback}
           disabled={!isEnabled}
-          title='이전 버전으로 롤백'
+          title='이전 버전으로 되돌리기'
         >
-          롤백
+          되돌리기
         </button>
       </div>
 
       <div className='camera-settings-stack'>
         {cameraOptionList.length === 0 ? (
           <div className='setting-group'>
-            <span className='setting-label'>Camera Options</span>
-            <span>Request camera options from the device.</span>
+            <span className='setting-label'></span>
+            <div className='settings-stack'>
+              <div className='settings-stack-inner'>
+                <button
+                  className='btn load'
+                  onClick={handleLoadSettings}
+                  disabled={!isEnabled}
+                  title='카메라 현재 설정 및 옵션 불러오기'
+                >
+                  설정/옵션 불러오기
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
           cameraOptionList.map((option) => {
@@ -767,7 +807,6 @@ const CameraModuleRowComponent = ({
             const currentValue =
               resolvedValue === undefined ? '' : String(resolvedValue)
             const disabled = !isEnabled || option.readOnly
-
 
             return (
               <div className='setting-group' key={option.key}>
@@ -801,17 +840,17 @@ const CameraModuleRowComponent = ({
             className='btn load'
             onClick={handleLoadSettings}
             disabled={!isEnabled}
-            title='현재 설정 및 카메라 옵션 불러오기'
+            title='카메라 현재 설정 및 옵션 불러오기'
           >
-            현재 설정 불러오기
+            설정/옵션 불러오기
           </button>
           <button
             className='btn apply'
             onClick={handleApplySettings}
             disabled={!isEnabled}
-            title='변경 사항 적용'
+            title='선택 설정 변경 적용'
           >
-            변경 옵션 적용
+            설정 변경 적용
           </button>
         </div>
       </div>
@@ -827,5 +866,5 @@ const CameraModuleRowComponent = ({
   )
 }
 
-// React.memo로 렌더링 최적화
+// React.memo를 사용하여 성능 최적화
 export const CameraModuleRow = React.memo(CameraModuleRowComponent)
