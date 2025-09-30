@@ -27,6 +27,7 @@ yarn-error.log*
 # AI Agents
 /.claude
 AGENTS.md
+
 # local artifacts
 tmp_*
 *.backup
